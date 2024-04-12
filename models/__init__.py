@@ -7,6 +7,8 @@ from models.department import Department
 from models.form import Form
 from models.job import Job
 from models.field import Field
+from models.absence import Absence
+from models.attendance import Attendance
 from os import getenv
 
 

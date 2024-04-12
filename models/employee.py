@@ -31,6 +31,10 @@ class Employee(BaseModel, Base):
         department = relationship("Department", back_populates="employees")
         job = relationship("Job", back_populates="employees")
         company = relationship("Company", back_populates="employees")
+        attendances = relationship("Attendance", back_populates="employee",
+                                   cascade="all, delete-orphan")
+        absences = relationship("Absence", back_populates="employee",
+                                cascade="all, delete-orphan")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
