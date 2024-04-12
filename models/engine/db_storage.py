@@ -1,0 +1,80 @@
+#!/usr/bin/python3
+""" This module defines a class called DBStorage that represents the
+database storage engine for the AirBnB clone project.
+"""
+
+from models import *
+from models.base_model import Base
+from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy import create_engine
+from os import getenv
+
+
+classes_list = [Company, Department, Job, Employee, Form, Field]
+
+class DBStorage:
+    __engine = None
+    __session = None
+
+    def __init__(self):
+        """This method initializes a new instance of the DBStorage class"""
+        env = getenv('HRPRO_ENV')
+        mysql_user = getenv('HRPR_MYSQL_USER', 'hrpro_dev')
+        mysql_pwd = getenv('HRPRO_MYSQL_PWD', 'hrpro_dev_pwd')
+        mysql_host = getenv('HRPRO_MYSQL_HOST', 'localhost')
+        mysql_db = getenv('HRPRO_MYSQL_DB', 'hrpro_dev_db')
+        # type_storage = getenv('HRPRO_TYPE_STORAGE')
+
+        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.
+                                      format(mysql_user, mysql_pwd,
+                                             mysql_host, mysql_db),
+                                      pool_pre_ping=True)
+
+        if env == 'test':
+            Base.metadata.drop_all(self.__engine)
+
+    def all(self, cls=None):
+        """Returns the dictionary __objects"""
+
+        if cls:
+            try:
+                cls = eval(cls)
+            except Exception:
+                pass
+        if cls and cls in classes_list:
+            query_list = self.__session.query(cls).all()
+        else:
+            query_list = []
+            for cls in classes_list:
+                query_list.extend(self.__session.query(cls).all())
+        obj = {type(obj).__name__ + '.' + obj.id: obj for obj in query_list}
+        return obj
+
+    def new(self, obj):
+        """This method adds the specified object to the current database
+        session
+        """
+        self.__session.add(obj)
+
+    def save(self):
+        """This method commits all changes to the current database session"""
+        self.__session.commit()
+
+    def delete(self, obj=None):
+        """This method deletes the specified object from the current database
+        session"""
+        if obj:
+            self.__session.delete(obj)
+
+    def reload(self):
+        """This method creates all tables in the database and initializes a
+        new session with the current database engine
+        """
+        Base.metadata.create_all(self.__engine)
+        Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        self.__session = scoped_session(Session)
+
+    def close(self):
+        """This method calls remove() on the private session attribute
+        (self.__session) or close() on the class Session"""
+        self.__session.remove()
