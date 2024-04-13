@@ -4,7 +4,6 @@ from flask import jsonify, request, abort
 from api.v1.views import app_views
 from api.v1.utils import is_exists_form
 from models import storage, Form, Company, Field
-import json
 
 
 @app_views.route('/companies/<company_id>/forms', methods=['GET'], strict_slashes=False)
