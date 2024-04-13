@@ -40,10 +40,11 @@ def post_form(company_id):
         return 'Not valid data', 400
     else:
         form = Form(name=data['name'], company_id=company_id)
+        form_dict = form.to_dict().copy()
         for field in data['fields']:
             form.fields.append(Field(**field))
         form.save()
-        return jsonify(form.to_dict()), 201
+        return jsonify(form_dict), 201
 
 @app_views.route('/forms/<form_id>', methods=['PUT'], strict_slashes=False)
 def put_form(form_id):
