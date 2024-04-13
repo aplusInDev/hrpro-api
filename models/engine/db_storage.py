@@ -36,11 +36,6 @@ class DBStorage:
     def all(self, cls=None):
         """Returns the dictionary __objects"""
 
-        if cls:
-            try:
-                cls = eval(cls)
-            except Exception:
-                pass
         if cls and cls in classes_list:
             query_list = self.__session.query(cls).all()
         else:
@@ -78,3 +73,10 @@ class DBStorage:
         """This method calls remove() on the private session attribute
         (self.__session) or close() on the class Session"""
         self.__session.remove()
+
+    def get(self, cls, id):
+        """This method retrieves one object based on the class name and its ID
+        """
+        if cls and cls in classes_list:
+            return self.__session.query(cls).filter(cls.id == id).first()
+        return None
