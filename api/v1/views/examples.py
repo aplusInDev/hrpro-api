@@ -16,6 +16,7 @@ def query_example():
 
     # return jsonify({"test": "ok"})
     # try http://127.0.0.1:5000/api/v1/query-example?language=Python&framework=Flask&website=DigitalOcean
+    # using curl: curl -X GET "http://localhost:5000/api/v1/query-example?language=python&framework=flask&website=hrpro"
     return jsonify({'language': language, 'framework': framework, 'website': website})
 
 # allow both GET and POST requests
