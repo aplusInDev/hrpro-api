@@ -12,10 +12,12 @@ def get_companies():
     all_companies = []
     for company in companies.values():
         company_dict = company.to_dict().copy()
-        form_dict = {}
-        for form in company.forms:
-            form_dict[form.name] = [field.to_dict() for field in form.fields]
-        company_dict['forms'] = form_dict
+        company_dict = company.to_dict().copy()
+        company_dict["employees"] = "http://localhost:5000/api/v1/companies/{}/employees".format(company.id)
+        company_dict["jobs"] = "http://localhost:5000/api/v1/companies/{}/jobs".format(company.id)
+        company_dict["departments"] = "http://localhost:5000/api/v1/companies/{}/departments".format(company.id)
+        forms = {form.name: "http://localhost:5000/api/v1/forms/{}".format(form.id) for form in company.forms}
+        company_dict["forms"] = forms
         all_companies.append(company_dict)
     return jsonify(all_companies)
 
@@ -25,7 +27,13 @@ def get_company(company_id):
     company = storage.get(Company, company_id)
     if company is None:
         abort(404)
-    return jsonify(company.to_dict())
+    company_dict = company.to_dict().copy()
+    company_dict["employees"] = "http://localhost:5000/api/v1/companies/{}/employees".format(company_id)
+    company_dict["jobs"] = "http://localhost:5000/api/v1/companies/{}/jobs".format(company_id)
+    company_dict["departments"] = "http://localhost:5000/api/v1/companies/{}/departments".format(company_id)
+    forms = {form.name: "http://localhost:5000/api/v1/forms/{}".format(form.id) for form in company.forms}
+    company_dict["forms"] = forms
+    return jsonify(company_dict)
 
 @app_views.route('/companies', methods=['POST'], strict_slashes=False)
 def post_company():

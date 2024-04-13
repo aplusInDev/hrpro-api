@@ -12,3 +12,4 @@ from api.v1.views.jobs import *
 from api.v1.views.employees import *
 from api.v1.views.attendances import *
 from api.v1.views.absences import *
+from api.v1.views.forms import *
