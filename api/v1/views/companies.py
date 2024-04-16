@@ -2,7 +2,7 @@
 
 from flask import jsonify, request, abort
 from api.v1.views import app_views
-from models import storage, Company
+from models import storage, Company, Form, Field
 
 
 @app_views.route('/companies', methods=['GET'], strict_slashes=False)
@@ -44,6 +44,15 @@ def post_company():
     if 'name' not in data:
         return 'Missing name', 400
     company = Company(**data)
+    emp_form = Form(name="emp_form", company_id=company.id)
+    dep_form = Form(name="dep_form", company_id=company.id)
+    job_form = Form(name="job_form", company_id=company.id)
+    emp_form.fields.append(Field(fname="name", ftype="text", is_required=False))
+    emp_form.fields.append(Field(fname="email", ftype="email", is_required=True))
+    emp_form.fields.append(Field(fname="password", ftype="password", is_required=True))
+    dep_form.fields.append(Field(fname="name", ftype="text", is_required=True))
+    job_form.fields.append(Field(fname="name", ftype="text", is_required=True))
+    company.forms.append([emp_form, dep_form, job_form])
     company.save()
     return jsonify(company.to_dict()), 201
 

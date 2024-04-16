@@ -29,6 +29,14 @@ class Company(BaseModel, Base):
         forms = relationship("Form", back_populates="company",
                              cascade="all, delete-orphan")
 
+        def to_dict(self):
+            new_dict = super().to_dict().copy()
+            new_dict["departments"] = [department.to_dict() for department in self.departments]
+            new_dict["employees"] = [employee.to_dict() for employee in self.employees]
+            new_dict["jobs"] = [job.to_dict() for job in self.jobs]
+            new_dict["forms"] = [form.to_dict() for form in self.forms]
+            return new_dict
+
     def __init__(self, *args, **kwargs):
         """Initializes a new instance"""
         super().__init__(*args, **kwargs)

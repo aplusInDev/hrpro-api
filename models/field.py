@@ -16,10 +16,10 @@ class Field(BaseModel, Base):
                         nullable=True
                         )
     fname = Column(String(50), nullable=True)
-    ftype = Column(String(50), nullable=True)
-    default_v = Column(String(50), nullable=True)
-    options = Column(String(50), nullable=True)
-    required = Column(Boolean, nullable=True, default=True)
+    ftype = Column(String(50), nullable=True, default="text")
+    default_value = Column(String(50), nullable=True, default="")
+    options = Column(String(50), nullable=True, default="[]")
+    is_required = Column(Boolean, nullable=True, default=True)
 
 
     if getenv('HRPRO_TYPE_STORAGE') == 'db':

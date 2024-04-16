@@ -20,6 +20,11 @@ class Department(BaseModel, Base):
         company = relationship("Company", back_populates="departments")
         employees = relationship("Employee", back_populates="department",
                                  cascade="all, delete-orphan")
+        
+        def to_dict(self):
+            new_dict = super().to_dict().copy()
+            new_dict["employees"] = [employee.to_dict() for employee in self.employees]
+            return new_dict
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

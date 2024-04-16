@@ -18,7 +18,8 @@ class Attendance(BaseModel, Base):
     check_in = Column(DateTime, nullable=False)
     check_out = Column(DateTime, nullable=False)
 
-    employee = relationship("Employee", back_populates="attendances")
+    if getenv('HRPRO_TYPE_STORAGE') == 'db':
+        employee = relationship("Employee", back_populates="attendances")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
