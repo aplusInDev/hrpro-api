@@ -56,7 +56,11 @@ def put_form(form_id):
         return 'Not a JSON', 400
     for key, value in data.items():
         if key not in ['id', 'created_at', 'updated_at']:
-            setattr(form, key, value)
+            if key == "fields":
+                for field in data["fields"]:
+                    form.fields.append(Field(**field))
+            else:
+                setattr(form, key, value)
     form.save()
     return jsonify(form.to_dict())
 
