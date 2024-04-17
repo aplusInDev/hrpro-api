@@ -31,7 +31,6 @@ def get_company(company_id):
     company_dict["employees"] = "http://localhost:5000/api/v1/companies/{}/employees".format(company_id)
     company_dict["jobs"] = "http://localhost:5000/api/v1/companies/{}/jobs".format(company_id)
     company_dict["departments"] = "http://localhost:5000/api/v1/companies/{}/departments".format(company_id)
-    # forms = {form.name: "http://localhost:5000/api/v1/forms/{}".format(form.id) for form in company.forms}
     forms = [{"id": form.id ,"name": form.name, "url": "http://localhost:5000/api/v1/forms/{}".format(form.id)} for form in company.forms]
     company_dict["forms"] = forms
     return jsonify(company_dict)
