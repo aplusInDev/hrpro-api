@@ -2,8 +2,7 @@
 
 from flask import jsonify, request, abort
 from api.v1.views import app_views
-from api.v1.utils import is_exists_form
-from models import storage, Form, Company, Field
+from models import storage, Form, Company
 
 
 @app_views.route('/companies/<company_id>/forms', methods=['GET'], strict_slashes=False)
@@ -17,6 +16,7 @@ def get_forms(company_id):
         form_dict = form.to_dict().copy()
         form_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(company_id)
         form_dict["fields"] = {field.fname: "http://localhost:5000/api/v1/fields/{}".format(field.id) for field in form.fields}
+        form_dict["uri"] = "http://localhost:5000/api/v1/forms/{}".format(form.id)
         all_forms.append(form_dict)
     return jsonify(all_forms)
 
@@ -29,20 +29,25 @@ def get_form(form_id):
     form_dict = form.to_dict().copy()
     form_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(form.company.id)
     form_dict["fields"] = [field.to_dict() for field in form.fields]
+    form_dict["uri"] = "http://localhost:5000/api/v1/forms/{}".format(form_id)
     return jsonify(form_dict)
 
 @app_views.route('/companies/<company_id>/forms', methods=['POST'], strict_slashes=False)
 def post_form(company_id):
     """ post form """
     data = request.get_json()
-    if is_exists_form(company_id, data):
-        return 'Not valid data', 400
+    # if is_exists_form(company_id, data):
+    #     return 'Not valid data', 400
+    if data is None:
+        return 'Not a JSON data', 400
+    elif 'name' not in data:
+        return 'Missing name', 400
     else:
         form = Form(name=data['name'], company_id=company_id)
-        form_dict = form.to_dict().copy()
-        for field in data['fields']:
-            form.fields.append(Field(**field))
         form.save()
+        form_dict = form.to_dict().copy()
+        form_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(company_id)
+        form_dict["uri"] = "http://localhost:5000/api/v1/forms/{}".format(form.id)
         return jsonify(form_dict), 201
 
 @app_views.route('/forms/<form_id>', methods=['PUT'], strict_slashes=False)
@@ -53,16 +58,17 @@ def put_form(form_id):
         abort(404)
     data = request.get_json()
     if data is None:
-        return 'Not a JSON', 400
+        return 'Not a JSON data', 400
     for key, value in data.items():
-        if key not in ['id', 'created_at', 'updated_at']:
-            if key == "fields":
-                for field in data["fields"]:
-                    form.fields.append(Field(**field))
-            else:
+        if key not in ['id', 'created_at', 'updated_at',
+                        'company', 'fields']:
                 setattr(form, key, value)
     form.save()
-    return jsonify(form.to_dict())
+    form_dict = form.to_dict().copy()
+    form_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(form.company.id)
+    form_dict["fields"] = [field.to_dict() for field in form.fields]
+    form_dict["uri"] = "http://localhost:5000/api/v1/forms/{}".format(form_id)
+    return jsonify(form_dict)
 
 @app_views.route('/forms/<form_id>', methods=['DELETE'], strict_slashes=False)
 def delete_form(form_id):

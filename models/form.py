@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from models import BaseModel, Base
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from os import getenv
 
@@ -11,6 +11,7 @@ class Form(BaseModel, Base):
     __tablename__ = 'forms'
 
     name = Column(String(50), nullable=False)
+    description = Column(Text, nullable=True)
     company_id = Column(String(50),
                         ForeignKey('companies.id', ondelete='CASCADE',
                                    onupdate='CASCADE'),

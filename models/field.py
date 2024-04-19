@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from models import BaseModel, Base
-from sqlalchemy import Column, String, ForeignKey, Boolean
+from sqlalchemy import Column, String, ForeignKey, Boolean, Text, Integer
 from sqlalchemy.orm import relationship
 from os import getenv
 
@@ -15,7 +15,9 @@ class Field(BaseModel, Base):
                                    onupdate='CASCADE'),
                         nullable=True
                         )
+    fposition = Column(Integer, nullable=True)
     fname = Column(String(50), nullable=True)
+    fdescription = Column(Text, nullable=True)
     ftype = Column(String(50), nullable=True, default="text")
     default_value = Column(String(50), nullable=True, default="")
     options = Column(String(50), nullable=True, default="[]")
