@@ -3,6 +3,7 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage, Form, Company
+from api.v1.utils import is_exists_form
 
 
 @app_views.route('/companies/<company_id>/forms', methods=['GET'], strict_slashes=False)
@@ -28,7 +29,12 @@ def get_form(form_id):
         abort(404)
     form_dict = form.to_dict().copy()
     form_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(form.company.id)
-    form_dict["fields"] = [field.to_dict() for field in form.fields]
+    form_fields = []
+    for field in form.fields:
+        field_dict = field.to_dict().copy()
+        field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
+        form_fields.append(field_dict)
+    form_dict["fields"] = form_fields
     form_dict["uri"] = "http://localhost:5000/api/v1/forms/{}".format(form_id)
     return jsonify(form_dict)
 
@@ -36,14 +42,14 @@ def get_form(form_id):
 def post_form(company_id):
     """ post form """
     data = request.get_json()
-    # if is_exists_form(company_id, data):
-    #     return 'Not valid data', 400
     if data is None:
         return 'Not a JSON data', 400
     elif 'name' not in data:
         return 'Missing name', 400
     else:
-        form = Form(name=data['name'], company_id=company_id)
+        if is_exists_form(company_id, data):
+            return jsonify({"error": "form name already exists"}), 400
+        form = Form(company_id=company_id, **data)
         form.save()
         form_dict = form.to_dict().copy()
         form_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(company_id)
