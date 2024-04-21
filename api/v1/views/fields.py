@@ -78,7 +78,6 @@ def put_field(field_id):
 	data = request.get_json()
 	if data is None:
 		return 'Not a JSON data', 400
-	field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
 	for key, value in data.items():
 		if key not in ['id', 'created_at', 'updated_at']:
 			setattr(field, key, value)
