@@ -50,6 +50,10 @@ def post_field(form_id):
 		field_dict = field.to_dict().copy()
 		field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(form.company.id)
 		field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(form_id)
+		try:
+				field_dict["options"] = eval(field.options)
+		except:
+					pass
 		field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
 		return jsonify(field_dict), 201
 	

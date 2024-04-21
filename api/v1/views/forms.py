@@ -32,6 +32,10 @@ def get_form(form_id):
     form_fields = []
     for field in form.fields:
         field_dict = field.to_dict().copy()
+        try:
+            field_dict["options"] = eval(field.options)
+        except:
+            pass
         field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
         form_fields.append(field_dict)
     form_dict["fields"] = form_fields
