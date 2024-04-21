@@ -14,6 +14,10 @@ def get_fields(form_id):
 	all_fields = []
 	for field in form.fields:
 		field_dict = field.to_dict().copy()
+		try:
+				field_dict["options"] = eval(field.options)
+		except:
+				pass
 		field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(form.company.id)
 		field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(form_id)
 		field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
@@ -27,6 +31,10 @@ def get_field(field_id):
 	if field is None:
 		abort(404)
 	field_dict = field.to_dict().copy()
+	try:
+			field_dict["options"] = eval(field.options)
+	except:
+			pass
 	field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(field.form.company.id)
 	field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(field.form.id)
 	field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
@@ -41,13 +49,17 @@ def post_field(form_id):
 	data = request.get_json()
 	if data is None:
 		return 'Not a JSON data', 400
-	elif 'fname' not in data:
-		return 'Missing fname', 400
+	elif 'name' not in data:
+		return 'Missing field name', 400
 	else:
 		pos = len(form.fields) + 1
-		field = Field(form_id=form_id, fposition=pos, **data)
+		field = Field(form_id=form_id, position=pos, **data)
 		field.save()
 		field_dict = field.to_dict().copy()
+		try:
+			field_dict["options"] = eval(field.options)
+		except:
+				pass
 		field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(form.company.id)
 		field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(form_id)
 		try:
@@ -72,6 +84,10 @@ def put_field(field_id):
 			setattr(field, key, value)
 	field.save()
 	field_dict = field.to_dict().copy()
+	try:
+			field_dict["options"] = eval(field.options)
+	except:
+			pass
 	field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(field.form.company.id)
 	field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(field.form.id)
 	field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
