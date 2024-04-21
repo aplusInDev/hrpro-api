@@ -16,7 +16,7 @@ def get_forms(company_id):
     for form in company.forms:
         form_dict = form.to_dict().copy()
         form_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(company_id)
-        form_dict["fields"] = {field.fname: "http://localhost:5000/api/v1/fields/{}".format(field.id) for field in form.fields}
+        form_dict["fields"] = {field.name: "http://localhost:5000/api/v1/fields/{}".format(field.id) for field in form.fields}
         form_dict["uri"] = "http://localhost:5000/api/v1/forms/{}".format(form.id)
         all_forms.append(form_dict)
     return jsonify(all_forms)

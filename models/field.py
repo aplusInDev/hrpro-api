@@ -15,10 +15,10 @@ class Field(BaseModel, Base):
                                    onupdate='CASCADE'),
                         nullable=True
                         )
-    fposition = Column(Integer, nullable=True)
-    fname = Column(String(50), nullable=True)
-    fdescription = Column(Text, nullable=True)
-    ftype = Column(String(50), nullable=True, default="text")
+    position = Column(Integer, nullable=True)
+    name = Column(String(50), nullable=True)
+    description = Column(Text, default="")
+    type = Column(String(50), nullable=True, default="text")
     default_value = Column(String(50), nullable=True, default="")
     options = Column(String(50), nullable=True, default="[]")
     is_required = Column(Boolean, nullable=True, default=True)

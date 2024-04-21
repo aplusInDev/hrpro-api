@@ -11,7 +11,7 @@ class Form(BaseModel, Base):
     __tablename__ = 'forms'
 
     name = Column(String(50), nullable=False)
-    description = Column(Text, nullable=True)
+    description = Column(Text, default="")
     company_id = Column(String(50),
                         ForeignKey('companies.id', ondelete='CASCADE',
                                    onupdate='CASCADE'),
