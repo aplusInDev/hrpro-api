@@ -7,6 +7,6 @@ def is_exists_field(form_id, data):
     if form is None:
         return True
     for field in form.fields:
-        if field.fname == data['fname']:
+        if field.name == data['name']:
             return True
     return False
