@@ -15,3 +15,5 @@ from api.v1.views.absences import *
 from api.v1.views.forms import *
 from api.v1.views.fields import *
 from api.v1.views.examples import *
+from api.v1.views.auth_session import *
+from api.v1.views.accounts import *

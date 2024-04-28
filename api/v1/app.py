@@ -20,11 +20,15 @@ def page_not_found(e):
     """ handle exception """
     return jsonify({"error": "Not found"}), 404
 
+@app.errorhandler(401)
+def unauthorized(e):
+    """ handle exception """
+    return jsonify({"error": "Unauthorized"}), 401
 
-@app.route('/')
-def hello():
-    """ hello """
-    return jsonify({"Hello": "HRPRO"})
+@app.errorhandler(403)
+def forbidden(e):
+    """ handle exception """
+    return jsonify({"error": "Forbidden"}), 403
 
 if __name__ == "__main__":
     host = getenv("HRPRO_API_HOST", "0.0.0.0")

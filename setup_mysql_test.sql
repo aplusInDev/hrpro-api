@@ -1,6 +1,6 @@
 -- setup_mysql_dev.sql.
 -- This file is used to create the database and tables for the
--- goldenBill project.
+-- hrpro project.
 CREATE DATABASE IF NOT EXISTS hrpro_test_db;
 CREATE USER IF NOT EXISTS 'hrpro_test'@'localhost' IDENTIFIED BY 'hrpro_test_pwd';
 GRANT USAGE ON *.* TO 'hrpro_test'@'localhost';

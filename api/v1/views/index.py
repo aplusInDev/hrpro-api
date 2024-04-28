@@ -5,6 +5,10 @@ from api.v1.views import app_views
 from models import *
 
 
+@app_views.route('/', methods=['GET'], strict_slashes=False)
+def hello():
+    return jsonify({"message": "hello world!"})
+
 @app_views.route('/status', methods=['GET'], strict_slashes=False)
 def status():
     """ status """

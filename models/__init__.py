@@ -10,6 +10,10 @@ from models.field import Field
 from models.absence import Absence
 from models.attendance import Attendance
 from os import getenv
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 if __name__ not in ['file_storage', 'db_storage']:
