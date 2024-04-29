@@ -4,7 +4,21 @@ from flask import jsonify, request
 from api.v1.views import app_views
 from api.v1.auth.auth import Auth
 from api.v1.views import hello
+from os import getenv
 
+
+@app_views.route('/activate', methods=['GET'])
+def activate_account():
+    """ GET /activate
+    """
+    auth = Auth()
+    try:
+        account_id = request.args.get('account_id')
+        activation_token = request.args.get('activation_token')
+        auth.activate_account(account_id, activation_token)
+        return jsonify({"message": "account activated"}), 200
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 403
 
 @app_views.route('/login', methods=['POST'])
 def login():

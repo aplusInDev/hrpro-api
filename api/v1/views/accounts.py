@@ -10,6 +10,7 @@ from api.v1.auth.middleware import session_required
 def register_account():
     """ POST /accounts
     """
+    from api.v1.app import mail
     email = request.form.get('email')
     password = request.form.get('password')
     role = request.form.get('role')
@@ -20,6 +21,7 @@ def register_account():
     auth = Auth()
     try:
         account = auth.register_account(email, password, role)
+        auth.send_activation_mail(email)
         return jsonify({
             "email": account.email,
             "message": "account created"

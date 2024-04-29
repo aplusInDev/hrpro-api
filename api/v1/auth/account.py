@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from uuid import uuid4
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -15,7 +15,8 @@ class Account(Base):
     email = Column(String(128), nullable=False)
     hashed_password = Column(String(128), nullable=False)
     role = Column(String(128), nullable=False, default="standard")
-    reset_token = Column(String(128), nullable=True)
+    tmp_token = Column(String(128), nullable=True)
+    is_active = Column(Boolean, nullable=False, default=False)
 
     sessions = relationship("SessionAuth", back_populates="account")
 
