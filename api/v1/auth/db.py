@@ -15,10 +15,10 @@ def create_sqlite_connection(db_path):
     return sqlite3.connect(db_path)
 
 env = getenv('HRPRO_ENV')
-mysql_user = getenv('HRPRO_DB_USER', 'hrpro_dev')
-mysql_pwd = getenv('HRPRO_DB_PWD', 'hrpro_dev_pwd')
-mysql_host = getenv('HRPRO_DB_HOST', 'localhost')
-mysql_db = getenv('HRPRO_ACCOUNTS_DB_NAME', 'hrpro_accounts_db')
+mysql_user = getenv('HRPR_MYSQL_USER')
+mysql_pwd = getenv('HRPRO_MYSQL_PWD')
+mysql_host = getenv('HRPRO_MYSQL_HOST')
+mysql_db = getenv('HRPRO_ACCOUNTS_DB_NAME')
 
 
 class DB:
