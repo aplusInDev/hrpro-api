@@ -7,6 +7,7 @@ from sqlalchemy.orm.session import Session
 from sqlalchemy.orm.exc import NoResultFound # moved to sqlalchemy.exec in the v 1.4.x
 from sqlalchemy.exc import InvalidRequestError
 from .account import Base, Account
+from .session import SessionAuth
 from os import getenv
 
 
@@ -77,6 +78,31 @@ class DB:
             else:
                 raise InvalidRequestError()
         raise NoResultFound()
+
+    def get_session(self, session_id: str) -> SessionAuth:
+        """Get a session by its id
+        """
+        return self._session.query(SessionAuth).\
+            filter(SessionAuth.id == session_id).first()
+        
+    def delete_session(self, session_id: str) -> None:
+        """Delete a session
+        """
+        session = self.get_session(session_id)
+        if session is not None:
+            self._session.delete(session)
+            self._session.commit()
+        else:
+            raise NoResultFound("Session not found")
+
+    def find_account_by_session_id(self, session_id: str) -> Account:
+        """Find an account by session id
+        """
+        session = self.get_session(session_id)
+        if session:
+            return session.account
+        else:
+            return None
     
     def update_account(self, account_id: int, **kwargs) -> None:
         """Update a account in the database

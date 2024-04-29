@@ -5,9 +5,11 @@
 
 from .db import DB
 from .account import Account
+from .session import SessionAuth
 import bcrypt
 from sqlalchemy.orm.exc import NoResultFound
 from uuid import uuid4
+from datetime import datetime, timedelta
 
 
 class Auth:
@@ -44,9 +46,9 @@ class Auth:
         """
         try:
             account = self._db.find_account_by(email=email)
-            account.session_id = _generate_uuid()
+            account.sessions.append(SessionAuth())
             self._db._session.commit()
-            return account.session_id
+            return account.sessions[-1].id
         except NoResultFound:
             return None
         
@@ -54,7 +56,7 @@ class Auth:
         """Get the account from the session id
         """
         try:
-            return self._db.find_account_by(session_id=session_id)
+            return self._db.find_account_by_session_id(session_id=session_id)
         except NoResultFound:
             return None
         
@@ -62,9 +64,7 @@ class Auth:
         """Destroy the session
         """
         try:
-            account = self._db.find_account_by(session_id=session_id)
-            account.session_id = None
-            self._db._session.commit()
+            self._db.delete_session(session_id=session_id)
             return True
         except NoResultFound:
             return False
@@ -74,23 +74,35 @@ class Auth:
         """
         try:
             account = self._db.find_account_by(email=email)
-            account.reset_token = _generate_uuid()
+            tmp_session = SessionAuth(session_duration=20)
+            account.sessions.append(tmp_session)
+            account.reset_token = tmp_session.id
             self._db._session.commit()
             return account.reset_token
         except NoResultFound:
-            raise ValueError
+            raise ValueError("Account not found")
         
     def update_password(self, reset_token: str, password: str) -> None:
         """Update the password
         """
-        try:
-            account = self._db.find_account_by(reset_token=reset_token)
+        session = self._db.get_session(reset_token)
+        if session:
+            try:
+                account = self._db.find_account_by(reset_token=reset_token)
+            except NoResultFound:
+                self._db.delete_session(reset_token)
+                raise ValueError("No account with this token found")
+            # check if session expired
+            if datetime.now() - session.created_at > timedelta(minutes=session.session_duration):
+                self._db.delete_session(reset_token)
+                account.reset_token = None
+                raise ValueError("Session token expired")
             account.hashed_password = _hash_password(password)
+            self._db.delete_session(reset_token)
             account.reset_token = None
             self._db._session.commit()
-        except NoResultFound:
-            raise ValueError
-
+        else:
+            raise ValueError("Session token not found")
 
 def _hash_password(password: str) -> str:
     """Hash password

@@ -13,7 +13,6 @@ def register_account():
     email = request.form.get('email')
     password = request.form.get('password')
     role = request.form.get('role')
-    portfolio_name = request.form.get('portfolio_name')
     if not email:
         return jsonify({"error": "email is required"}), 400
     if not password:
@@ -53,5 +52,5 @@ def update_password():
     try:
         auth.update_password(reset_token, password)
         return jsonify({"email": email, "message": "password updated"}), 200
-    except ValueError:
-        return jsonify({"error": "reset_token not found"}), 403
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 403
