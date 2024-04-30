@@ -53,11 +53,11 @@ class DB:
             self.__session.remove()
             self.__session = None
     
-    def add_account(self, email: str, hashed_password: str, role: str) -> Account:
+    def add_account(self, **kwargs) -> Account:
         """Add a new account to the database
         """
         try:
-            new_account = Account(email=email, hashed_password=hashed_password, role=role)
+            new_account = Account(**kwargs)
             self._session.add(new_account)
             self._session.commit()
         except Exception:

@@ -27,7 +27,7 @@ class Auth:
         """
         self._db.close()
 
-    def send_activation_mail(self, email: str) -> None:
+    def send_activation_mail(self, email: str, name: str) -> None:
         """Send activation mail to registred user
         """
         from api.v1.app import mail
@@ -38,6 +38,7 @@ class Auth:
             account.tmp_token = activation_session.id
             self._db._session.commit()
             data = {
+                "name": name,
                 "activation_link": "http://localhost:5000/api/v1/activate?account_id={}&activation_token={}".\
                     format(account.id, account.tmp_token)
                 }
@@ -52,13 +53,18 @@ class Auth:
         except NoResultFound:
             return None
 
-    def register_account(self, email: str, password: str, role: str ="standard") -> Account:
+    def register_account(self, **kwargs) -> Account:
         """Register a new account.
         """
-        if self._db._session.query(Account).filter(Account.email == email).first():
-            raise ValueError("Account <{}> already exists".format(email))
-        hashed_password = _hash_password(password)
-        return self._db.add_account(email, hashed_password, role)
+        if self._db._session.query(Account).filter(Account.email == kwargs.get("email")).first():
+            raise ValueError("Account <{}> already exists".format(kwargs.get("email")))
+        hashed_password = _hash_password(kwargs.get("password"))
+        data = kwargs.copy()
+        data["hashed_password"] = hashed_password
+        data["role"] = data.get("role", "employee")
+        if data.get("password"):
+            del data["password"]
+        return self._db.add_account(**data)
     
     def activate_account(self, account_id: str, activation_token: str) -> bool:
         """Activate the account
@@ -82,12 +88,16 @@ class Auth:
                 self._db.delete_session(activation_token)
                 self._db._session.commit()
                 return True
+        else:
+            raise ValueError("token not valid")
     
     def valid_login(self, email: str, password: str) -> bool:
         """Check if the login is valid.
         """
         try:
             account = self._db.find_account_by(email=email)
+            if account.role == "admin" and not account.is_active:
+                raise ValueError("account unactivated!")
             return bcrypt.checkpw(password.encode(), account.hashed_password.encode())
         except NoResultFound:
             return False

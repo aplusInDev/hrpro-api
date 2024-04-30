@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 
 from uuid import uuid4
-from sqlalchemy import Column, String, ForeignKey, Boolean
+from sqlalchemy import Column, String, Enum, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 
 Base = declarative_base()
-
+role_enum = Enum("employee", "hr", "admin", name="role_type")
 
 class Account(Base):
     __tablename__ = 'accounts'
     id = Column(String(128), primary_key=True)
+    first_name = Column(String(128), nullable=False)
+    last_name = Column(String(128), nullable=False)
     email = Column(String(128), nullable=False)
     hashed_password = Column(String(128), nullable=False)
-    role = Column(String(128), nullable=False, default="standard")
+    role = Column(role_enum, nullable=False, default="employee")
     tmp_token = Column(String(128), nullable=True)
     is_active = Column(Boolean, nullable=False, default=False)
 

@@ -3,25 +3,18 @@
 from flask import jsonify, request
 from api.v1.views import app_views
 from api.v1.auth.auth import Auth
-from api.v1.auth.middleware import session_required
+from api.v1.auth.middleware import session_required, validate_register
 
 
 @app_views.route('/accounts', methods=['POST'])
-def register_account():
+@validate_register
+def register_account(data):
     """ POST /accounts
     """
-    from api.v1.app import mail
-    email = request.form.get('email')
-    password = request.form.get('password')
-    role = request.form.get('role')
-    if not email:
-        return jsonify({"error": "email is required"}), 400
-    if not password:
-        return jsonify({"error": "password is required"}), 400
     auth = Auth()
     try:
-        account = auth.register_account(email, password, role)
-        auth.send_activation_mail(email)
+        account = auth.register_account(**data, role="admin")
+        # auth.send_activation_mail(account.email, account.first_name)
         return jsonify({
             "email": account.email,
             "message": "account created"

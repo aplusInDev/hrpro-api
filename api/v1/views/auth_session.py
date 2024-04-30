@@ -31,13 +31,16 @@ def login():
     if not password:
         return jsonify({"error": "password is required"}), 400
     auth = Auth()
-    if auth.valid_login(email, password):
-        session_id = auth.create_session(email)
-        if session_id:
-            response = jsonify({"email": email, "message": "logged in"})
-            response.set_cookie('session_id', session_id)
-            return response, 200
-    return jsonify({"error": "no account found"}), 401
+    try:
+        if auth.valid_login(email, password):
+            session_id = auth.create_session(email)
+            if session_id:
+                response = jsonify({"email": email, "message": "logged in"})
+                response.set_cookie('session_id', session_id)
+                return response, 200
+        return jsonify({"error": "Uncorrect email or password"}), 401
+    except ValueError:
+        return jsonify({"message": "check your email and activate your account"}), 403
 
 
 @app_views.route('/logout', methods=['DELETE'])
