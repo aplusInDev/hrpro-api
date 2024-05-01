@@ -14,7 +14,7 @@ class Company(BaseModel, Base):
 
     name = Column(String(50), nullable=False, unique=True)
     description = Column(Text, nullable=True)
-    address = Column(String(50), nullable=True)
+    address = Column(String(50), nullable=False)
     email = Column(String(50), nullable=True)
     phone = Column(String(50), nullable=True)
     website = Column(String(50), nullable=True)

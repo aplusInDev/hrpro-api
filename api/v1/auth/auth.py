@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from flask import render_template, jsonify
 from flask_mail import Message
 from os import getenv
+from models import storage
 
 
 class Auth:
@@ -53,18 +54,20 @@ class Auth:
         except NoResultFound:
             return None
 
-    def register_account(self, **kwargs) -> Account:
+    def register_account(self, admin_info, company_info, **kwargs) -> Account:
         """Register a new account.
         """
-        if self._db._session.query(Account).filter(Account.email == kwargs.get("email")).first():
-            raise ValueError("Account <{}> already exists".format(kwargs.get("email")))
-        hashed_password = _hash_password(kwargs.get("password"))
-        data = kwargs.copy()
-        data["hashed_password"] = hashed_password
-        data["role"] = data.get("role", "employee")
-        if data.get("password"):
-            del data["password"]
-        return self._db.add_account(**data)
+        if self._db._session.query(Account).filter(Account.email == admin_info.get("email")).first():
+            raise ValueError("Account <{}> already exists".format(admin_info.get("email")))
+        if storage.get_company_by_name(company_info.get("name")):
+            raise ValueError("Giving company name already exists")
+        hashed_password = _hash_password(admin_info.get("password"))
+        admin_data = admin_info.copy()
+        admin_data["hashed_password"] = hashed_password
+        admin_data["role"] = kwargs.get("role", "employee")
+        if admin_data.get("password"):
+            del admin_data["password"]
+        return self._db.add_account(admin_data, company_info)
     
     def activate_account(self, account_id: str, activation_token: str) -> bool:
         """Activate the account

@@ -79,3 +79,8 @@ class DBStorage:
         if cls and cls in classes_list:
             return self.__session.query(cls).filter(cls.id == id).first()
         return None
+    
+    def get_company_by_name(self, name: str):
+        """This method retrieves one company based on its name
+        """
+        return self.__session.query(Company).filter(Company.name == name).first()

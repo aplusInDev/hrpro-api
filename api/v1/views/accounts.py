@@ -8,12 +8,12 @@ from api.v1.auth.middleware import session_required, validate_register
 
 @app_views.route('/accounts', methods=['POST'])
 @validate_register
-def register_account(data):
+def register_account(admin_info, company_info):
     """ POST /accounts
     """
     auth = Auth()
     try:
-        account = auth.register_account(**data, role="admin")
+        account = auth.register_account(admin_info, company_info, role="admin")
         # auth.send_activation_mail(account.email, account.first_name)
         return jsonify({
             "email": account.email,

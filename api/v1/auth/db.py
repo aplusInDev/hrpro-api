@@ -9,6 +9,7 @@ from sqlalchemy.exc import InvalidRequestError
 from .account import Base, Account
 from .session import SessionAuth
 from os import getenv
+from models import Employee, Company
 
 
 def create_sqlite_connection(db_path):
@@ -53,11 +54,15 @@ class DB:
             self.__session.remove()
             self.__session = None
     
-    def add_account(self, **kwargs) -> Account:
+    def add_account(self, admin_info, company_info) -> Account:
         """Add a new account to the database
         """
         try:
-            new_account = Account(**kwargs)
+            new_employee = Employee(**admin_info)
+            new_account = Account(**admin_info, employee_id=new_employee.id)
+            new_company = Company(**company_info)
+            new_company.employees.append(new_employee)
+            new_company.save()
             self._session.add(new_account)
             self._session.commit()
         except Exception:

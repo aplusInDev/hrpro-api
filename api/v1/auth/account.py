@@ -16,6 +16,7 @@ class Account(Base):
     last_name = Column(String(128), nullable=False)
     email = Column(String(128), nullable=False)
     hashed_password = Column(String(128), nullable=False)
+    employee_id = Column(String(128), nullable=False)
     role = Column(role_enum, nullable=False, default="employee")
     tmp_token = Column(String(128), nullable=True)
     is_active = Column(Boolean, nullable=False, default=False)

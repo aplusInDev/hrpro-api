@@ -43,6 +43,8 @@ def validate_register(func):
         last_name = request.form.get('last_name')
         email = request.form.get('email')
         password = request.form.get('password')
+        company_name = request.form.get('company_name')
+        company_address = request.form.get('company_address')
         if not first_name:
             return jsonify({"error": "first name is required"}), 400
         if not last_name:
@@ -51,11 +53,19 @@ def validate_register(func):
             return jsonify({"error": "email is required"}), 400
         if not password:
             return jsonify({"error": "password is required"}), 400
-        data = {
+        if not company_name:
+            return jsonify({"error": "company name is required"}), 400
+        if not company_address:
+            return jsonify({"error": "company address is required"}), 400
+        admin_info = {
             "first_name": first_name,
             "last_name": last_name,
             "email": email,
             "password": password
         }
-        return func(data, *args, **kwargs)
+        company_info = {}
+        for key, value in request.form.items():
+            if "company_" in key:
+                company_info[key.split("company_")[1]] = value
+        return func(admin_info, company_info, *args, **kwargs)
     return wrapper
