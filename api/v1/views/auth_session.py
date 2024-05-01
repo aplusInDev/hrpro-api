@@ -16,7 +16,7 @@ def activate_account():
         account_id = request.args.get('account_id')
         activation_token = request.args.get('activation_token')
         auth.activate_account(account_id, activation_token)
-        return jsonify({"message": "account activated"}), 200
+        return "<h1>Account activated</h1>", 200
     except ValueError as err:
         return jsonify({"error": str(err)}), 403
 

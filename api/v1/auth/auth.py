@@ -81,7 +81,8 @@ class Auth:
             if datetime.now() - session.created_at > timedelta(seconds=session.session_duration):
                 self._db.delete_session(activation_token)
                 account.tmp_token = None
-                raise ValueError("Session token expired")
+                self.send_activation_mail(account.email, account.first_name)
+                raise ValueError("Session token expired, another email sent")
             if session and account.tmp_token == activation_token:
                 account.is_active = True
                 account.tmp_token = None

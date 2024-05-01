@@ -1,13 +1,22 @@
-<div>
-  <div class="header">
-    <span class="logo">hr</span>pro
-  </div>
+<div style="padding-left: 20px; font-size: 1.2rem; font-family: 'Times New Roman', Times, serif;">
+  <header style="width: 100%; height: 40px; padding: 5px; margin-bottom: 30px;">
+    <div style="width: 100%; height: 30px; padding-left: 5px;">
+      <span
+      style="display: inline-block; padding: 5px 1px 5px 5px; width: 30px; height: 30px; color: #fefefe; font-size: 1.2rem; background-color: #000000; border-radius: 50%;"
+      >hr</span>
+      <span 
+        style="display: inline-block; padding: 5px 1px; width: 30px; height: 30px; color: #000000; font-size: 1.2rem;"
+      >
+        pro
+      </span>
+    </div>
+  </header>
   <h2>Hello {{data.name}}</h2>
   <p>
     You have successfully registered with hrpro. Please click the button below to activate your account.
   </p>
-  <button class="btn btn-primary">
-    <a href="{{data.activation_link}}">Activate Your Account</a>
+  <button style="background-color: #000000; color: #fefefe; border: none; border-radius: 8px; height: 30px; min-width: 90px; padding: 10px;">
+    <a href="{{data.activation_link}}" style="text-decoration: none; color: #fefefe;">Activate Your Account</a>
   </button>
   <p>
     If you are unable to click the button above, please copy and paste the following link into your browser:

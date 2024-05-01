@@ -14,7 +14,7 @@ def register_account(data):
     auth = Auth()
     try:
         account = auth.register_account(**data, role="admin")
-        # auth.send_activation_mail(account.email, account.first_name)
+        auth.send_activation_mail(account.email, account.first_name)
         return jsonify({
             "email": account.email,
             "message": "account created"
