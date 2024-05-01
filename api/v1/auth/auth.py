@@ -97,8 +97,8 @@ class Auth:
         """
         try:
             account = self._db.find_account_by(email=email)
-            if account.role == "admin" and not account.is_active:
-                raise ValueError("account unactivated!")
+            # if account.role == "admin" and not account.is_active:
+            #     raise ValueError("account unactivated!")
             return bcrypt.checkpw(password.encode(), account.hashed_password.encode())
         except NoResultFound:
             return False
