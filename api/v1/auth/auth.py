@@ -54,7 +54,7 @@ class Auth:
         except NoResultFound:
             return None
 
-    def register_account(self, admin_info, company_info, **kwargs) -> Account:
+    def register_account(self, admin_info: dict, company_info: dict, **kwargs) -> Account:
         """Register a new account.
         """
         if self._db._session.query(Account).filter(Account.email == admin_info.get("email")).first():

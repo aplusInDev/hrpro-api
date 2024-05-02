@@ -8,7 +8,7 @@ from api.v1.auth.middleware import session_required, validate_register
 
 @app_views.route('/accounts', methods=['POST'])
 @validate_register
-def register_account(admin_info, company_info):
+def register_account(admin_info: dict, company_info: dict):
     """ POST /accounts
     """
     auth = Auth()

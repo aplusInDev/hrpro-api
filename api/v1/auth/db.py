@@ -9,7 +9,7 @@ from sqlalchemy.exc import InvalidRequestError
 from .account import Base, Account
 from .session import SessionAuth
 from os import getenv
-from models import Employee, Company
+from models import Employee, Company, Form, Field
 
 
 def create_sqlite_connection(db_path):
@@ -54,13 +54,18 @@ class DB:
             self.__session.remove()
             self.__session = None
     
-    def add_account(self, admin_info, company_info) -> Account:
+    def add_account(self, admin_info: dict, company_info: dict) -> Account:
         """Add a new account to the database
         """
         try:
-            new_employee = Employee(**admin_info)
+            employee_info = {
+                "first name": admin_info.get("first_name"),
+                "last name": admin_info.get("last_name"),
+                "email": admin_info.get("email"),
+            }
+            new_employee = self.add_employee(employee_info)
             new_account = Account(**admin_info, employee_id=new_employee.id)
-            new_company = Company(**company_info)
+            new_company = self.add_company(company_info)
             new_company.employees.append(new_employee)
             new_company.save()
             self._session.add(new_account)
@@ -69,6 +74,40 @@ class DB:
             self._session.rollback()
             new_account = None
         return new_account
+    
+    def add_company(self, company_info: dict) -> Company:
+        """Creates new company
+        Args:
+            company_info: company information
+        Returns:
+            created company
+        """
+        new_company = Company(**company_info)
+        new_company.save()
+        emp_form = Form(name="employee", description="employee form")
+        dep_form = Form(name="department", description="department form")
+        job_form = Form(name="job", description="job form")
+        emp_form.fields.append(Field(name="first name", type="text", is_required=False, position=1))
+        emp_form.fields.append(Field(name="last name", type="text", is_required=False, position=2))
+        emp_form.fields.append(Field(name="email", type="email", is_required=True, position=3))
+        dep_form.fields.append(Field(name="name", type="text", is_required=True, position=1))
+        job_form.fields.append(Field(name="job title", type="text", is_required=True, position=1))
+        for form in [emp_form, dep_form, job_form]:
+            new_company.forms.append(form)
+        new_company.save()
+        return new_company
+    
+    def add_employee(self, employee_info: dict) -> Employee:
+        """Creates new Emplyee
+        Args:
+            employee_info: employee information
+        Returns:
+            created employee
+        """
+        emp_info = str(employee_info)
+        new_employee = Employee(info=emp_info)
+        new_employee.save()
+        return new_employee
     
     def find_account_by(self, **kwargs) -> Account:
         """Finds a account based on a set of filters.

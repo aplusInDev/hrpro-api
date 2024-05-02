@@ -11,7 +11,12 @@ def get_employees(company_id):
     company = storage.get(Company, company_id)
     if company is None:
         abort(404)
-    all_employees = [employee.to_dict() for employee in company.employees]
+    all_employees = []
+    for employee in company.employees:
+        employee_dict = employee.to_dict().copy()
+        employee_dict["uri"] = "http://localhost:5000/api/v1/employees/{}".format(employee.id)
+        del employee_dict["info"]
+        all_employees.append(employee_dict)
     return jsonify(all_employees)
 
 @app_views.route('/employees/<employee_id>', methods=['GET'], strict_slashes=False)
@@ -20,8 +25,10 @@ def get_employee(employee_id):
     employee = storage.get(Employee, employee_id)
     if employee is None:
         abort(404)
-
-    return jsonify(employee.to_dict())
+    employee_dict = employee.to_dict().copy()
+    employee_dict["uri"] = "http://localhost:5000/api/v1/employees/{}".format(employee.id)
+    employee_dict["info"] = eval(employee.info)
+    return jsonify(employee_dict)
 
 @app_views.route('/companies/<company_id>/employees', methods=['POST'], strict_slashes=False)
 def post_employee(company_id):
