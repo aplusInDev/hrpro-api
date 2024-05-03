@@ -35,7 +35,8 @@ def login():
         if auth.valid_login(email, password):
             session_id = auth.create_session(email)
             if session_id:
-                response = jsonify({"email": email, "message": "logged in"})
+                current_user = auth.get_current_user(email)
+                response = jsonify(current_user)
                 response.set_cookie('session_id', session_id)
                 return response, 200
         return jsonify({"error": "Uncorrect email or password"}), 401
@@ -56,6 +57,7 @@ def logout():
         if auth.destroy_session(session_id):
             return hello(), 200
         return jsonify({"error": "session not found"}), 403
+    return jsonify({"error": "session not found"}), 403
 
 @app_views.route('/reset_password', methods=['POST'])
 def get_reset_password_token():

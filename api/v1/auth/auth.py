@@ -117,6 +117,24 @@ class Auth:
         except NoResultFound:
             return None
         
+    def get_current_user(self, email: str) -> dict:
+        """Retrive current user
+        """
+        try:
+            account = self._db.find_account_by(email=email)
+            current_user = {
+                "employee_id": account.employee_id,
+                "email": account.email,
+                "role": account.role,
+            }
+            if account.role == "admin":
+                company = storage.get_company_by_employee_id(account.employee_id)
+                if company:
+                    current_user["company_id"] = company.id
+            return current_user
+        except NoResultFound:
+            return None
+        
     def get_account_from_session_id(self, session_id: str) -> Account:
         """Get the account from the session id
         """
