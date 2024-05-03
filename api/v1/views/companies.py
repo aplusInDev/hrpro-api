@@ -3,6 +3,7 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage, Company, Form, Field
+from api.v1.auth.middleware import session_required
 
 
 @app_views.route('/companies', methods=['GET'], strict_slashes=False)
@@ -100,3 +101,48 @@ def delete_company(company_id):
         abort(404)
     company.delete()
     return jsonify({}), 200
+
+#######
+
+@app_views.route('/company', methods=['GET'])
+@session_required
+def get_acc_company(account):
+    """ get company for account """
+    company = storage.get_company_by_employee_id(account.employee_id)
+    if company is None:
+        abort(404)
+    company_dict = company.to_dict().copy()
+    company_dict["employees"] = "http://localhost:5000/api/v1/companies/{}/employees".format(company.id)
+    company_dict["jobs"] = "http://localhost:5000/api/v1/companies/{}/jobs".format(company.id)
+    company_dict["departments"] = "http://localhost:5000/api/v1/companies/{}/departments".format(company.id)
+    forms = [{
+        "id": form.id ,"name": form.name,
+        "uri": "http://localhost:5000/api/v1/forms/{}".format(form.id)} for form in company.forms]
+    company_dict["forms"] = forms
+    company_dict["uri"] = "http://localhost:5000/api/v1/companies/{}".format(company.id)
+    return jsonify(company_dict)
+
+@app_views.route('/company', methods=['PuT'])
+@session_required
+def put_acc_company(account):
+    """ update company information  """
+    company = storage.get_company_by_employee_id(account.employee_id)
+    if company is None:
+        abort(404)
+    data = request.form
+    for key, value in data.items():
+        if key not in ['id', 'created_at', 'updated_at', 'forms',
+                       'employees', 'jobs', 'departments'
+                       ]:
+            setattr(company, key, value)
+    company.save()
+    company_dict = company.to_dict().copy()
+    company_dict["employees"] = "http://localhost:5000/api/v1/companies/{}/employees".format(company.id)
+    company_dict["jobs"] = "http://localhost:5000/api/v1/companies/{}/jobs".format(company.id)
+    company_dict["departments"] = "http://localhost:5000/api/v1/companies/{}/departments".format(company.id)
+    forms = [{
+        "id": form.id ,"name": form.name,
+        "uri": "http://localhost:5000/api/v1/forms/{}".format(form.id)} for form in company.forms]
+    company_dict["forms"] = forms
+    company_dict["uri"] = "http://localhost:5000/api/v1/companies/{}".format(company.id)
+    return jsonify(company_dict)

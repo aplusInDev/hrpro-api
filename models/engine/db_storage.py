@@ -84,3 +84,13 @@ class DBStorage:
         """This method retrieves one company based on its name
         """
         return self.__session.query(Company).filter(Company.name == name).first()
+    
+    def get_company_by_employee_id(self, employee_id: str) -> Company:
+        """This method retrieves one company based on an employee's ID
+        Args:
+            employee_id:
+        Returns:
+            company
+        """
+        employee = self.get(Employee, employee_id)
+        return employee.company if employee else None
