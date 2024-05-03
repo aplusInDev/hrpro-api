@@ -108,6 +108,8 @@ def delete_company(company_id):
 @session_required
 def get_acc_company(account):
     """ get company for account """
+    if account.role != "admin":
+        abort(401)
     company = storage.get_company_by_employee_id(account.employee_id)
     if company is None:
         abort(404)
@@ -126,6 +128,9 @@ def get_acc_company(account):
 @session_required
 def put_acc_company(account):
     """ update company information  """
+    
+    if account.role != "admin":
+        abort(401)
     company = storage.get_company_by_employee_id(account.employee_id)
     if company is None:
         abort(404)
