@@ -4,6 +4,7 @@ from flask import jsonify, request
 from api.v1.views import app_views
 from api.v1.auth.auth import Auth
 from api.v1.auth.middleware import session_required, validate_register
+from models import storage
 
 
 @app_views.route('/accounts', methods=['POST'])
@@ -30,7 +31,9 @@ def profile(account):
     key = session_id
     If the account exists it returns the account email
     """
-    return jsonify({"email": account.email}), 200
+    employee_info = storage.get_emplyee_info(account.employee_id)
+    employee_info = eval(employee_info)
+    return jsonify(employee_info), 200
 
 @app_views.route('/reset_password', methods=['PUT'])
 def update_password():

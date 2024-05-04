@@ -8,6 +8,8 @@ from models.base_model import Base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
 from os import getenv
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import InvalidRequestError
 
 
 classes_list = [Company, Department, Job, Employee, Form, Field]
@@ -94,3 +96,21 @@ class DBStorage:
         """
         employee = self.get(Employee, employee_id)
         return employee.company if employee else None
+    
+    def get_emplyee_info(self, employee_id: str):
+        """This method retrieves employee info based on its ID
+        """
+        employee = self.get(Employee, employee_id)
+        return employee.info if employee else None
+    
+    def find_form_by_(self, **kwargs) -> Form:
+        """Finds a account based on a set of filters.
+        """
+        for key in kwargs.keys():
+            if not hasattr(Form, key):
+                raise InvalidRequestError("Invalid filter key")
+        form = self.__session.query(Form).filter_by(**kwargs).first()
+        if form:
+            return form
+        else:
+            raise NoResultFound("form not found")

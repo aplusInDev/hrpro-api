@@ -24,6 +24,19 @@ def get_fields(form_id):
 		all_fields.append(field_dict)
 	return jsonify(all_fields)
 
+@app_views.route('fields', methods=['GET'], strict_slashes=False)
+def get_all_fields():
+	"""Get all form fields based on form name and company_id
+	"""
+	form_name = request.args.get('form_name')
+	company_id = request.args.get('company_id')
+	if not form_name:
+		return 'Missing form_name', 400
+	if not company_id:
+		return 'Missing company_id', 400
+	form = storage.find_form_by_(name=form_name, company_id=company_id)
+	return get_fields(form.id)
+
 @app_views.route('/fields/<field_id>', methods=['GET'], strict_slashes=False)
 def get_field(field_id):
 	""" get field """
