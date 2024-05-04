@@ -97,11 +97,11 @@ class DBStorage:
         employee = self.get(Employee, employee_id)
         return employee.company if employee else None
     
-    def get_emplyee_info(self, employee_id: str):
+    def get_emplyee_info(self, employee_id: str) -> dict:
         """This method retrieves employee info based on its ID
         """
         employee = self.get(Employee, employee_id)
-        return employee.info if employee else None
+        return eval(employee.info) if employee else None
     
     def find_form_by_(self, **kwargs) -> Form:
         """Finds a account based on a set of filters.

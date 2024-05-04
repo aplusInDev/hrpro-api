@@ -32,7 +32,6 @@ def profile(account):
     If the account exists it returns the account email
     """
     employee_info = storage.get_emplyee_info(account.employee_id)
-    employee_info = eval(employee_info)
     return jsonify(employee_info), 200
 
 @app_views.route('/reset_password', methods=['PUT'])
