@@ -112,16 +112,14 @@ class DB:
     def find_account_by(self, **kwargs) -> Account:
         """Finds a account based on a set of filters.
         """
-        for key, value in kwargs.items():
-            if hasattr(Account, key):
-                result = self._session.query(Account).\
-                    filter(getattr(Account, key) == value).\
-                    first()
-                if result is not None:
-                    return result
-            else:
+        for key, value in kwargs.keys():
+            if not hasattr(Account, key):
                 raise InvalidRequestError()
-        raise NoResultFound()
+        account =  self._session.query(Account).filter_by(**kwargs).first()
+        if account:
+            return account
+        else:
+            raise NoResultFound()
 
     def get_session(self, session_id: str) -> SessionAuth:
         """Get a session by its id
