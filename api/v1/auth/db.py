@@ -112,7 +112,7 @@ class DB:
     def find_account_by(self, **kwargs) -> Account:
         """Finds a account based on a set of filters.
         """
-        for key, value in kwargs.keys():
+        for key in kwargs.keys():
             if not hasattr(Account, key):
                 raise InvalidRequestError()
         account =  self._session.query(Account).filter_by(**kwargs).first()
