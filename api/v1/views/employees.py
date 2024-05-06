@@ -61,6 +61,22 @@ def put_employee(employee_id):
     employee.save()
     return jsonify(employee.to_dict())
 
+@app_views.route('/employees/<employee_id>/info', methods=['PUT'], strict_slashes=False)
+def put_employee_info(employee_id):
+    """ put employee info """
+    employee = storage.get(Employee, employee_id)
+    if employee is None:
+        abort(404)
+    data = request.get_json()
+    if data is None:
+        return 'Not valid data', 400
+    else:
+        from api.v1.utils.validate_field import handle_update_info
+        data = handle_update_info("employee", employee.company_id, data)
+        employee.info = str(data)
+        employee.save()
+        return jsonify(employee.to_dict())
+
 @app_views.route('/employees/<employee_id>', methods=['DELETE'], strict_slashes=False)
 def delete_employee(employee_id):
     """ delete employee """
