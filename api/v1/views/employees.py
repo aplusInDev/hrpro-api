@@ -75,7 +75,7 @@ def put_employee_info(employee_id):
         data = handle_update_info("employee", employee.company_id, data)
         employee.info = str(data)
         employee.save()
-        return jsonify(employee.to_dict())
+        return jsonify(eval(employee.info))
 
 @app_views.route('/employees/<employee_id>', methods=['DELETE'], strict_slashes=False)
 def delete_employee(employee_id):
