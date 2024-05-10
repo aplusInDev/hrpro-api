@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-#!/usr/bin/env python3
-
-
 from .db import DB
 from .account import Account
 from .session import SessionAuth
@@ -14,6 +11,8 @@ from flask import render_template, jsonify
 from flask_mail import Message
 from os import getenv
 from models import storage
+import string
+import secrets
 
 
 class Auth:
@@ -53,6 +52,24 @@ class Auth:
                 return jsonify({"sending email error:": str(err)}), 400
         except NoResultFound:
             return None
+        
+    def send_welcome_mail(self, name:str, email: str, password: str) -> None:
+        """Send welcome mail to new employee
+        """
+        from api.v1.app import mail
+        data = {
+            "name": name,
+            "email": email,
+            "password": password,
+            "login_link": "http://localhost:3000/login"
+        }
+        msg = Message("Welcome to HRPro", sender=getenv('HRPRO_EMAIL'),
+                    recipients=[email])
+        msg.html = render_template("email_welcome.html", data=data)
+        try:
+            mail.send(msg)
+        except Exception as err:
+            return jsonify({"sending email error:": str(err)}), 400
 
     def register_account(self, admin_info: dict, company_info: dict, **kwargs) -> Account:
         """Register a new account.
@@ -127,10 +144,13 @@ class Auth:
                 "email": account.email,
                 "role": account.role,
             }
-            if account.role == "admin":
-                company = storage.get_company_by_employee_id(account.employee_id)
-                if company:
-                    current_user["company_id"] = company.id
+            # if account.role == "admin":
+            #     company = storage.get_company_by_employee_id(account.employee_id)
+            #     if company:
+            #         current_user["company_id"] = company.id
+            company = storage.get_company_by_employee_id(account.employee_id)
+            if company:
+                current_user["company_id"] = company.id
             return current_user
         except NoResultFound:
             return None
@@ -191,3 +211,17 @@ def _hash_password(password: str) -> str:
     """Hash password
     """
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+def _generate_random_pass():
+    """Generate random password for new employee
+    """
+    symbols = ['*', '@', '_']
+    password = ""
+
+    for _ in range(9):
+        password += secrets.choice(string.ascii_lowercase)
+        password += secrets.choice(string.ascii_uppercase)
+        password += secrets.choice(string.digits)
+        password += secrets.choice(symbols)
+    
+    return password

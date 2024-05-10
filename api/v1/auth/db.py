@@ -10,6 +10,7 @@ from .account import Base, Account
 from .session import SessionAuth
 from os import getenv
 from models import Employee, Company, Form, Field
+from models import storage
 
 
 def create_sqlite_connection(db_path):
@@ -54,25 +55,34 @@ class DB:
             self.__session.remove()
             self.__session = None
     
-    def add_account(self, admin_info: dict, company_info: dict) -> Account:
+    def add_account(self, account_info: dict, company_info: dict) -> Account:
         """Add a new account to the database
         """
         try:
             employee_info = {
-                "first name": admin_info.get("first_name"),
-                "last name": admin_info.get("last_name"),
-                "email": admin_info.get("email"),
+                "first name": account_info.get("first_name"),
+                "last name": account_info.get("last_name"),
+                "email": account_info.get("email"),
             }
             new_employee = self.add_employee(employee_info)
-            new_account = Account(**admin_info, employee_id=new_employee.id)
-            new_company = self.add_company(company_info)
-            new_company.employees.append(new_employee)
-            new_company.save()
+            new_account = Account(**account_info, employee_id=new_employee.id)
+            if account_info['role'] == 'admin':
+                company = self.add_company(company_info)
+            else:
+                employee_id = company_info.get("employee_id", None)
+                if not employee_id:
+                    raise ValueError("Request error")
+                company = storage.get_company_by_employee_id(employee_id)
+                if not company:
+                    raise InvalidRequestError("Company not found")
+            company.employees.append(new_employee)
+            company.save()
             self._session.add(new_account)
             self._session.commit()
-        except Exception:
+        except Exception as err:
             self._session.rollback()
             new_account = None
+            raise ValueError("Error creating account: {}".format(err))
         return new_account
     
     def add_company(self, company_info: dict) -> Company:
