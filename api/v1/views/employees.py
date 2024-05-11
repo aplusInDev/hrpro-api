@@ -3,6 +3,7 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage, Company, Employee
+from api.v1.auth.middleware import session_required
 
 
 @app_views.route('/companies/<company_id>/employees', methods=['GET'], strict_slashes=False)
@@ -15,7 +16,25 @@ def get_employees(company_id):
     for employee in company.employees:
         employee_dict = employee.to_dict().copy()
         employee_dict["uri"] = "http://localhost:5000/api/v1/employees/{}".format(employee.id)
-        del employee_dict["info"]
+        for key in ['info', 'absences', 'attendances']:
+            del employee_dict[key]
+        all_employees.append(employee_dict)
+    return jsonify(all_employees)
+
+@app_views.route('/employees', methods=['GET'])
+@session_required
+def get_all_employees(account):
+    """GET employees
+    """
+    company = storage.get_company_by_employee_id(account.employee_id)
+    if company is None:
+        abort(404)
+    all_employees = []
+    for employee in company.employees:
+        employee_dict = employee.to_dict().copy()
+        employee_dict["uri"] = "http://localhost:5000/api/v1/employees/{}".format(employee.id)
+        for key in ['info', 'absences', 'attendances']:
+            del employee_dict[key]
         all_employees.append(employee_dict)
     return jsonify(all_employees)
 
