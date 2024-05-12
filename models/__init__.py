@@ -16,12 +16,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-if __name__ not in ['file_storage', 'db_storage']:
-    if getenv('HRPRO_TYPE_STORAGE') == 'db':
-        from models.engine.db_storage import DBStorage
-        storage = DBStorage()
-    else:
-        from models.engine.file_storage import FileStorage
-        storage = FileStorage()
-
+if __name__ not in ['db_storage']:
+    from models.engine.db_storage import DBStorage
+    storage = DBStorage()
     storage.reload()
