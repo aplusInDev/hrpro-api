@@ -114,3 +114,27 @@ class DBStorage:
             return form
         else:
             raise NoResultFound("form not found")
+        
+    def find_job_by(self, **kwargs) -> Job:
+        """Finds a job based on a set of filters.
+        """
+        for key in kwargs.keys():
+            if not hasattr(Job, key):
+                raise InvalidRequestError("Invalid filter key")
+        job = self.__session.query(Job).filter_by(**kwargs).first()
+        if job:
+            return job
+        else:
+            raise NoResultFound("job not found")
+        
+    def find_department_by(self, **kwargs) -> Department:
+        """Finds department based on a set of filters
+        """
+        for key in kwargs.keys():
+            if not hasattr(Department, key):
+                raise InvalidRequestError("Invalid filter key")
+        department = self.__session.query(Department).filter_by(**kwargs).first()
+        if department:
+            return department
+        else:
+            raise NoResultFound("department not found")

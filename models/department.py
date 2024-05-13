@@ -9,6 +9,7 @@ from os import getenv
 class Department(BaseModel, Base):
     __tablename__ = 'departments'
 
+    name = Column(String(50), nullable=False)
     company_id = Column(String(50),
                         ForeignKey('companies.id', ondelete='CASCADE',
                                    onupdate='CASCADE'),

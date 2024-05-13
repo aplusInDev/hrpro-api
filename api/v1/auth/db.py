@@ -9,8 +9,12 @@ from sqlalchemy.exc import InvalidRequestError
 from .account import Base, Account
 from .session import SessionAuth
 from os import getenv
-from models import Employee, Company, Form, Field
-from models import storage
+import models
+from models import (
+    Employee, Company, Department,
+    Job, Form, Field, storage
+)
+
 
 
 def create_sqlite_connection(db_path):
@@ -63,11 +67,11 @@ class DB:
                 "first name": account_info.get("first_name"),
                 "last name": account_info.get("last_name"),
                 "email": account_info.get("email"),
+                "role": account_info.get("role"),
             }
-            new_employee = self.add_employee(employee_info)
-            new_account = Account(**account_info, employee_id=new_employee.id)
             if account_info['role'] == 'admin':
                 company = self.add_company(company_info)
+                company.save()
             else:
                 employee_id = company_info.get("employee_id", None)
                 if not employee_id:
@@ -75,6 +79,8 @@ class DB:
                 company = storage.get_company_by_employee_id(employee_id)
                 if not company:
                     raise InvalidRequestError("Company not found")
+            new_employee = self.add_employee(employee_info)
+            new_account = Account(**account_info, employee_id=new_employee.id)
             company.employees.append(new_employee)
             company.save()
             self._session.add(new_account)
@@ -101,7 +107,7 @@ class DB:
         emp_form.fields.append(Field(name="last name", type="text", is_required=False, position=2))
         emp_form.fields.append(Field(name="email", type="email", is_required=True, position=3))
         dep_form.fields.append(Field(name="name", type="text", is_required=True, position=1))
-        job_form.fields.append(Field(name="job title", type="text", is_required=True, position=1))
+        job_form.fields.append(Field(name="title", type="text", is_required=True, position=1))
         for form in [emp_form, dep_form, job_form]:
             new_company.forms.append(form)
         new_company.save()
@@ -114,8 +120,21 @@ class DB:
         Returns:
             created employee
         """
-        emp_info = str(employee_info)
-        new_employee = Employee(info=emp_info)
+        if "role" not in employee_info:
+            raise ValueError("employee role is not defined")
+        if employee_info["role"] in ["hr", "employee"]:
+            try:
+                emp_department = storage.find_department_by(name=employee_info["department"])
+                emp_job = storage.find_job_by(title=employee_info["job title"])
+            except:
+                raise ValueError("Employee department or job not found")
+        else:
+            emp_department = Department(name="hr", info='{"name": "hr"}')
+            emp_job = Job(title="hr", info='{"title": "hr"}')
+        employee_info = str(employee_info)
+        new_employee = Employee(info=employee_info)
+        new_employee.department = emp_department
+        new_employee.job = emp_job
         new_employee.save()
         return new_employee
     

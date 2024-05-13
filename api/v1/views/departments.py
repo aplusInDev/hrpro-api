@@ -40,8 +40,9 @@ def post_department(account, company_id):
     data = data.to_dict()
     data = handle_update_info("department", company_id, data)
     if data:
+        dep_name = data.get("name")
         data = str(data)
-        new_department = Department(info=data, company_id=company_id)
+        new_department = Department(name=dep_name, info=data, company_id=company_id)
         new_department.save()
         return jsonify(new_department.to_dict())
 
@@ -64,6 +65,8 @@ def put_department(account, department_id):
     data = data.to_dict()
     data = handle_update_info("department", department.company_id, data)
     if data:
+        if 'name' in data:
+            department.name = data.get('name')
         department.info = str(data)
         department.save()
         return jsonify(department.to_dict())

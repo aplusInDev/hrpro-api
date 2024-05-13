@@ -38,8 +38,9 @@ def post_job(account, company_id):
     from api.v1.utils.validate_field import handle_update_info
     data = handle_update_info("job", company_id, data)
     if data:
+        job_title = data.get("title")
         data = str(data)
-        new_job = Job(info=data, company_id=company_id)
+        new_job = Job(title=job_title, info=data, company_id=company_id)
         new_job.save()
         return jsonify(new_job.to_dict()), 201
     return jsonify({"error": "unvalid request"}), 400
@@ -56,11 +57,13 @@ def put_job(account, job_id):
     data = request.form
     if not data:
         return jsonify({"error": "unvalid request"}), 400
-    else:
-        data = data.to_dict()
+
     from api.v1.utils.validate_field import handle_update_info
+    data = data.to_dict()
     data = handle_update_info("job", job.company_id, data)
     if data:
+        if "title" in data:
+            job.title = data["title"]
         job.info = str(data)
         job.save()
         return jsonify(job.to_dict())

@@ -4,6 +4,7 @@ from uuid import uuid4
 from sqlalchemy import Column, String, Enum, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from models import storage, Employee
 
 
 Base = declarative_base()
@@ -29,3 +30,6 @@ class Account(Base):
                 self.id = str(uuid4())
             for key, value in kwargs.items():
                 setattr(self, key, value)
+
+    def employee(self) -> Employee:
+        return storage.get(Employee, self.employee_id)

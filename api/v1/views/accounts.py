@@ -20,8 +20,8 @@ def register_account(admin_info: dict, company_info: dict):
             "email": account.email,
             "message": "account created"
             }), 201
-    except ValueError:
-        return jsonify({"message": "email already registered"}), 400
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 400
 
 @app_views.route('/add_employee', methods=['POST'])
 @session_required
@@ -30,25 +30,20 @@ def add_employee(account):
     """
     if account.role != "admin":
         return jsonify({"error": "Unauthorized"}), 401
-    first_name = request.form.get('first_name')
-    last_name = request.form.get('last_name')
-    email = request.form.get('email')
-    role = request.form.get('role', 'employee')
-    for field in [first_name, last_name, email]:
-        if not field:
+    required_fields = ['first_name', 'last_name', 'email']
+    if 'role' not in request.form or 'role' == 'emplyee':
+        required_fields.append(*('department', 'job_title'))
+    for field in required_fields:
+        if field not in request.form:
             return jsonify({"error": "missing information"}), 400
+        employee_info = request.form.to_dict().copy()
     auth = Auth()
     try:
         password = _generate_random_pass()
         hashed_password = _hash_password(password)
-        employee_info = {
-            "first_name": first_name,
-            "last_name": last_name,
-            "email": email,
-            "role": role,
-            "hashed_password": hashed_password,
-            "is_active": True,
-        }
+        employee_info["role"] = request.get("role", "employee")
+        employee_info["is_active"] = True
+        employee_info["hashed_password"] = hashed_password
         company_info = {
             "employee_id": account.employee_id,
         }
