@@ -39,10 +39,9 @@ def post_job(account, company_id):
     data = handle_update_info("job", company_id, data)
     if data:
         data = str(data)
-        job = Job(info=data, company_id=company_id)
-        # job.company_id = company_id
-        job.save()
-        return jsonify(job.to_dict()), 201
+        new_job = Job(info=data, company_id=company_id)
+        new_job.save()
+        return jsonify(new_job.to_dict()), 201
     return jsonify({"error": "unvalid request"}), 400
 
 @app_views.route('/jobs/<job_id>', methods=['PUT'], strict_slashes=False)
