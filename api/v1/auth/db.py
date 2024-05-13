@@ -82,6 +82,9 @@ class DB:
             new_employee = self.add_employee(employee_info)
             new_account = Account(**account_info, employee_id=new_employee.id)
             company.employees.append(new_employee)
+            if account_info['role'] == 'admin':
+                company.departments.append(new_employee.department)
+                company.jobs.append(new_employee.job)
             company.save()
             self._session.add(new_account)
             self._session.commit()
