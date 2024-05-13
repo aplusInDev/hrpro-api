@@ -3,6 +3,7 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage, Company, Job
+from api.v1.auth.middleware import session_required
 
 
 @app_views.route('/companies/<company_id>/jobs', methods=['GET'], strict_slashes=False)
@@ -24,35 +25,47 @@ def get_job(job_id):
     return jsonify(job.to_dict())
 
 @app_views.route('/companies/<company_id>/jobs', methods=['POST'], strict_slashes=False)
-def post_job(company_id):
+@session_required
+def post_job(account, company_id):
     """ post job """
-    company = storage.get(Company, company_id)
-    if company is None:
-        abort(404)
-    data = request.get_json()
-    if data is None:
-        return 'Not a JSON', 400
-    if 'info' not in data:
-        return 'Job Informations missing', 400
-    job = Job(**data)
-    job.company_id = company_id
-    job.save()
-    return jsonify(job.to_dict()), 201
+    if account.role != "admin":
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.form
+    if not data:
+        return jsonify({"error": "unvalid request"}), 400
+    else:
+        data = data.to_dict()
+    from api.v1.utils.validate_field import handle_update_info
+    data = handle_update_info("job", company_id, data)
+    if data:
+        data = str(data)
+        job = Job(info=data, company_id=company_id)
+        # job.company_id = company_id
+        job.save()
+        return jsonify(job.to_dict()), 201
+    return jsonify({"error": "unvalid request"}), 400
 
 @app_views.route('/jobs/<job_id>', methods=['PUT'], strict_slashes=False)
-def put_job(job_id):
+@session_required
+def put_job(account, job_id):
     """ put job """
+    if account.role != "admin":
+        return jsonify({"error": "Unauthorized"}), 401
     job = storage.get(Job, job_id)
     if job is None:
         abort(404)
-    data = request.get_json()
-    if data is None:
-        return 'Not a JSON', 400
-    for key, value in data.items():
-        if key not in ['id', 'created_at', 'updated_at']:
-            setattr(job, key, value)
-    job.save()
-    return jsonify(job.to_dict())
+    data = request.form
+    if not data:
+        return jsonify({"error": "unvalid request"}), 400
+    else:
+        data = data.to_dict()
+    from api.v1.utils.validate_field import handle_update_info
+    data = handle_update_info("job", job.company_id, data)
+    if data:
+        job.info = str(data)
+        job.save()
+        return jsonify(job.to_dict())
+    return jsonify({"error": "unvalid request"}), 400
 
 @app_views.route('/jobs/<job_id>', methods=['DELETE'], strict_slashes=False)
 def delete_job(job_id):

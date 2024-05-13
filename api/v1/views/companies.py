@@ -56,7 +56,7 @@ def post_company():
     emp_form.fields.append(Field(name="email", type="email", is_required=True, position=2))
     emp_form.fields.append(Field(name="password", type="password", is_required=True, position=3))
     dep_form.fields.append(Field(name="name", type="text", is_required=True, position=1))
-    job_form.fields.append(Field(name="name", type="text", is_required=True, position=1))
+    job_form.fields.append(Field(name="title", type="text", is_required=True, position=1))
     for form in [emp_form, dep_form, job_form]:
         company.forms.append(form)
     company.save()
