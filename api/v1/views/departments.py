@@ -55,12 +55,12 @@ def post_department(account, company_id):
         abort(404)
     data = request.form
     if not data:
-        return jsonify({"error": "unvalid request"}), 400
+        return jsonify({"error": "Not a form data"}), 400
 
     from api.v1.utils.validate_field import handle_update_info
     data = data.to_dict()
     data = handle_update_info("department", company_id, data)
-    if data:
+    if data and data.get("name", None):
         dep_name = data.get("name")
         data = str(data)
         new_department = Department(name=dep_name, info=data, company_id=company_id)
@@ -79,18 +79,21 @@ def put_department(account, department_id):
     department = storage.get(Department, department_id)
     if department is None:
         abort(404)
-    data = request.form
+    data = request.get_json()
     if not data:
-        return jsonify({"error": "unvalid request"}), 400
+        return jsonify({"error": "Not a json data"}), 400
     from api.v1.utils.validate_field import handle_update_info
-    data = data.to_dict()
     data = handle_update_info("department", department.company_id, data)
     if data:
         if 'name' in data:
             department.name = data.get('name')
         department.info = str(data)
         department.save()
-        return jsonify(department.to_dict())
+        dep_dict = department.to_dict().copy()
+        dep_dict['info'] = eval(dep_dict['info'])
+        dep_dict['uri'] = 'http://localhost:5000/api/v1/departments/{}'.format(dep_dict['id'])
+        del dep_dict['employees']
+        return jsonify(dep_dict)
     return jsonify({"error": "unvalid request"}), 400
 
 @app_views.route('departments/<department_id>', methods=['DELETE'], strict_slashes=False)

@@ -75,19 +75,22 @@ def put_job(account, job_id):
     job = storage.get(Job, job_id)
     if job is None:
         abort(404)
-    data = request.form
+    data = request.get_json()
     if not data:
-        return jsonify({"error": "unvalid request"}), 400
+        return jsonify({"error": "Not a json data"}), 400
 
     from api.v1.utils.validate_field import handle_update_info
-    data = data.to_dict()
     data = handle_update_info("job", job.company_id, data)
     if data:
         if "title" in data:
             job.title = data["title"]
         job.info = str(data)
         job.save()
-        return jsonify(job.to_dict())
+        job_dict = job.to_dict().copy()
+        job_dict['info'] = eval(job_dict['info'])
+        job_dict['uri'] = 'http://localhost:5000/api/v1/jobs/{}'.format(job_dict['id'])
+        del job_dict['employees']
+        return jsonify(job_dict)
     return jsonify({"error": "unvalid request"}), 400
 
 @app_views.route('/jobs/<job_id>', methods=['DELETE'], strict_slashes=False)
