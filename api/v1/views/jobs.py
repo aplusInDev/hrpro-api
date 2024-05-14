@@ -13,8 +13,25 @@ def get_jobs(company_id):
     if company is None:
         abort(404)
 
-    all_jobs = [job.to_dict() for job in company.jobs]
+    all_jobs = []
+    for job in company.jobs:
+        job_dict = job.to_dict().copy()
+        job_dict['info'] = eval(job_dict['info'])
+        job_dict['uri'] = 'http://localhost:5000/api/v1/jobs/{}'.format(job_dict['id'])
+        del job_dict['employees']
+        all_jobs.append(job_dict)
     return jsonify(all_jobs)
+
+@app_views.route('/companies/<company_id>/jobs_titles', methods=['GET'])
+def get_jobs_names(company_id):
+    """ get the list of company jobs titles """
+    company = storage.get(Company, company_id)
+    if company is None:
+        abort(404)
+    all_jobs = []
+    for job in company.jobs:
+        all_jobs.append(job.title)
+    return jsonify(all_jobs), 200
 
 @app_views.route('/jobs/<job_id>', methods=['GET'], strict_slashes=False)
 def get_job(job_id):
@@ -22,7 +39,11 @@ def get_job(job_id):
     job = storage.get(Job, job_id)
     if job is None:
         abort(404)
-    return jsonify(job.to_dict())
+    job_dict = job.to_dict().copy()
+    job_dict['info'] = eval(job_dict['info'])
+    job_dict['uri'] = 'http://localhost:5000/api/v1/jobs/{}'.format(job_dict['id'])
+    del job_dict['employees']
+    return jsonify(job_dict)
 
 @app_views.route('/companies/<company_id>/jobs', methods=['POST'], strict_slashes=False)
 @session_required
