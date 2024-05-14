@@ -125,10 +125,16 @@ class DB:
         """
         if "role" not in employee_info:
             raise ValueError("employee role is not defined")
-        if employee_info["role"] in ["hr", "employee"]:
+        if employee_info["role"] == "employee":
             try:
                 emp_department = storage.find_department_by(name=employee_info["department"])
                 emp_job = storage.find_job_by(title=employee_info["job title"])
+            except:
+                raise ValueError("Employee department or job not found")
+        elif employee_info["role"] == "hr":
+            try:
+                emp_department = storage.find_department_by(name="hr")
+                emp_job = storage.find_job_by(title="hr")
             except:
                 raise ValueError("Employee department or job not found")
         else:

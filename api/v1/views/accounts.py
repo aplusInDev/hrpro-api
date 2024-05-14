@@ -41,7 +41,7 @@ def add_employee(account):
     try:
         password = _generate_random_pass()
         hashed_password = _hash_password(password)
-        employee_info["role"] = request.get("role", "employee")
+        employee_info["role"] = request.form.get("role", "employee")
         employee_info["is_active"] = True
         employee_info["hashed_password"] = hashed_password
         company_info = {
