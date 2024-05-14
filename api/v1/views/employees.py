@@ -15,7 +15,13 @@ def get_employees(company_id):
     all_employees = []
     for employee in company.employees:
         employee_dict = employee.to_dict().copy()
+        employee_info = eval(employee.info)
         employee_dict["uri"] = "http://localhost:5000/api/v1/employees/{}".format(employee.id)
+        employee_dict["first_name"] = employee_info["first name"]
+        employee_dict["last_name"] = employee_info["last name"]
+        if employee.job is not None:
+            job_info = eval(employee.job.info)
+            employee_dict["job_title"] = job_info["title"]
         for key in ['info', 'absences', 'attendances']:
             del employee_dict[key]
         all_employees.append(employee_dict)
