@@ -68,6 +68,8 @@ class DB:
                 "last name": account_info.get("last_name"),
                 "email": account_info.get("email"),
                 "role": account_info.get("role"),
+                "department": account_info.get("department"),
+                "job title": account_info.get("job title"),
             }
             if account_info['role'] == 'admin':
                 company = self.add_company(company_info)
@@ -128,9 +130,12 @@ class DB:
         if employee_info["role"] == "employee":
             try:
                 emp_department = storage.find_department_by(name=employee_info["department"])
+            except:
+                raise ValueError("Employee department not found")
+            try:
                 emp_job = storage.find_job_by(title=employee_info["job title"])
             except:
-                raise ValueError("Employee department or job not found")
+                raise ValueError("Employee job not found")
         elif employee_info["role"] == "hr":
             try:
                 emp_department = storage.find_department_by(name="hr")
