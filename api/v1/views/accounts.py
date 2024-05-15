@@ -32,7 +32,7 @@ def add_employee(account):
         return jsonify({"error": "Unauthorized"}), 401
     required_fields = ['first_name', 'last_name', 'email']
     if 'role' not in request.form or 'role' == 'emplyee':
-        required_fields.append(*('department', 'job_title'))
+        required_fields = [*required_fields, "department", "job title"]
     for field in required_fields:
         if field not in request.form:
             return jsonify({"error": "missing information"}), 400
