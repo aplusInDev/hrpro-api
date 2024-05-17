@@ -14,7 +14,8 @@ def upload_file2():
         return 'No file part', 400
     file = request.files['file']
     if file:
-        df = pd.read_excel(file, skiprows=3, usecols="B:E", names=["name", "start", "end", "absent"])
+        df = pd.read_excel(file, skiprows=3, usecols="B:F", names=[
+            "date", "name", "start", "end", "absent"])
         for col in df.columns:
             df[col] = df[col].astype(str)
         # convert each row from str to datetime
@@ -23,15 +24,12 @@ def upload_file2():
         df['duration'] = df.apply(lambda row: str(
             timedelta(seconds=(datetime.combine(date.min, row['end']) -
                                datetime.combine(date.min, row['start'])).\
-                                total_seconds()) if row['absent'] == 'False'
-                                and row['start'] != "NaN"
-                                and row['end'] != "NaN"
+                                total_seconds()) if row['absent'] != 'True'
                                 else '0:00:00'
                                 ),
                         axis=1)
         for col in df.columns:
             df[col] = df[col].astype(str)
-        print(df)
         df['absent'] = df['absent'].apply(lambda x: 'No' if x == "False" else 'Yes')
         return jsonify(df.to_dict(orient='records')), 200
 
