@@ -14,7 +14,7 @@ def upload_file2():
         return 'No file part', 400
     file = request.files['file']
     if file:
-        df = pd.read_excel(file, skiprows=3, usecols="B:F", names=[
+        df = pd.read_excel(file, skiprows=1, usecols="B:F", names=[
             "date", "name", "start", "end", "absent"])
         for col in df.columns:
             df[col] = df[col].astype(str)
