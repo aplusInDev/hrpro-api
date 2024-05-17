@@ -31,5 +31,6 @@ class Account(Base):
             for key, value in kwargs.items():
                 setattr(self, key, value)
 
+    @property
     def employee(self) -> Employee:
         return storage.get(Employee, self.employee_id)

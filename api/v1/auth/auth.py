@@ -140,17 +140,11 @@ class Auth:
         try:
             account = self._db.find_account_by(email=email)
             current_user = {
-                "employee_id": account.employee_id,
+                "employee_id": account.employee.id,
                 "email": account.email,
                 "role": account.role,
+                "company_id": account.employee.company_id,
             }
-            # if account.role == "admin":
-            #     company = storage.get_company_by_employee_id(account.employee_id)
-            #     if company:
-            #         current_user["company_id"] = company.id
-            company = storage.get_company_by_employee_id(account.employee_id)
-            if company:
-                current_user["company_id"] = company.id
             return current_user
         except NoResultFound:
             return None
