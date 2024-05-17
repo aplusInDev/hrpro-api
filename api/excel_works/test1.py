@@ -15,14 +15,24 @@ def upload_file2():
     file = request.files['file']
     if file:
         df = pd.read_excel(file, skiprows=3, usecols="B:E", names=["name", "start", "end", "absent"])
-        df['duration'] = df.apply(lambda row: str(timedelta(seconds=(datetime.combine(date.min, row['end']) - 
-                                                                     datetime.combine(date.min, row['start'])).total_seconds()))
-                                                                     if row['absent'] else None,
-                                  axis=1)
         for col in df.columns:
             df[col] = df[col].astype(str)
-        df['absent'] = df['absent'].apply(lambda x: 'No' if x == "nan" else 'Yes')
+        # convert each row from str to datetime
+        df['start'] = df['start'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "nan")
+        df['end'] = df['end'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "nan")
+        df['duration'] = df.apply(lambda row: str(
+            timedelta(seconds=(datetime.combine(date.min, row['end']) -
+                               datetime.combine(date.min, row['start'])).\
+                                total_seconds()) if row['absent'] == 'False'
+                                and row['start'] != "NaN"
+                                and row['end'] != "NaN"
+                                else '0:00:00'
+                                ),
+                        axis=1)
+        for col in df.columns:
+            df[col] = df[col].astype(str)
         print(df)
+        df['absent'] = df['absent'].apply(lambda x: 'No' if x == "False" else 'Yes')
         return jsonify(df.to_dict(orient='records')), 200
 
 
