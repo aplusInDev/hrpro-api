@@ -16,15 +16,15 @@ def upload_file2():
     file = request.files['file']
     if file:
         df = pd.read_excel(file, skiprows=1, usecols="B:F", names=[
-            "date", "name", "start", "end", "absent"])
+            "date", "name", "check_in", "check_out", "absent"])
         for col in df.columns:
             df[col] = df[col].astype(str)
         # convert each row from str to datetime
-        df['start'] = df['start'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "nan")
-        df['end'] = df['end'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "nan")
+        df['check_in'] = df['check_in'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "nan")
+        df['check_out'] = df['check_out'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "nan")
         df['duration'] = df.apply(lambda row: str(
-            timedelta(seconds=(datetime.combine(date.min, row['end']) -
-                               datetime.combine(date.min, row['start'])).\
+            timedelta(seconds=(datetime.combine(date.min, row['check_out']) -
+                               datetime.combine(date.min, row['check_in'])).\
                                 total_seconds()) if row['absent'] != 'True'
                                 else '0:00:00'
                                 ),
