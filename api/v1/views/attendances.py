@@ -2,61 +2,38 @@
 
 from flask import jsonify, request, abort
 from api.v1.views import app_views
-from models import storage, Employee, Attendance
+from models import storage, Department, Company
+import pandas as pd
+from datetime import datetime, date, timedelta
 
-
-@app_views.route('/employees/<employee_id>/attendances', methods=['GET'], strict_slashes=False)
-def get_attendances(employee_id):
-    """ get attendances """
-    employee = storage.get(Employee, employee_id)
-    if employee is None:
+@app_views.route('companies/<company_id>/attendance', methods=['POST'])
+def post_employees_attendance(company_id):
+    """ post employees attendance """
+    company = storage.get(Company, company_id)
+    if company is None:
         abort(404)
-    all_attendances = [attendance.to_dict() for attendance in employee.attendances]
-    return jsonify(all_attendances)
-
-@app_views.route('/attendances/<attendance_id>', methods=['GET'], strict_slashes=False)
-def get_attendance(attendance_id):
-    """ get attendance """
-    attendance = storage.get(Attendance, attendance_id)
-    if attendance is None:
-        abort(404)
-    return jsonify(attendance.to_dict())
-
-@app_views.route('/employees/<employee_id>/attendances', methods=['POST'], strict_slashes=False)
-def post_attendance(employee_id):
-    """ post attendance """
-    employee = storage.get(Employee, employee_id)
-    if employee is None:
-        abort(404)
-    data = request.get_json()
-    if data is None:
-        return 'Not a JSON', 400
-    if 'check_in' not in data or 'check_out' not in data:
-        return 'Attendance informations missing', 400
-    attendance = Attendance(**data)
-    attendance.employee_id = employee_id
-    attendance.save()
-    return jsonify(attendance.to_dict()), 201
-
-@app_views.route('/attendances/<attendance_id>', methods=['PUT'], strict_slashes=False)
-def put_attendance(attendance_id):
-    """ put attendance """
-    attendance = storage.get(Attendance, attendance_id)
-    if attendance is None:
-        abort(404)
-    data = request.get_json()
-    if data is None:
-        return 'Not a JSON', 400
-    for key, value in data.items():
-        if key not in ['id', 'created_at', 'updated_at']:
-            setattr(attendance, key, value)
-    attendance.save()
-    return jsonify(attendance.to_dict())
-
-@app_views.route('/attendances/<attendance_id>', methods=['DELETE'], strict_slashes=False)
-def delete_attendance(attendance_id):
-    """ delete attendance """
-    attendance = storage.get(Attendance, attendance_id)
-    if attendance is None:
-        abort(404)
-    attendance.delete()
+    if 'file' not in request.files:
+        return 'No file part', 400
+    file = request.files['file']
+    if file:
+        df = pd.read_excel(file, skiprows=1, usecols="B:F", names=[
+            "date", "name", "check_in", "check_out", "absent"])
+        for col in df.columns:
+            df[col] = df[col].astype(str)
+        # convert each row from str to datetime
+        df['check_in'] = df['check_in'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "nan")
+        df['check_out'] = df['check_out'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "nan")
+        df['duration'] = df.apply(lambda row: str(
+            timedelta(seconds=(datetime.combine(date.min, row['check_out']) -
+                                 datetime.combine(date.min, row['check_in'])).\
+                                total_seconds()) if row['absent'] != 'True'
+                                else '0:00:00'
+                                ),
+                        axis=1)
+        for col in df.columns:
+            df[col] = df[col].astype(str)
+        df['absent'] = df['absent'].apply(lambda x: 'No' if x == "False" else 'Yes')
+        # return jsonify(df.to_dict(orient='records')), 200
+    
+        return jsonify({"msg": "File uploaded successfully"}), 200
+    return jsonify({"error": "Not a form data"}), 400
