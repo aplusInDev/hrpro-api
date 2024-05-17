@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, send_file
 from flask_cors import CORS
 import pandas as pd
 from datetime import datetime, date, timedelta
+import io
 
 
 app = Flask(__name__)
@@ -31,7 +32,19 @@ def upload_file2():
         for col in df.columns:
             df[col] = df[col].astype(str)
         df['absent'] = df['absent'].apply(lambda x: 'No' if x == "False" else 'Yes')
-        return jsonify(df.to_dict(orient='records')), 200
+        # return jsonify(df.to_dict(orient='records')), 200
+    
+    # Create an in-memory buffer for the Excel file
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, sheet_name="Sheet1", index=False)
+        output.seek(0)  # Important: move to the beginning of the BytesIO buffer!
+
+        # Return the buffer content as a 'send_file' response
+        return send_file(
+            output, download_name='book2.xlsx', as_attachment=True,
+            mimetype='application/vnd.openxmlformats-officedocument.\
+                spreadsheetml.sheet')
 
 
 if __name__ == '__main__':
