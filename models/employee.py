@@ -10,6 +10,8 @@ class Employee(BaseModel, Base):
     """Employee class"""
     __tablename__ = 'employees'
 
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
     company_id = Column(String(50),
                         ForeignKey('companies.id', ondelete='CASCADE',
                                    onupdate='CASCADE'),

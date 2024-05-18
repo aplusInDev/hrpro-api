@@ -18,6 +18,15 @@ class DBStorage:
     __engine = None
     __session = None
 
+    @property
+    def _session(self):
+        """This method creates a new session with the current database engine
+        """
+        if self.__session is None:
+            Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
+            self.__session = scoped_session(Session)
+        return self.__session
+
     def __init__(self):
         """This method initializes a new instance of the DBStorage class"""
         env = getenv('HRPRO_ENV')
@@ -138,3 +147,15 @@ class DBStorage:
             return department
         else:
             raise NoResultFound("department not found")
+        
+    def find_employee_by(self, **kwargs):
+        """Finds employee based on a set of filters
+        """
+        for key in kwargs.keys():
+            if not hasattr(Employee, key):
+                raise InvalidRequestError("Invalid filter key")
+        employee = self.__session.query(Employee).filter_by(**kwargs).first()
+        if employee:
+            return employee
+        else:
+            raise NoResultFound("employee not found")

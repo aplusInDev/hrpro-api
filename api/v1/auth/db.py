@@ -145,8 +145,12 @@ class DB:
         else:
             emp_department = Department(name="hr", info='{"name": "hr"}')
             emp_job = Job(title="hr", info='{"title": "hr"}')
-        employee_info = str(employee_info)
-        new_employee = Employee(info=employee_info)
+        str_employee_info = str(employee_info)
+        print(employee_info)
+        new_employee = Employee(first_name=employee_info["first name"],
+                                last_name=employee_info["last name"],
+                                info=str_employee_info
+                                )
         new_employee.department = emp_department
         new_employee.job = emp_job
         new_employee.save()
