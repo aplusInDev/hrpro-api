@@ -76,7 +76,6 @@ def get_employees_attendance(company_id):
     if company is None or reqDate is None:
         abort(404)
 
-    print(date)
     attendances = []
     for employee in company.employees:
         for attendance in employee.attendances:
