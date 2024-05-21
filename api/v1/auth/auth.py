@@ -5,7 +5,6 @@ from .account import Account
 from .session import SessionAuth
 import bcrypt
 from sqlalchemy.orm.exc import NoResultFound
-from uuid import uuid4
 from datetime import datetime, timedelta
 from flask import render_template, jsonify
 from flask_mail import Message

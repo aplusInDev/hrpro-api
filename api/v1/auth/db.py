@@ -16,10 +16,6 @@ from models import (
 )
 
 
-
-def create_sqlite_connection(db_path):
-    return sqlite3.connect(db_path)
-
 env = getenv('HRPRO_ENV')
 mysql_user = getenv('HRPR_MYSQL_USER')
 mysql_pwd = getenv('HRPRO_MYSQL_PWD')
@@ -137,7 +133,8 @@ class DB:
         """Get a session by its id
         """
         return self._session.query(SessionAuth).\
-            filter(SessionAuth.id == session_id).first()
+            filter(SessionAuth.id == session_id).\
+            first()
         
     def delete_session(self, session_id: str) -> None:
         """Delete a session

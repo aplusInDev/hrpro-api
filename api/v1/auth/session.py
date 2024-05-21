@@ -3,10 +3,9 @@
 """ Session management
 """
 
-from .account import Account, Base
-from sqlalchemy.orm.exc import NoResultFound
+from .account import Base
 from uuid import uuid4
-from datetime import datetime, timedelta
+from datetime import datetime
 from sqlalchemy import Column, String, ForeignKey, Integer, DateTime
 from sqlalchemy.orm import relationship
 
