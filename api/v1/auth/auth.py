@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from flask import render_template, jsonify
 from flask_mail import Message
 from os import getenv
-from models import storage
+from models import storage, Company
 import string
 import secrets
 
@@ -70,21 +70,38 @@ class Auth:
             mail.send(msg)
         except Exception as err:
             return jsonify({"sending email error:": str(err)}), 400
-
-    def register_account(self, admin_info: dict, company_info: dict, **kwargs) -> Account:
-        """Register a new account.
-        """
-        if self._db._session.query(Account).filter(Account.email == admin_info.get("email")).first():
-            raise ValueError("Account <{}> already exists".format(admin_info.get("email")))
+        
+    def register_admin(self, admin_info: dict, company_info: dict) -> Account:
+        """ register admin """
+        account = self._db.find_account_by(email=admin_info.get("email"))
+        if account:
+            raise ValueError("Account <{}> already exists".format(
+                admin_info.get("email")))
         if storage.get_company_by_name(company_info.get("name")):
             raise ValueError("Giving company name already exists")
         hashed_password = _hash_password(admin_info.get("password"))
-        admin_data = admin_info.copy()
-        admin_data["hashed_password"] = hashed_password
-        admin_data["role"] = kwargs.get("role", "employee")
-        if admin_data.get("password"):
-            del admin_data["password"]
-        return self._db.add_account(admin_data, company_info)
+        admin_info["hashed_password"] = hashed_password
+        if admin_info.get("password"):
+            del admin_info["password"]
+        return self._db.add_admin_account(admin_info, company_info)
+    
+    def add_employee_account(self, account_info: dict, position_info: dict) -> Account:
+        """ Add new employee account """
+        company_id = position_info.get("company_id")
+        company = storage.get(Company, company_id)
+        if not company:
+            raise ValueError("Company not found")
+        employee_info = account_info.copy()
+        if employee_info.get("hashed_password"):
+            del employee_info["hashed_password"]
+        role = employee_info.get("role")
+        del employee_info["role"]
+        new_employee = self._db.add_employee(role, employee_info, position_info)
+        new_employee.company = company
+        new_employee.save()
+        new_account = Account(**account_info, employee_id=new_employee.id)
+        new_account.save()
+        return new_account
     
     def activate_account(self, account_id: str, activation_token: str) -> bool:
         """Activate the account
@@ -212,7 +229,7 @@ def _generate_random_pass():
     symbols = ['*', '@', '_']
     password = ""
 
-    for _ in range(9):
+    for _ in range(2):
         password += secrets.choice(string.ascii_lowercase)
         password += secrets.choice(string.ascii_uppercase)
         password += secrets.choice(string.digits)

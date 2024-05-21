@@ -58,42 +58,17 @@ class DB:
         if self.__session is not None:
             self.__session.remove()
             self.__session = None
-    
-    def add_account(self, account_info: dict, company_info: dict) -> Account:
-        """Add a new account to the database
-        """
-        try:
-            employee_info = {
-                "first name": account_info.get("first_name"),
-                "last name": account_info.get("last_name"),
-                "email": account_info.get("email"),
-                "role": account_info.get("role"),
-                "department": account_info.get("department"),
-                "job title": account_info.get("job title"),
-            }
-            if account_info['role'] == 'admin':
-                company = self.add_company(company_info)
-                company.save()
-            else:
-                employee_id = company_info.get("employee_id", None)
-                if not employee_id:
-                    raise ValueError("Request error")
-                company = storage.get_company_by_employee_id(employee_id)
-                if not company:
-                    raise InvalidRequestError("Company not found")
-            new_employee = self.add_employee(employee_info)
-            new_account = Account(**account_info, employee_id=new_employee.id)
-            company.employees.append(new_employee)
-            if account_info['role'] == 'admin':
-                company.departments.append(new_employee.department)
-                company.jobs.append(new_employee.job)
-            company.save()
-            self._session.add(new_account)
-            self._session.commit()
-        except Exception as err:
-            self._session.rollback()
-            new_account = None
-            raise ValueError("Error creating account: {}".format(err))
+
+    def add_admin_account(self, account_info: dict, company_info: dict) -> Account:
+        """ Add new admin account """
+        company = self.add_company(company_info)
+        company.save()
+        employee_info = account_info.copy()
+        if employee_info.get("hashed_password"):
+            del employee_info["hashed_password"]
+        new_employee = self.add_employee("admin", employee_info)
+        new_account = Account(**account_info, employee_id=new_employee.id)
+        new_account.save()
         return new_account
     
     def add_company(self, company_info: dict) -> Company:
@@ -118,55 +93,45 @@ class DB:
         new_company.save()
         return new_company
     
-    def add_employee(self, employee_info: dict) -> Employee:
+    def add_employee(self, role: str, employee_info: dict,
+                     position_info: dict={}) -> Employee:
         """Creates new Emplyee
         Args:
             employee_info: employee information
         Returns:
             created employee
         """
-        if "role" not in employee_info:
-            raise ValueError("employee role is not defined")
-        if employee_info["role"] == "employee":
+        if role in ["employee", "hr"]:
             try:
-                emp_department = storage.find_department_by(name=employee_info["department"])
+                employee_department = storage.find_department_by(name=position_info["department"])
             except:
                 raise ValueError("Employee department not found")
             try:
-                emp_job = storage.find_job_by(title=employee_info["job title"])
+                employee_job = storage.find_job_by(title=position_info["job title"])
             except:
                 raise ValueError("Employee job not found")
-        elif employee_info["role"] == "hr":
-            try:
-                emp_department = storage.find_department_by(name="hr")
-                emp_job = storage.find_job_by(title="hr")
-            except:
-                raise ValueError("Employee department or job not found")
+        elif role == "admin":
+            employee_department = Department(name="hr", info='{"name": "hr"}')
+            employee_job = Job(title="hr", info='{"title": "hr"}')
         else:
-            emp_department = Department(name="hr", info='{"name": "hr"}')
-            emp_job = Job(title="hr", info='{"title": "hr"}')
+            raise ValueError("Invalid role")
         str_employee_info = str(employee_info)
-        print(employee_info)
-        new_employee = Employee(first_name=employee_info["first name"],
-                                last_name=employee_info["last name"],
-                                info=str_employee_info
-                                )
-        new_employee.department = emp_department
-        new_employee.job = emp_job
+        new_employee = Employee(**employee_info, info=str_employee_info)
+        new_employee.department = employee_department
+        new_employee.job = employee_job
         new_employee.save()
         return new_employee
     
     def find_account_by(self, **kwargs) -> Account:
         """Finds a account based on a set of filters.
         """
+        if not kwargs:
+            return None
         for key in kwargs.keys():
             if not hasattr(Account, key):
-                raise InvalidRequestError()
+                raise InvalidRequestError(f"Invalid filter criteria: {key}")
         account =  self._session.query(Account).filter_by(**kwargs).first()
-        if account:
-            return account
-        else:
-            raise NoResultFound()
+        return account
 
     def get_session(self, session_id: str) -> SessionAuth:
         """Get a session by its id
@@ -183,24 +148,15 @@ class DB:
             self._session.commit()
         else:
             raise NoResultFound("Session not found")
-
-    def find_account_by_session_id(self, session_id: str) -> Account:
-        """Find an account by session id
-        """
-        session = self.get_session(session_id)
-        if session:
-            return session.account
-        else:
-            return None
     
     def update_account(self, account_id: int, **kwargs) -> None:
         """Update a account in the database
         """
-        account = self._session.query(Account).filter(Account.id == account_id).first()
-        if account is not None:
+        try:
+            account = self.find_account_by(id=account_id)
             for key, value in kwargs.items():
-                if hasattr(Account, key):
-                    setattr(Account, key, value)
-                else:
-                    raise ValueError()
+                setattr(account, key, value)
             self._session.commit()
+        except Exception as err:
+            self._session.rollback()
+            raise ValueError("Error updating account: {}".format(err))

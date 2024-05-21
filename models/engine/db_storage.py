@@ -106,56 +106,46 @@ class DBStorage:
         employee = self.get(Employee, employee_id)
         return employee.company if employee else None
     
-    def get_emplyee_info(self, employee_id: str) -> dict:
-        """This method retrieves employee info based on its ID
-        """
-        employee = self.get(Employee, employee_id)
-        return eval(employee.info) if employee else None
-    
     def find_form_by_(self, **kwargs) -> Form:
         """Finds a account based on a set of filters.
         """
+        if not kwargs:
+            raise InvalidRequestError("No filter criteria")
         for key in kwargs.keys():
             if not hasattr(Form, key):
                 raise InvalidRequestError("Invalid filter key")
         form = self.__session.query(Form).filter_by(**kwargs).first()
-        if form:
-            return form
-        else:
-            raise NoResultFound("form not found")
+        return form
         
     def find_job_by(self, **kwargs) -> Job:
         """Finds a job based on a set of filters.
         """
+        if not kwargs:
+            raise InvalidRequestError("No filter criteria")
         for key in kwargs.keys():
             if not hasattr(Job, key):
                 raise InvalidRequestError("Invalid filter key")
         job = self.__session.query(Job).filter_by(**kwargs).first()
-        if job:
-            return job
-        else:
-            raise NoResultFound("job not found")
+        return job
         
     def find_department_by(self, **kwargs) -> Department:
         """Finds department based on a set of filters
         """
+        if not kwargs:
+            raise InvalidRequestError("No filter criteria")
         for key in kwargs.keys():
             if not hasattr(Department, key):
                 raise InvalidRequestError("Invalid filter key")
         department = self.__session.query(Department).filter_by(**kwargs).first()
-        if department:
-            return department
-        else:
-            raise NoResultFound("department not found")
+        return department
         
     def find_employee_by(self, **kwargs):
         """Finds employee based on a set of filters
         """
+        if not kwargs:
+            raise InvalidRequestError("No filter criteria")
         for key in kwargs.keys():
             if not hasattr(Employee, key):
                 raise InvalidRequestError("Invalid filter key")
         employee = self.__session.query(Employee).filter_by(**kwargs).first()
-        if employee:
-            return employee
-        else:
-            raise NoResultFound("employee not found")
+        return employee
