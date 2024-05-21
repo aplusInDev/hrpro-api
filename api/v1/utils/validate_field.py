@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from models import storage, Form
-import json
 
 
 def is_exists_field(form_id, data):
