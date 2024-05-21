@@ -16,7 +16,7 @@ class Employee(BaseModel, Base):
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     leave_balance = Column(Integer, nullable=True, default=0)
-    hire_date = Column(Date, nullable=False)
+    hire_date = Column(Date, nullable=True)
     company_id = Column(String(50),
                         ForeignKey('companies.id', ondelete='CASCADE',
                                    onupdate='CASCADE'),

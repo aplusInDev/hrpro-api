@@ -108,10 +108,18 @@ class DB:
         elif role == "admin":
             employee_department = Department(name="hr", info='{"name": "hr"}')
             employee_job = Job(title="hr", info='{"title": "hr"}')
+            position_info = {
+                "department": "hr",
+                "job title": "hr",
+            }
         else:
             raise ValueError("Invalid role")
         str_employee_info = str(employee_info)
-        new_employee = Employee(**employee_info, info=str_employee_info)
+        str_position_info = str(position_info)
+        new_employee = Employee(
+            **employee_info, info=str_employee_info,
+            position_info=str_position_info
+            )
         new_employee.department = employee_department
         new_employee.job = employee_job
         new_employee.save()
