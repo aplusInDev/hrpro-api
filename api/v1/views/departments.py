@@ -12,14 +12,7 @@ def get_departments(company_id):
     company = storage.get(Company, company_id)
     if company is None:
         abort(404)
-    all_departments = []
-    for department in company.departments:
-        dep_dict = department.to_dict().copy()
-        dep_dict['info'] = eval(dep_dict['info'])
-        dep_dict['uri'] = 'http://localhost:5000/api/v1/departments/{}'.format(dep_dict['id'])
-        del dep_dict['employees']
-        all_departments.append(dep_dict)
-    return jsonify(all_departments), 200
+    return jsonify([d.to_dict() for d in company.departments]), 200
 
 @app_views.route('companies/<company_id>/departments_names', methods=['GET'])
 def get_departments_names(company_id):
@@ -38,11 +31,7 @@ def get_department(department_id):
     department = storage.get(Department, department_id)
     if department is None:
         abort(404)
-    dep_dict = department.to_dict().copy()
-    dep_dict['info'] = eval(dep_dict['info'])
-    dep_dict['uri'] = 'http://localhost:5000/api/v1/departments/{}'.format(dep_dict['id'])
-    del dep_dict['employees']
-    return jsonify(dep_dict)
+    return jsonify(department.to_dict())
 
 @app_views.route('companies/<company_id>/departments', methods=['POST'], strict_slashes=False)
 def post_department(company_id):
@@ -83,11 +72,7 @@ def put_department(department_id):
             department.name = data.get('name')
         department.info = str(data)
         department.save()
-        dep_dict = department.to_dict().copy()
-        dep_dict['info'] = eval(dep_dict['info'])
-        dep_dict['uri'] = 'http://localhost:5000/api/v1/departments/{}'.format(dep_dict['id'])
-        del dep_dict['employees']
-        return jsonify(dep_dict)
+        return jsonify(department.to_dict())
     return jsonify({"error": "unvalid request"}), 400
 
 @app_views.route('departments/<department_id>', methods=['DELETE'], strict_slashes=False)
