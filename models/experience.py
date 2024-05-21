@@ -30,5 +30,6 @@ class Experience(BaseModel, Base):
 
     def to_dict(self):
         new_dict = super().to_dict().copy()
-        new_dict["employee"] = self.employee.to_dict()
+        new_dict["employee"] = "http://localhost:5000/api/v1/employees/{}".\
+            format(self.employee_id)
         return new_dict

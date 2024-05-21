@@ -52,7 +52,7 @@ class Training(BaseModel, Base):
     trainer_id = Column(String(50),
                         ForeignKey('employees.id', ondelete='CASCADE',
                                    onupdate='CASCADE'),
-                        nullable=True
+                        nullable=False
                         )
 
     company = relationship("Company", back_populates="trainings")
@@ -68,4 +68,17 @@ class Training(BaseModel, Base):
 
     def to_dict(self):
         new_dict = super().to_dict().copy()
+        new_dict["company"] = "http://localhost:5000/api/v1/companies/{}".\
+            format(self.company_id)
+        new_dict["department"] = "http://localhost:5000/api/v1/departments/{}".\
+            format(self.department_id)
+        new_dict["job"] = "http://localhost:5000/api/v1/jobs/{}".\
+            format(self.job_id)
+        new_dict["trainer"] = "http://localhost:5000/api/v1/employees/{}".\
+            format(self.trainer_id)
+        new_dict["trainees"] = {
+            trainee.first_name + " " + trainee.last_name:
+            "http://localhost:5000/api/v1/employees/" + trainee.id
+            for trainee in self.trainees
+            }
         return new_dict

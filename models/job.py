@@ -27,5 +27,11 @@ class Job(BaseModel, Base):
 
     def to_dict(self):
         new_dict = super().to_dict().copy()
-        new_dict["employees"] = [employee.to_dict() for employee in self.employees]
+        new_dict["employees"] = {
+            employee.first_name + " " + employee.last_name:
+            "http://localhost/api/v1/employees/" + employee.id
+            for employee in self.employees
+            }
+        new_dict["company"] = "http://localhost/api/v1/companies/{}".\
+            format(self.company_id)
         return new_dict

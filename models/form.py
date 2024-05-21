@@ -27,4 +27,6 @@ class Form(BaseModel, Base):
     def to_dict(self):
         new_dict = super().to_dict().copy()
         new_dict["fields"] = [field.to_dict() for field in self.fields]
+        new_dict["company"] = "http://localhost:5000/api/v1/companies/{}".\
+            format(self.company_id)
         return new_dict

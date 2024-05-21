@@ -31,4 +31,6 @@ class Attendance(BaseModel, Base):
         new_dict['check_in'] = self.check_in.strftime('%H:%M:%S')
         new_dict['check_out'] = self.check_out.strftime('%H:%M:%S')
         new_dict['date'] = self.date.strftime('%Y-%m-%d')
+        new_dict["employee"] = "http://localhost:5000/api/v1/employees/{}".\
+        format(self.employee_id)
         return new_dict

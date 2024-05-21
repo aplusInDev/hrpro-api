@@ -26,3 +26,9 @@ class Field(BaseModel, Base):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def to_dict(self):
+        new_dict = super().to_dict().copy()
+        new_dict["form"] = "http://localhost:5000/api/v1/forms/{}".\
+            format(self.form_id)
+        return new_dict

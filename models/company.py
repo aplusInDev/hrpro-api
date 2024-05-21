@@ -28,10 +28,23 @@ class Company(BaseModel, Base):
 
     def to_dict(self):
         new_dict = super().to_dict().copy()
-        new_dict["departments"] = [department.to_dict() for department in self.departments]
-        new_dict["employees"] = [employee.to_dict() for employee in self.employees]
-        new_dict["jobs"] = [job.to_dict() for job in self.jobs]
-        new_dict["forms"] = [form.to_dict() for form in self.forms]
+        new_dict["departments"] = {
+            department.name: "http://localhost/api/v1/jobs/" +
+            department.id for department in self.departments
+            }
+        new_dict["employees"] = {
+            employee.first_name + " " + employee.last_name:
+            "http://localhost/api/v1/employees/" + employee.id
+            for employee in self.employees
+            }
+        new_dict["jobs"] = {
+            job.title: "http://localhost/api/v1/jobs/" + job.id
+            for job in self.jobs
+            }
+        new_dict["forms"] = {
+            form.name: "http://localhost/api/v1/forms/" + form.id
+            for form in self.forms
+            }
         return new_dict
 
     def __init__(self, *args, **kwargs):
