@@ -1,9 +1,7 @@
 """DB module
 """
-import sqlite3
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm.session import Session
 from sqlalchemy.orm.exc import NoResultFound # moved to sqlalchemy.exec in the v 1.4.x
 from sqlalchemy.exc import InvalidRequestError
 from .account import Base, Account
@@ -11,9 +9,10 @@ from .session import SessionAuth
 from os import getenv
 import models
 from models import (
-    Employee, Company, Department,
-    Job, Form, Field, storage
-)
+    storage, Company, Department,
+    Job, Form, Field, Employee,
+    )
+from typing import TypeVar
 
 
 env = getenv('HRPRO_ENV')
@@ -40,7 +39,7 @@ class DB:
         self.__session = None
 
     @property
-    def _session(self) -> Session:
+    def _session(self) -> TypeVar['Session']:
         """Memoized session object
         """
         if self.__session is None:
@@ -55,7 +54,7 @@ class DB:
             self.__session.remove()
             self.__session = None
 
-    def add_admin_account(self, account_info: dict, company_info: dict) -> Account:
+    def add_admin_account(self, account_info: dict, company_info: dict) -> TypeVar['Account']:
         """ Add new admin account """
         company = self.add_company(company_info)
         company.save()
@@ -67,7 +66,7 @@ class DB:
         new_account.save()
         return new_account
     
-    def add_company(self, company_info: dict) -> Company:
+    def add_company(self, company_info: dict) -> TypeVar['Account']:
         """Creates new company
         Args:
             company_info: company information
@@ -90,7 +89,7 @@ class DB:
         return new_company
     
     def add_employee(self, role: str, employee_info: dict,
-                     position_info: dict={}) -> Employee:
+                     position_info: dict={}) -> TypeVar['Employee']:
         """Creates new Emplyee
         Args:
             employee_info: employee information
@@ -118,7 +117,7 @@ class DB:
         new_employee.save()
         return new_employee
     
-    def find_account_by(self, **kwargs) -> Account:
+    def find_account_by(self, **kwargs) -> TypeVar['Account']:
         """Finds a account based on a set of filters.
         """
         if not kwargs:
@@ -129,7 +128,7 @@ class DB:
         account =  self._session.query(Account).filter_by(**kwargs).first()
         return account
 
-    def get_session(self, session_id: str) -> SessionAuth:
+    def get_session(self, session_id: str) -> TypeVar['SessionAuth']:
         """Get a session by its id
         """
         return self._session.query(SessionAuth).\

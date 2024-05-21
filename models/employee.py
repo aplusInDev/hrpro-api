@@ -27,6 +27,7 @@ class Employee(BaseModel, Base):
                         nullable=True
                         )
     info = Column(Text, nullable=True)
+    position_info = Column(Text, nullable=True)
 
     department = relationship("Department", back_populates="employees")
     job = relationship("Job", back_populates="employees")

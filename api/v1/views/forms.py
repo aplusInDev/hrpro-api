@@ -2,14 +2,14 @@
 
 from flask import jsonify, request, abort
 from api.v1.views import app_views
-from models import storage, Form, Company
+from models import storage, Form
 from api.v1.utils import is_exists_form
 
 
 @app_views.route('/companies/<company_id>/forms', methods=['GET'], strict_slashes=False)
 def get_forms(company_id):
     """ get forms """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     return jsonify([form.to_dict() for form in company.forms])
@@ -17,7 +17,7 @@ def get_forms(company_id):
 @app_views.route('/forms/<form_id>', methods=['GET'], strict_slashes=False)
 def get_form(form_id):
     """ get form """
-    form = storage.get(Form, form_id)
+    form = storage.get("Form", form_id)
     if form is None:
         abort(404)
     return jsonify(form.to_dict())
@@ -40,7 +40,7 @@ def post_form(company_id):
 @app_views.route('/forms/<form_id>', methods=['PUT'], strict_slashes=False)
 def put_form(form_id):
     """ put form """
-    form = storage.get(Form, form_id)
+    form = storage.get("Form", form_id)
     if form is None:
         abort(404)
     data = request.get_json()
@@ -56,7 +56,7 @@ def put_form(form_id):
 @app_views.route('/forms/<form_id>', methods=['DELETE'], strict_slashes=False)
 def delete_form(form_id):
     """ delete form """
-    form = storage.get(Form, form_id)
+    form = storage.get("Form", form_id)
     if form is None:
         abort(404)
     form.delete()

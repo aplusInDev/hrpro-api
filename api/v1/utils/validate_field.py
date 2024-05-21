@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from models import storage, Form
+from models import storage
 
 
 def is_exists_field(form_id, data):
-    form = storage.get(Form, form_id)
+    form = storage.get("Form", form_id)
     if form is None:
         return True
     for field in form.fields:

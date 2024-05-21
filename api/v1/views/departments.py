@@ -2,13 +2,13 @@
 
 from flask import jsonify, request, abort
 from api.v1.views import app_views
-from models import storage, Department, Company
+from models import storage, Department
 
 
 @app_views.route('companies/<company_id>/departments', methods=['GET'], strict_slashes=False)
 def get_departments(company_id):
     """ get departments """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     return jsonify([d.to_dict() for d in company.departments]), 200
@@ -16,7 +16,7 @@ def get_departments(company_id):
 @app_views.route('companies/<company_id>/departments_names', methods=['GET'])
 def get_departments_names(company_id):
     """ get departments names """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     all_departments = []
@@ -27,7 +27,7 @@ def get_departments_names(company_id):
 @app_views.route('departments/<department_id>', methods=['GET'], strict_slashes=False)
 def get_department(department_id):
     """ get department """
-    department = storage.get(Department, department_id)
+    department = storage.get("Department", department_id)
     if department is None:
         abort(404)
     return jsonify(department.to_dict())
@@ -35,7 +35,7 @@ def get_department(department_id):
 @app_views.route('companies/<company_id>/departments', methods=['POST'], strict_slashes=False)
 def post_department(company_id):
     """ post department """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     data = request.form
@@ -58,7 +58,7 @@ def post_department(company_id):
 @app_views.route('departments/<department_id>', methods=['PUT'], strict_slashes=False)
 def put_department(department_id):
     """ put department """
-    department = storage.get(Department, department_id)
+    department = storage.get("Department", department_id)
     if department is None:
         abort(404)
     data = request.get_json()
@@ -77,7 +77,7 @@ def put_department(department_id):
 @app_views.route('departments/<department_id>', methods=['DELETE'], strict_slashes=False)
 def delete_department(department_id):
     """ delete department """
-    department = storage.get(Department, department_id)
+    department = storage.get("Department", department_id)
     if department is None:
         abort(404)
     department.delete()

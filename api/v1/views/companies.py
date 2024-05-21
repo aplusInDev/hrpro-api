@@ -8,13 +8,13 @@ from models import storage, Company, Form, Field
 @app_views.route('/companies', methods=['GET'], strict_slashes=False)
 def get_companies():
     """ get companies """
-    companies = storage.all(Company)
+    companies = storage.all("Company")
     return jsonify([company.to_dict() for company in companies.values()])
 
 @app_views.route('/companies/<company_id>', methods=['GET'], strict_slashes=False)
 def get_company(company_id):
     """ get company """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     return jsonify(company.to_dict())
@@ -44,7 +44,7 @@ def post_company():
 @app_views.route('/companies/<company_id>', methods=['PUT'], strict_slashes=False)
 def put_company(company_id):
     """ put company """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     data = request.get_json()
@@ -61,7 +61,7 @@ def put_company(company_id):
 @app_views.route('/companies/<company_id>', methods=['DELETE'], strict_slashes=False)
 def delete_company(company_id):
     """ delete company """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     company.delete()

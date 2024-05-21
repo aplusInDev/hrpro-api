@@ -2,13 +2,13 @@
 
 from flask import jsonify, request, abort
 from api.v1.views import app_views
-from models import storage, Form, Field
+from models import storage, Field
 
 
 @app_views.route('forms/<form_id>/fields', methods=['GET'], strict_slashes=False)
 def get_fields(form_id):
 	""" get fields """
-	form = storage.get(Form, form_id)
+	form = storage.get("Form", form_id)
 	if form is None:
 		abort(404)
 	return jsonify([field.to_dict() for field in form.fields])
@@ -29,7 +29,7 @@ def get_all_fields():
 @app_views.route('/fields/<field_id>', methods=['GET'], strict_slashes=False)
 def get_field(field_id):
 	""" get field """
-	field = storage.get(Field, field_id)
+	field = storage.get("Field", field_id)
 	if field is None:
 		abort(404)
 	return jsonify(field.save())
@@ -37,7 +37,7 @@ def get_field(field_id):
 @app_views.route('/forms/<form_id>/fields', methods=['POST'], strict_slashes=False)
 def post_field(form_id):
 	""" post field """
-	form = storage.get(Form, form_id)
+	form = storage.get("Form", form_id)
 	if form is None:
 		abort(404)
 	data = request.get_json()
@@ -69,7 +69,7 @@ def put_field(field_id):
 @app_views.route('/fields/<field_id>', methods=['DELETE'], strict_slashes=False)
 def delete_field(field_id):
 	""" delete field """
-	field = storage.get(Field, field_id)
+	field = storage.get("Field", field_id)
 	if field is None:
 		abort(404)
 	field.delete()

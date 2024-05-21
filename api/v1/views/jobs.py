@@ -2,13 +2,13 @@
 
 from flask import jsonify, request, abort
 from api.v1.views import app_views
-from models import storage, Company, Job
+from models import storage, Job
 
 
 @app_views.route('/companies/<company_id>/jobs', methods=['GET'], strict_slashes=False)
 def get_jobs(company_id):
     """ get jobs """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     return jsonify([job.to_dict() for job in company.jobs])
@@ -16,7 +16,7 @@ def get_jobs(company_id):
 @app_views.route('/companies/<company_id>/jobs_titles', methods=['GET'])
 def get_jobs_names(company_id):
     """ get the list of company jobs titles """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     all_jobs = []
@@ -27,7 +27,7 @@ def get_jobs_names(company_id):
 @app_views.route('/jobs/<job_id>', methods=['GET'], strict_slashes=False)
 def get_job(job_id):
     """ get job """
-    job = storage.get(Job, job_id)
+    job = storage.get("Job", job_id)
     if job is None:
         abort(404)
     return jsonify(job.to_dict())
@@ -57,7 +57,7 @@ def put_job(account, job_id):
     """ put job """
     if account.role != "admin":
         return jsonify({"error": "Unauthorized"}), 401
-    job = storage.get(Job, job_id)
+    job = storage.get("Job", job_id)
     if job is None:
         abort(404)
     data = request.get_json()
@@ -77,7 +77,7 @@ def put_job(account, job_id):
 @app_views.route('/jobs/<job_id>', methods=['DELETE'], strict_slashes=False)
 def delete_job(job_id):
     """ delete job """
-    job = storage.get(Job, job_id)
+    job = storage.get("Job", job_id)
     if job is None:
         abort(404)
     job.delete()

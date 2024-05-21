@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from models import storage, Company
+from models import storage
 
 
 def is_exists_form(company_id, data):
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         return True
     for form in company.forms:

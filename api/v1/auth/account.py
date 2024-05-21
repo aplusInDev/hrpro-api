@@ -4,7 +4,8 @@ from uuid import uuid4
 from sqlalchemy import Column, String, Enum, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from models import storage, Employee
+from models import storage
+from typing import TypeVar
 
 
 Base = declarative_base()
@@ -30,5 +31,5 @@ class Account(Base):
                 setattr(self, key, value)
 
     @property
-    def employee(self) -> Employee:
-        return storage.get(Employee, self.employee_id)
+    def employee(self) -> TypeVar['Employee']:
+        return storage.get("Employee", self.employee_id)

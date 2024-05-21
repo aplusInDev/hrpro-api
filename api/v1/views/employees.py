@@ -2,13 +2,13 @@
 
 from flask import jsonify, request, abort
 from api.v1.views import app_views
-from models import storage, Company, Employee
+from models import storage
 
 
 @app_views.route('/companies/<company_id>/employees', methods=['GET'], strict_slashes=False)
 def get_employees(company_id):
     """ get employees """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     return jsonify([employee.to_dict() for employee in company.employees])
@@ -16,7 +16,7 @@ def get_employees(company_id):
 @app_views.route('/employees/<employee_id>', methods=['GET'], strict_slashes=False)
 def get_employee(employee_id):
     """ get employee """
-    employee = storage.get(Employee, employee_id)
+    employee = storage.get("Employee", employee_id)
     if employee is None:
         abort(404)
     return jsonify(employee.to_dict())
@@ -24,7 +24,7 @@ def get_employee(employee_id):
 @app_views.route('/employees/<employee_id>', methods=['PUT'], strict_slashes=False)
 def put_employee(employee_id):
     """ put employee """
-    employee = storage.get(Employee, employee_id)
+    employee = storage.get("Employee", employee_id)
     if employee is None:
         abort(404)
     data = request.get_json()
@@ -39,7 +39,7 @@ def put_employee(employee_id):
 @app_views.route('/employees/<employee_id>/info', methods=['PUT'], strict_slashes=False)
 def put_employee_info(employee_id):
     """ put employee info """
-    employee = storage.get(Employee, employee_id)
+    employee = storage.get("Employee", employee_id)
     if employee is None:
         abort(404)
     data = request.get_json()
@@ -55,7 +55,7 @@ def put_employee_info(employee_id):
 @app_views.route('/employees/<employee_id>', methods=['DELETE'], strict_slashes=False)
 def delete_employee(employee_id):
     """ delete employee """
-    employee = storage.get(Employee, employee_id)
+    employee = storage.get("Employee", employee_id)
     if employee is None:
         abort(404)
     employee.delete()

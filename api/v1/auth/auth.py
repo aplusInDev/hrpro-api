@@ -9,7 +9,8 @@ from datetime import datetime, timedelta
 from flask import render_template, jsonify
 from flask_mail import Message
 from os import getenv
-from models import storage, Company
+from typing import TypeVar
+from models import storage
 import string
 import secrets
 
@@ -41,7 +42,6 @@ class Auth:
                 "activation_link": "http://localhost:5000/api/v1/activate?account_id={}&activation_token={}".\
                     format(account.id, account.tmp_token)
                 }
-            # return data
             msg = Message("Activation email", sender=getenv('HRPRO_EMAIL'),
                         recipients=[account.email])
             msg.html = render_template("email_activation.html", data=data)
@@ -70,7 +70,7 @@ class Auth:
         except Exception as err:
             return jsonify({"sending email error:": str(err)}), 400
         
-    def register_admin(self, admin_info: dict, company_info: dict) -> Account:
+    def register_admin(self, admin_info: dict, company_info: dict) -> TypeVar['Account']:
         """ register admin """
         account = self._db.find_account_by(email=admin_info.get("email"))
         if account:
@@ -84,10 +84,10 @@ class Auth:
             del admin_info["password"]
         return self._db.add_admin_account(admin_info, company_info)
     
-    def add_employee_account(self, account_info: dict, position_info: dict) -> Account:
+    def add_employee_account(self, account_info: dict, position_info: dict) -> TypeVar['Account']:
         """ Add new employee account """
         company_id = position_info.get("company_id")
-        company = storage.get(Company, company_id)
+        company = storage.get("Company", company_id)
         if not company:
             raise ValueError("Company not found")
         employee_info = account_info.copy()
@@ -168,7 +168,7 @@ class Auth:
         except NoResultFound:
             return None
         
-    def get_account_from_session_id(self, session_id: str) -> Account:
+    def get_account_from_session_id(self, session_id: str) -> TypeVar['Account']:
         """Get the account from the session id
         """
         try:
