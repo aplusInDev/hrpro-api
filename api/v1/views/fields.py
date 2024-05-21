@@ -18,9 +18,6 @@ def get_fields(form_id):
 				field_dict["options"] = eval(field.options)
 		except:
 				pass
-		field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(form.company.id)
-		field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(form_id)
-		field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
 		all_fields.append(field_dict)
 	return jsonify(all_fields)
 
@@ -48,9 +45,6 @@ def get_field(field_id):
 			field_dict["options"] = eval(field.options)
 	except:
 			pass
-	field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(field.form.company.id)
-	field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(field.form.id)
-	field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
 	return jsonify(field_dict)
 
 @app_views.route('/forms/<form_id>/fields', methods=['POST'], strict_slashes=False)
@@ -70,16 +64,9 @@ def post_field(form_id):
 		field.save()
 		field_dict = field.to_dict().copy()
 		try:
-			field_dict["options"] = eval(field.options)
-		except:
-				pass
-		field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(form.company.id)
-		field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(form_id)
-		try:
 				field_dict["options"] = eval(field.options)
 		except:
 					pass
-		field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
 		return jsonify(field_dict), 201
 	
 @app_views.route('/fields/<field_id>', methods=['PUT'], strict_slashes=False)
@@ -100,9 +87,6 @@ def put_field(field_id):
 			field_dict["options"] = eval(field.options)
 	except:
 			pass
-	field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(field.form.company.id)
-	field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(field.form.id)
-	field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
 	return jsonify(field_dict), 200
 
 @app_views.route('/fields/<field_id>', methods=['DELETE'], strict_slashes=False)
