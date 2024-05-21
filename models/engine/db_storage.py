@@ -8,11 +8,15 @@ from models.base_model import Base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
 from os import getenv
-from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import InvalidRequestError
 
 
 classes_list = [Company, Department, Job, Employee, Form, Field]
+classes_dict = {
+    "Company": Company, "Department": Department,
+    "Job": Job, "Employee": Employee, "Form": Form,
+    "Field": Field,
+}
 
 class DBStorage:
     __engine = None
@@ -46,11 +50,12 @@ class DBStorage:
     def all(self, cls=None):
         """Returns the dictionary __objects"""
 
-        if cls and cls in classes_list:
+        if cls and cls in classes_dict:
+            cls = classes_dict[cls]
             query_list = self.__session.query(cls).all()
         else:
             query_list = []
-            for cls in classes_list:
+            for cls in classes_dict.values():
                 query_list.extend(self.__session.query(cls).all())
         obj = {type(obj).__name__ + '.' + obj.id: obj for obj in query_list}
         return obj
@@ -87,7 +92,8 @@ class DBStorage:
     def get(self, cls, id):
         """This method retrieves one object based on the class name and its ID
         """
-        if cls and cls in classes_list:
+        if cls and cls in classes_dict:
+            cls = classes_dict[cls]
             return self.__session.query(cls).filter(cls.id == id).first()
         return None
     
