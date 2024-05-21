@@ -3,7 +3,7 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage
-from api.v1.utils import validate_post_employee
+from api.v1.utils.accounts_utils import validate_post_employee
 from api.v1.auth.auth import Auth, _generate_random_pass
 
 
