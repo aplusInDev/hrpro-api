@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 from models import BaseModel, Base
-# from models import Employee
-from sqlalchemy import Column, String, ForeignKey, Text
+from sqlalchemy import Column, String, Text
 from sqlalchemy.orm import relationship
 
 
