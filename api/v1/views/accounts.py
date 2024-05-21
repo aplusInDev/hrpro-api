@@ -31,7 +31,10 @@ def post_employee(account_info, position_info):
     """
     auth = Auth()
     account_info["hashed_password"] = _generate_random_pass()
-    account = auth.add_employee_account(account_info, position_info)
+    try:
+        account = auth.add_employee_account(account_info, position_info)
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 400
     return jsonify({"email": account.email, "message": "employee added"}), 201
 
 @app_views.route('/reset_password', methods=['PUT'])

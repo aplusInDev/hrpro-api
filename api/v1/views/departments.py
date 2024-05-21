@@ -45,11 +45,8 @@ def get_department(department_id):
     return jsonify(dep_dict)
 
 @app_views.route('companies/<company_id>/departments', methods=['POST'], strict_slashes=False)
-@session_required
-def post_department(account, company_id):
+def post_department(company_id):
     """ post department """
-    if account.role != "admin":
-        return jsonify({"error": "Unauthorized"}), 401
     company = storage.get(Company, company_id)
     if company is None:
         abort(404)
@@ -71,11 +68,8 @@ def post_department(account, company_id):
     
 
 @app_views.route('departments/<department_id>', methods=['PUT'], strict_slashes=False)
-@session_required
-def put_department(account, department_id):
+def put_department(department_id):
     """ put department """
-    if account.role != "admin":
-        abort(401)
     department = storage.get(Department, department_id)
     if department is None:
         abort(404)

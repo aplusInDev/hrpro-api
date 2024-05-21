@@ -96,7 +96,10 @@ class Auth:
             del employee_info["hashed_password"]
         role = employee_info.get("role")
         del employee_info["role"]
-        new_employee = self._db.add_employee(role, employee_info, position_info)
+        try:
+            new_employee = self._db.add_employee(role, employee_info, position_info)
+        except ValueError as err:
+            raise ValueError(str(err))
         new_employee.company = company
         new_employee.save()
         new_account = Account(**account_info, employee_id=new_employee.id)
