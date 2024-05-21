@@ -3,6 +3,8 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage
+from api.v1.utils import validate_post_employee
+from api.v1.auth.auth import Auth, _generate_random_pass
 
 
 @app_views.route('/companies/<company_id>/employees', methods=['GET'], strict_slashes=False)
@@ -20,6 +22,19 @@ def get_employee(employee_id):
     if employee is None:
         abort(404)
     return jsonify(employee.to_dict())
+
+@app_views.route('/add_employee', methods=['POST'])
+@validate_post_employee
+def post_employee(account_info, position_info):
+    """ POST /add_employee
+    """
+    auth = Auth()
+    account_info["hashed_password"] = _generate_random_pass()
+    try:
+        account = auth.add_employee_account(account_info, position_info)
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 400
+    return jsonify({"email": account.email, "message": "employee added"}), 201
 
 @app_views.route('/employees/<employee_id>', methods=['PUT'], strict_slashes=False)
 def put_employee(employee_id):

@@ -2,11 +2,8 @@
 
 from flask import jsonify, request
 from api.v1.views import app_views
-from api.v1.auth.auth import Auth, _generate_random_pass
-from api.v1.utils.accounts_utils import (
-    validate_register,
-    validate_post_employee
-    )
+from api.v1.auth.auth import Auth
+from api.v1.utils.accounts_utils import validate_register
 
 
 @app_views.route('/accounts', methods=['POST'])
@@ -24,19 +21,6 @@ def post_admin(admin_info: dict, company_info: dict):
             }), 201
     except ValueError as err:
         return jsonify({"error": str(err)}), 400
-
-@app_views.route('/add_employee', methods=['POST'])
-@validate_post_employee
-def post_employee(account_info, position_info):
-    """ POST /add_employee
-    """
-    auth = Auth()
-    account_info["hashed_password"] = _generate_random_pass()
-    try:
-        account = auth.add_employee_account(account_info, position_info)
-    except ValueError as err:
-        return jsonify({"error": str(err)}), 400
-    return jsonify({"email": account.email, "message": "employee added"}), 201
 
 @app_views.route('/reset_password', methods=['PUT'])
 def update_password():
