@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 
 from models import BaseModel, Base
-from sqlalchemy import Column, String, ForeignKey, Text
+from sqlalchemy import (
+    Column, String, Date,
+    ForeignKey, Text, Integer,
+    )
 from sqlalchemy.orm import relationship
+from datetime import date
 
 
 class Employee(BaseModel, Base):
@@ -11,6 +15,8 @@ class Employee(BaseModel, Base):
 
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
+    leave_balance = Column(Integer, nullable=True, default=0)
+    hire_date = Column(Date, nullable=False)
     company_id = Column(String(50),
                         ForeignKey('companies.id', ondelete='CASCADE',
                                    onupdate='CASCADE'),
@@ -36,9 +42,21 @@ class Employee(BaseModel, Base):
                                 cascade="all, delete-orphan")
     absences = relationship("Absence", back_populates="employee",
                             cascade="all, delete-orphan")
+    leaves = relationship("Leave", back_populates="employee",
+                          cascade="all, delete-orphan")
+    trainings = relationship("Training", secondary="training_trainees",
+                            back_populates="trainees")
+    evaluations = relationship("Evaluation", back_populates="employee",
+                                cascade="all, delete-orphan")
+    certificates = relationship("Certificate", backpopulates="employee",
+                                cascade="all, delete-orphan")
+    experiences = relationship("Experience", back_populates="employee",
+                               cascade="all, delete-orphan")
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if "hire_date" not in kwargs:
+            self.hire_date = date.today()
 
     def to_dict(self):
         new_dict = super().to_dict().copy()
