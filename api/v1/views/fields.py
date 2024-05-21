@@ -2,7 +2,7 @@
 
 from flask import jsonify, request, abort
 from api.v1.views import app_views
-from models import storage, Form, Company, Field
+from models import storage, Form, Field
 
 
 @app_views.route('forms/<form_id>/fields', methods=['GET'], strict_slashes=False)

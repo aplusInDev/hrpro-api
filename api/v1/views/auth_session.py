@@ -4,7 +4,6 @@ from flask import jsonify, request
 from api.v1.views import app_views
 from api.v1.auth.auth import Auth
 from api.v1.views import hello
-from os import getenv
 
 
 @app_views.route('/activate', methods=['GET'])

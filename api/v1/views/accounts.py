@@ -3,9 +3,10 @@
 from flask import jsonify, request
 from api.v1.views import app_views
 from api.v1.auth.auth import Auth, _generate_random_pass
-from api.v1.auth.middleware import session_required
-from models import storage
-from api.v1.utils.accounts_utils import validate_register, validate_post_employee
+from api.v1.utils.accounts_utils import (
+    validate_register,
+    validate_post_employee
+    )
 
 
 @app_views.route('/accounts', methods=['POST'])

@@ -3,7 +3,6 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage, Company, Employee
-from api.v1.auth.middleware import session_required
 
 
 @app_views.route('/companies/<company_id>/employees', methods=['GET'], strict_slashes=False)
