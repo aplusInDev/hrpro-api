@@ -11,7 +11,6 @@ from os import getenv
 from sqlalchemy.exc import InvalidRequestError
 
 
-classes_list = [Company, Department, Job, Employee, Form, Field]
 classes_dict = {
     "Company": Company, "Department": Department,
     "Job": Job, "Employee": Employee, "Form": Form,
