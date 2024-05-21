@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request, jsonify, abort
+from flask import request, abort
 from api.v1.auth.auth import Auth
 
 

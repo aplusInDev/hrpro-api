@@ -25,6 +25,8 @@ class Company(BaseModel, Base):
                         cascade="all, delete-orphan")
     forms = relationship("Form", back_populates="company",
                             cascade="all, delete-orphan")
+    trainings = relationship("Training", back_populates="company",
+                            cascade="all, delete-orphan")
 
     def to_dict(self):
         new_dict = super().to_dict().copy()
@@ -45,6 +47,10 @@ class Company(BaseModel, Base):
             form.name: "http://localhost/api/v1/forms/" + form.id
             for form in self.forms
             }
+        new_dict["trainings"] = {
+            training.title: "http://localhost/api/v1/trainings/" + training.id
+            for training in self.trainings
+        }
         return new_dict
 
     def __init__(self, *args, **kwargs):

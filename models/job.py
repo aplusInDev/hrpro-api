@@ -20,6 +20,8 @@ class Job(BaseModel, Base):
     company = relationship("Company", back_populates="jobs")
     employees = relationship("Employee", back_populates="job",
                             cascade="all, delete-orphan")
+    trainings = relationship("Training", back_populates="job",
+                            cascade="all, delete-orphan")
     
     def __init__(self, *args, **kwargs):
         """Initializes a new instance"""
@@ -34,4 +36,8 @@ class Job(BaseModel, Base):
             }
         new_dict["company"] = "http://localhost/api/v1/companies/{}".\
             format(self.company_id)
+        new_dict["trainings"] = {
+            training.title: "http://localhost/api/v1/trainings/" + training.id
+            for training in self.trainings
+        }
         return new_dict

@@ -28,7 +28,7 @@ class Certificate(BaseModel, Base):
     template = Column(LargeBinary, nullable=True)
     cssText = Column(String(128), nullable=True)
 
-    training = relationship("Training", back_populates="certificates")
+    training = relationship("Training", back_populates="certificate")
     employee = relationship("Employee", back_populates="certificates")
 
     def __init__(self, *args, **kwargs):

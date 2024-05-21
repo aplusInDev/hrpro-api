@@ -62,6 +62,7 @@ class Training(BaseModel, Base):
     trainees = relationship("Employee", secondary=training_trainees,
                             back_populates="trainings")
     certificate = relationship("Certificate", back_populates="training", uselist=False)
+    evaluations = relationship("Evaluation", back_populates="training")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -81,4 +82,11 @@ class Training(BaseModel, Base):
             "http://localhost:5000/api/v1/employees/" + trainee.id
             for trainee in self.trainees
             }
+        new_dict["evaluations"] = {
+            "anonimous" if evaluation.anonimous
+            else evaluation.employee.first_name + " " +
+            evaluation.employee.last_name:
+            "http://localhost:5000/api/v1/evaluations/" + evaluation.id
+            for evaluation in self.evaluations
+        }
         return new_dict

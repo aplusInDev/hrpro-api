@@ -12,7 +12,6 @@ from models import (
     storage, Company, Department,
     Job, Form, Field, Employee,
     )
-from typing import TypeVar
 
 
 env = getenv('HRPRO_ENV')
@@ -39,7 +38,7 @@ class DB:
         self.__session = None
 
     @property
-    def _session(self) -> TypeVar['Session']:
+    def _session(self):
         """Memoized session object
         """
         if self.__session is None:
@@ -54,7 +53,7 @@ class DB:
             self.__session.remove()
             self.__session = None
 
-    def add_admin_account(self, account_info: dict, company_info: dict) -> TypeVar['Account']:
+    def add_admin_account(self, account_info: dict, company_info: dict):
         """ Add new admin account """
         company = self.add_company(company_info)
         company.save()
@@ -66,7 +65,7 @@ class DB:
         new_account.save()
         return new_account
     
-    def add_company(self, company_info: dict) -> TypeVar['Account']:
+    def add_company(self, company_info: dict):
         """Creates new company
         Args:
             company_info: company information
@@ -89,7 +88,7 @@ class DB:
         return new_company
     
     def add_employee(self, role: str, employee_info: dict,
-                     position_info: dict={}) -> TypeVar['Employee']:
+                     position_info: dict={}):
         """Creates new Emplyee
         Args:
             employee_info: employee information
@@ -125,7 +124,7 @@ class DB:
         new_employee.save()
         return new_employee
     
-    def find_account_by(self, **kwargs) -> TypeVar['Account']:
+    def find_account_by(self, **kwargs):
         """Finds a account based on a set of filters.
         """
         if not kwargs:
@@ -136,7 +135,7 @@ class DB:
         account =  self._session.query(Account).filter_by(**kwargs).first()
         return account
 
-    def get_session(self, session_id: str) -> TypeVar['SessionAuth']:
+    def get_session(self, session_id: str):
         """Get a session by its id
         """
         return self._session.query(SessionAuth).\

@@ -48,7 +48,7 @@ class Employee(BaseModel, Base):
                             back_populates="trainees")
     evaluations = relationship("Evaluation", back_populates="employee",
                                 cascade="all, delete-orphan")
-    certificates = relationship("Certificate", backpopulates="employee",
+    certificates = relationship("Certificate", back_populates="employee",
                                 cascade="all, delete-orphan")
     experiences = relationship("Experience", back_populates="employee",
                                cascade="all, delete-orphan")

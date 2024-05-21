@@ -19,6 +19,8 @@ class Department(BaseModel, Base):
     company = relationship("Company", back_populates="departments")
     employees = relationship("Employee", back_populates="department",
                                 cascade="all, delete-orphan")
+    trainings = relationship("Training", back_populates="department",
+                            cascade="all, delete-orphan")
         
 
     def __init__(self, *args, **kwargs):
@@ -33,4 +35,8 @@ class Department(BaseModel, Base):
             }
         new_dict["company"] = "http://localhost/api/v1/companies/{}".\
             format(self.company_id)
+        new_dict["trainings"] = {
+            training.title: "http://localhost/api/v1/trainings/" + training.id
+            for training in self.trainings
+        }
         return new_dict
