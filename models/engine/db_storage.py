@@ -4,11 +4,11 @@ database storage engine for the AirBnB clone project.
 """
 
 from models import *
-from models.base_model import Base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
 from os import getenv
 from sqlalchemy.exc import InvalidRequestError
+from typing import TypeVar, Union
 
 
 classes_dict = {
@@ -22,7 +22,7 @@ class DBStorage:
     __session = None
 
     @property
-    def _session(self):
+    def _session(self) -> TypeVar['Session']:
         """This method creates a new session with the current database engine
         """
         if self.__session is None:
@@ -46,8 +46,11 @@ class DBStorage:
         if env == 'test':
             Base.metadata.drop_all(self.__engine)
 
-    def all(self, cls=None):
+    def all(self, cls: str = None) -> dict:
         """Returns the dictionary __objects"""
+
+        if not isinstance(cls, str):
+            raise TypeError("Expected a string for cls parameter")
 
         if cls and cls in classes_dict:
             cls = classes_dict[cls]
@@ -59,23 +62,23 @@ class DBStorage:
         obj = {type(obj).__name__ + '.' + obj.id: obj for obj in query_list}
         return obj
 
-    def new(self, obj):
+    def new(self, obj: TypeVar['BaseModel']) -> None:
         """This method adds the specified object to the current database
         session
         """
         self.__session.add(obj)
 
-    def save(self):
+    def save(self) -> None:
         """This method commits all changes to the current database session"""
         self.__session.commit()
 
-    def delete(self, obj=None):
+    def delete(self, obj: TypeVar['BaseModel'] = None) -> None:
         """This method deletes the specified object from the current database
         session"""
         if obj:
             self.__session.delete(obj)
 
-    def reload(self):
+    def reload(self) -> None:
         """This method creates all tables in the database and initializes a
         new session with the current database engine
         """
@@ -83,25 +86,29 @@ class DBStorage:
         Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
         self.__session = scoped_session(Session)
 
-    def close(self):
+    def close(self) -> None:
         """This method calls remove() on the private session attribute
         (self.__session) or close() on the class Session"""
         self.__session.remove()
 
-    def get(self, cls, id):
+    def get(self, cls: str, id: str) -> Union[TypeVar['BaseModel'], None]:
         """This method retrieves one object based on the class name and its ID
         """
+
+        if not isinstance(cls, str):
+            raise TypeError("Expected a string for cls parameter")
+
         if cls and cls in classes_dict:
             cls = classes_dict[cls]
             return self.__session.query(cls).filter(cls.id == id).first()
         return None
     
-    def get_company_by_name(self, name: str):
+    def get_company_by_name(self, name: str) -> Union[TypeVar['Company'], None]:
         """This method retrieves one company based on its name
         """
         return self.__session.query(Company).filter(Company.name == name).first()
     
-    def get_company_by_employee_id(self, employee_id: str) -> Company:
+    def get_company_by_employee_id(self, employee_id: str) -> Union[TypeVar['Company'], None]:
         """This method retrieves one company based on an employee's ID
         Args:
             employee_id:
@@ -111,7 +118,7 @@ class DBStorage:
         employee = self.get(Employee, employee_id)
         return employee.company if employee else None
     
-    def find_form_by_(self, **kwargs) -> Form:
+    def find_form_by_(self, **kwargs) -> Union[TypeVar['Form'], None]:
         """Finds a account based on a set of filters.
         """
         if not kwargs:
@@ -122,7 +129,7 @@ class DBStorage:
         form = self.__session.query(Form).filter_by(**kwargs).first()
         return form
         
-    def find_job_by(self, **kwargs) -> Job:
+    def find_job_by(self, **kwargs) -> Union[TypeVar['Job'], None]:
         """Finds a job based on a set of filters.
         """
         if not kwargs:
@@ -133,7 +140,7 @@ class DBStorage:
         job = self.__session.query(Job).filter_by(**kwargs).first()
         return job
         
-    def find_department_by(self, **kwargs) -> Department:
+    def find_department_by(self, **kwargs) -> Union[TypeVar['Department'], None]:
         """Finds department based on a set of filters
         """
         if not kwargs:
@@ -144,7 +151,7 @@ class DBStorage:
         department = self.__session.query(Department).filter_by(**kwargs).first()
         return department
         
-    def find_employee_by(self, **kwargs):
+    def find_employee_by(self, **kwargs) -> Union[TypeVar['Employee'], None]:
         """Finds employee based on a set of filters
         """
         if not kwargs:
