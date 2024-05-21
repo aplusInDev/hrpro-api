@@ -3,7 +3,6 @@
 from models import BaseModel, Base
 from sqlalchemy import Column, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from os import getenv
 
 
 class Form(BaseModel, Base):
@@ -17,16 +16,15 @@ class Form(BaseModel, Base):
                                    onupdate='CASCADE'),
                         nullable=True
                         )
-    
-    if getenv('HRPRO_TYPE_STORAGE') == 'db':
-        company = relationship("Company", back_populates="forms")
-        fields = relationship("Field", back_populates="form",
-                              cascade="all, delete-orphan")
-        
-        def to_dict(self):
-            new_dict = super().to_dict().copy()
-            new_dict["fields"] = [field.to_dict() for field in self.fields]
-            return new_dict
+
+    company = relationship("Company", back_populates="forms")
+    fields = relationship("Field", back_populates="form",
+                            cascade="all, delete-orphan")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+    
+    def to_dict(self):
+        new_dict = super().to_dict().copy()
+        new_dict["fields"] = [field.to_dict() for field in self.fields]
+        return new_dict

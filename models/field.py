@@ -3,7 +3,6 @@
 from models import BaseModel, Base
 from sqlalchemy import Column, String, ForeignKey, Boolean, Text, Integer
 from sqlalchemy.orm import relationship
-from os import getenv
 
 
 class Field(BaseModel, Base):
@@ -23,9 +22,7 @@ class Field(BaseModel, Base):
     options = Column(String(50), nullable=True, default="[]")
     is_required = Column(Boolean, nullable=True, default=True)
 
-
-    if getenv('HRPRO_TYPE_STORAGE') == 'db':
-        form = relationship("Form", back_populates="fields")
+    form = relationship("Form", back_populates="fields")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

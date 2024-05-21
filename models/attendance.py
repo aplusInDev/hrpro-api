@@ -3,7 +3,7 @@
 from models import BaseModel, Base
 from sqlalchemy import Column, String, ForeignKey, Time, Date, Enum
 from sqlalchemy.orm import relationship
-from os import getenv
+
 
 # create enum with two values yes or no
 absence_enum = Enum('Yes', 'No', name='absence_enum')
@@ -21,8 +21,7 @@ class Attendance(BaseModel, Base):
     check_out = Column(Time, nullable=False)
     absent = Column(absence_enum, nullable=False)
 
-    if getenv('HRPRO_TYPE_STORAGE') == 'db':
-        employee = relationship("Employee", back_populates="attendances")
+    employee = relationship("Employee", back_populates="attendances")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

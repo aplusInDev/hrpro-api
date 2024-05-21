@@ -4,7 +4,6 @@ from models import BaseModel, Base
 # from models import Employee
 from sqlalchemy import Column, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from os import getenv
 
 
 class Company(BaseModel, Base):
@@ -19,23 +18,22 @@ class Company(BaseModel, Base):
     phone = Column(String(50), nullable=True)
     website = Column(String(50), nullable=True)
 
-    if getenv('HRPRO_TYPE_STORAGE') == 'db':
-        departments = relationship("Department", back_populates="company",
-                                   cascade="all, delete-orphan")
-        employees = relationship("Employee", back_populates="company",
-                                 cascade="all, delete-orphan")
-        jobs = relationship("Job", back_populates="company",
+    departments = relationship("Department", back_populates="company",
+                                cascade="all, delete-orphan")
+    employees = relationship("Employee", back_populates="company",
+                                cascade="all, delete-orphan")
+    jobs = relationship("Job", back_populates="company",
+                        cascade="all, delete-orphan")
+    forms = relationship("Form", back_populates="company",
                             cascade="all, delete-orphan")
-        forms = relationship("Form", back_populates="company",
-                             cascade="all, delete-orphan")
 
-        def to_dict(self):
-            new_dict = super().to_dict().copy()
-            new_dict["departments"] = [department.to_dict() for department in self.departments]
-            new_dict["employees"] = [employee.to_dict() for employee in self.employees]
-            new_dict["jobs"] = [job.to_dict() for job in self.jobs]
-            new_dict["forms"] = [form.to_dict() for form in self.forms]
-            return new_dict
+    def to_dict(self):
+        new_dict = super().to_dict().copy()
+        new_dict["departments"] = [department.to_dict() for department in self.departments]
+        new_dict["employees"] = [employee.to_dict() for employee in self.employees]
+        new_dict["jobs"] = [job.to_dict() for job in self.jobs]
+        new_dict["forms"] = [form.to_dict() for form in self.forms]
+        return new_dict
 
     def __init__(self, *args, **kwargs):
         """Initializes a new instance"""
