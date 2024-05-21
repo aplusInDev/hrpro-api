@@ -13,8 +13,6 @@ role_enum = Enum("employee", "hr", "admin", name="role_type")
 class Account(Base):
     __tablename__ = 'accounts'
     id = Column(String(128), primary_key=True)
-    first_name = Column(String(128), nullable=False)
-    last_name = Column(String(128), nullable=False)
     email = Column(String(128), nullable=False)
     hashed_password = Column(String(128), nullable=False)
     employee_id = Column(String(128), nullable=False)
