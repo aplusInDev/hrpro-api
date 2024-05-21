@@ -3,7 +3,6 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage, Company, Job
-from api.v1.auth.middleware import session_required
 
 
 @app_views.route('/companies/<company_id>/jobs', methods=['GET'], strict_slashes=False)
@@ -12,15 +11,7 @@ def get_jobs(company_id):
     company = storage.get(Company, company_id)
     if company is None:
         abort(404)
-
-    all_jobs = []
-    for job in company.jobs:
-        job_dict = job.to_dict().copy()
-        job_dict['info'] = eval(job_dict['info'])
-        job_dict['uri'] = 'http://localhost:5000/api/v1/jobs/{}'.format(job_dict['id'])
-        del job_dict['employees']
-        all_jobs.append(job_dict)
-    return jsonify(all_jobs)
+    return jsonify([job.to_dict() for job in company.jobs])
 
 @app_views.route('/companies/<company_id>/jobs_titles', methods=['GET'])
 def get_jobs_names(company_id):
@@ -39,14 +30,9 @@ def get_job(job_id):
     job = storage.get(Job, job_id)
     if job is None:
         abort(404)
-    job_dict = job.to_dict().copy()
-    job_dict['info'] = eval(job_dict['info'])
-    job_dict['uri'] = 'http://localhost:5000/api/v1/jobs/{}'.format(job_dict['id'])
-    del job_dict['employees']
-    return jsonify(job_dict)
+    return jsonify(job.to_dict())
 
 @app_views.route('/companies/<company_id>/jobs', methods=['POST'], strict_slashes=False)
-@session_required
 def post_job(account, company_id):
     """ post job """
     if account.role != "admin":
@@ -58,16 +44,15 @@ def post_job(account, company_id):
         data = data.to_dict()
     from api.v1.utils.validate_field import handle_update_info
     data = handle_update_info("job", company_id, data)
-    if data:
-        job_title = data.get("title")
-        data = str(data)
-        new_job = Job(title=job_title, info=data, company_id=company_id)
-        new_job.save()
-        return jsonify(new_job.to_dict()), 201
-    return jsonify({"error": "unvalid request"}), 400
+    if not data:
+        return jsonify({"error": "unvalid request"}), 400
+    job_title = data.get("title")
+    data = str(data)
+    new_job = Job(title=job_title, info=data, company_id=company_id)
+    new_job.save()
+    return jsonify(new_job.to_dict()), 201
 
 @app_views.route('/jobs/<job_id>', methods=['PUT'], strict_slashes=False)
-@session_required
 def put_job(account, job_id):
     """ put job """
     if account.role != "admin":
@@ -81,17 +66,13 @@ def put_job(account, job_id):
 
     from api.v1.utils.validate_field import handle_update_info
     data = handle_update_info("job", job.company_id, data)
-    if data:
-        if "title" in data:
-            job.title = data["title"]
-        job.info = str(data)
-        job.save()
-        job_dict = job.to_dict().copy()
-        job_dict['info'] = eval(job_dict['info'])
-        job_dict['uri'] = 'http://localhost:5000/api/v1/jobs/{}'.format(job_dict['id'])
-        del job_dict['employees']
-        return jsonify(job_dict)
-    return jsonify({"error": "unvalid request"}), 400
+    if not data:
+        return jsonify({"error": "unvalid request"}), 400
+    if "title" in data:
+        job.title = data["title"]
+    job.info = str(data)
+    job.save()
+    return jsonify(job.to_dict())
 
 @app_views.route('/jobs/<job_id>', methods=['DELETE'], strict_slashes=False)
 def delete_job(job_id):
