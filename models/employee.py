@@ -60,7 +60,5 @@ class Employee(BaseModel, Base):
 
     def to_dict(self):
         new_dict = super().to_dict().copy()
-        new_dict["attendances"] = [attendance.to_dict() for attendance in self.attendances]
-        new_dict["absences"] = [absence.to_dict() for absence in self.absences]
         return new_dict
 

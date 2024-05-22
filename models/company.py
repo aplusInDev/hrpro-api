@@ -28,6 +28,10 @@ class Company(BaseModel, Base):
     trainings = relationship("Training", back_populates="company",
                             cascade="all, delete-orphan")
 
+    def __init__(self, *args, **kwargs):
+        """Initializes a new instance"""
+        super().__init__(*args, **kwargs)
+
     def to_dict(self):
         new_dict = super().to_dict().copy()
         new_dict["departments"] = {
@@ -52,7 +56,3 @@ class Company(BaseModel, Base):
             for training in self.trainings
         }
         return new_dict
-
-    def __init__(self, *args, **kwargs):
-        """Initializes a new instance"""
-        super().__init__(*args, **kwargs)

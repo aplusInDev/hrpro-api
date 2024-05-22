@@ -4,6 +4,7 @@ from flask import jsonify, request
 from api.v1.views import app_views
 from api.v1.auth.auth import Auth
 from api.v1.views import hello
+from sqlalchemy.orm.exc import NoResultFound
 
 
 @app_views.route('/activate', methods=['GET'])
@@ -42,6 +43,18 @@ def login():
     except ValueError:
         return jsonify({"message": "check your email and activate your account"}), 403
 
+@app_views.route('/profile', methods=['GET'])
+def get_profile():
+    """ GET /profile
+    """
+    session_id = request.cookies.get('session_id')
+    if session_id:
+        auth = Auth()
+        try:
+            account = auth.get_account_from_session_id(session_id)
+            return jsonify(account.employee.to_dict()), 200
+        except NoResultFound:
+            return jsonify({"error": "session not found"}), 403
 
 @app_views.route('/logout', methods=['DELETE'])
 def logout():

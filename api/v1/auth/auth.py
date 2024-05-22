@@ -101,7 +101,7 @@ class Auth:
         new_employee.company = company
         new_employee.save()
         new_account = Account(**account_info, employee_id=new_employee.id)
-        new_account.save()
+        self._db._session.commit()
         return new_account
     
     def activate_account(self, account_id: str, activation_token: str) -> bool:
@@ -170,10 +170,10 @@ class Auth:
     def get_account_from_session_id(self, session_id: str):
         """Get the account from the session id
         """
-        try:
-            return self._db.find_account_by_session_id(session_id=session_id)
-        except NoResultFound:
-            return None
+        session = self._db.get_session(session_id)
+        if session is None:
+            raise NoResultFound("Session not found")
+        return session.account
         
     def destroy_session(self, session_id: str) -> bool:
         """Destroy the session
