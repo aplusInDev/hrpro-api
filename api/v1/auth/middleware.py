@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request, abort
+from flask import request, abort, jsonify
 from api.v1.auth.auth import Auth
 
 
@@ -36,14 +36,16 @@ def requires_auth(allowed_roles=None):
         def decorated(*args, **kwargs):
             session_id = request.cookies.get('session_id')
             if not session_id:
-                abort(401, description="Unauthorized: Missing session ID")
+                return jsonify({"error": "Unauthorized: Missing session ID"}), 401
 
             account = Auth().get_account_from_session_id(session_id)
             if not account:
-                abort(401, description="Unauthorized: Invalid session ID")
-
-            if allowed_roles and account.role in allowed_roles:
-                abort(403, description="Forbidden: Insufficient permissions")
+                return jsonify({"error": "Unauthorized: Invalid session ID"}), 401
+            
+            if allowed_roles and account.role not in allowed_roles:
+                return jsonify({"error": "Forbidden: Insufficient permissions"}), 403
+            else:
+                print("passed")
 
             return func(*args, **kwargs)
 

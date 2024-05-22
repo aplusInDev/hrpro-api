@@ -3,9 +3,11 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage, Department
+from api.v1.auth.middleware import requires_auth
 
 
 @app_views.route('companies/<company_id>/departments', methods=['GET'], strict_slashes=False)
+@requires_auth(["employee"])
 def get_departments(company_id):
     """ get departments """
     company = storage.get("Company", company_id)
