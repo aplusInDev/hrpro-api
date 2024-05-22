@@ -5,7 +5,7 @@ database storage engine for the AirBnB clone project.
 
 from models import *
 from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, extract
 from os import getenv
 from sqlalchemy.exc import InvalidRequestError
 
@@ -162,3 +162,17 @@ class DBStorage:
                 raise InvalidRequestError("Invalid filter key")
         employee = self.__session.query(Employee).filter_by(**kwargs).first()
         return employee
+    
+    def get_leaves(self, company_id, year):
+        """ retrieve all leaves for a company in a given year
+        """
+        # leaves = self.__session.query(Leave).\
+        #     filter(Leave.employee.has(company_id=company_id)).\
+        #     filter(Leave.start_date.like(f"{year}-%")).\
+        #     all()
+        leaves = self.__session.query(Leave)\
+           .join(Leave.employee)\
+           .filter(Employee.company_id == company_id)\
+           .filter(extract('year', Leave.start_date) == year)\
+           .all()
+        return [leave.to_dict() for leave in leaves]
