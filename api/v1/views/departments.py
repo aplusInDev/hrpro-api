@@ -7,7 +7,7 @@ from api.v1.auth.middleware import requires_auth
 
 
 @app_views.route('companies/<company_id>/departments', methods=['GET'], strict_slashes=False)
-@requires_auth(["employee"])
+@requires_auth(["admin", "hr"])
 def get_departments(company_id):
     """ get departments """
     company = storage.get("Company", company_id)
@@ -15,6 +15,7 @@ def get_departments(company_id):
         abort(404)
     return jsonify([d.to_dict() for d in company.departments]), 200
 
+@requires_auth(["admin", "hr"])
 @app_views.route('companies/<company_id>/departments_names', methods=['GET'])
 def get_departments_names(company_id):
     """ get departments names """
@@ -26,6 +27,7 @@ def get_departments_names(company_id):
         all_departments.append(department.name)
     return jsonify(all_departments), 200
 
+@requires_auth(["admin", "hr"])
 @app_views.route('departments/<department_id>', methods=['GET'], strict_slashes=False)
 def get_department(department_id):
     """ get department """
@@ -34,6 +36,7 @@ def get_department(department_id):
         abort(404)
     return jsonify(department.to_dict())
 
+@requires_auth(["admin"])
 @app_views.route('companies/<company_id>/departments', methods=['POST'], strict_slashes=False)
 def post_department(company_id):
     """ post department """
@@ -57,6 +60,7 @@ def post_department(company_id):
     return jsonify({"error": "unvalid request"}), 400
     
 
+@requires_auth(["admin"])
 @app_views.route('departments/<department_id>', methods=['PUT'], strict_slashes=False)
 def put_department(department_id):
     """ put department """
@@ -76,6 +80,7 @@ def put_department(department_id):
         return jsonify(department.to_dict())
     return jsonify({"error": "unvalid request"}), 400
 
+@requires_auth(["admin"])
 @app_views.route('departments/<department_id>', methods=['DELETE'], strict_slashes=False)
 def delete_department(department_id):
     """ delete department """

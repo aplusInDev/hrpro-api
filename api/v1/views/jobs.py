@@ -3,9 +3,11 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage, Job
+from api.v1.auth.middleware import requires_auth
 
 
 @app_views.route('/companies/<company_id>/jobs', methods=['GET'], strict_slashes=False)
+@requires_auth(["admin", "hr"])
 def get_jobs(company_id):
     """ get jobs """
     company = storage.get("Company", company_id)
@@ -14,6 +16,7 @@ def get_jobs(company_id):
     return jsonify([job.to_dict() for job in company.jobs])
 
 @app_views.route('/companies/<company_id>/jobs_titles', methods=['GET'])
+@requires_auth(["admin", "hr"])
 def get_jobs_names(company_id):
     """ get the list of company jobs titles """
     company = storage.get("Company", company_id)
@@ -25,6 +28,7 @@ def get_jobs_names(company_id):
     return jsonify(all_jobs), 200
 
 @app_views.route('/jobs/<job_id>', methods=['GET'], strict_slashes=False)
+@requires_auth(["admin", "hr"])
 def get_job(job_id):
     """ get job """
     job = storage.get("Job", job_id)
@@ -33,6 +37,7 @@ def get_job(job_id):
     return jsonify(job.to_dict())
 
 @app_views.route('/companies/<company_id>/jobs', methods=['POST'], strict_slashes=False)
+@requires_auth(["admin"])
 def post_job(company_id):
     """ post job """
     data = request.form
@@ -51,6 +56,7 @@ def post_job(company_id):
     return jsonify(new_job.to_dict()), 201
 
 @app_views.route('/jobs/<job_id>', methods=['PUT'], strict_slashes=False)
+@requires_auth(["admin"])
 def put_job(job_id):
     """ put job """
     job = storage.get("Job", job_id)
@@ -71,6 +77,7 @@ def put_job(job_id):
     return jsonify(job.to_dict())
 
 @app_views.route('/jobs/<job_id>', methods=['DELETE'], strict_slashes=False)
+@requires_auth(["admin"])
 def delete_job(job_id):
     """ delete job """
     job = storage.get("Job", job_id)

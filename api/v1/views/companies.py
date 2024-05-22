@@ -3,6 +3,7 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage, Company, Form, Field
+from api.v1.auth.middleware import requires_auth
 
 
 @app_views.route('/companies', methods=['GET'], strict_slashes=False)
@@ -12,6 +13,7 @@ def get_companies():
     return jsonify([company.to_dict() for company in companies.values()])
 
 @app_views.route('/companies/<company_id>', methods=['GET'], strict_slashes=False)
+@requires_auth()
 def get_company(company_id):
     """ get company """
     company = storage.get("Company", company_id)
@@ -20,6 +22,7 @@ def get_company(company_id):
     return jsonify(company.to_dict())
 
 @app_views.route('/companies', methods=['POST'], strict_slashes=False)
+@requires_auth(["admin"])
 def post_company():
     """ post company """
     data = request.get_json()
@@ -42,12 +45,13 @@ def post_company():
     return jsonify(company.to_dict()), 201
 
 @app_views.route('/companies/<company_id>', methods=['PUT'], strict_slashes=False)
+@requires_auth(["admin"])
 def put_company(company_id):
     """ put company """
     company = storage.get("Company", company_id)
     if company is None:
         abort(404)
-    data = request.get_json()
+    data = request.form.to_dict()
     if data is None:
         return 'Not a JSON', 400
     for key, value in data.items():
@@ -59,6 +63,7 @@ def put_company(company_id):
     return jsonify(company.to_dict())
 
 @app_views.route('/companies/<company_id>', methods=['DELETE'], strict_slashes=False)
+@requires_auth(["admin"])
 def delete_company(company_id):
     """ delete company """
     company = storage.get("Company", company_id)
