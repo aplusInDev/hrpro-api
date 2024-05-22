@@ -33,10 +33,8 @@ def get_job(job_id):
     return jsonify(job.to_dict())
 
 @app_views.route('/companies/<company_id>/jobs', methods=['POST'], strict_slashes=False)
-def post_job(account, company_id):
+def post_job(company_id):
     """ post job """
-    if account.role != "admin":
-        return jsonify({"error": "Unauthorized"}), 401
     data = request.form
     if not data:
         return jsonify({"error": "unvalid request"}), 400
@@ -53,10 +51,8 @@ def post_job(account, company_id):
     return jsonify(new_job.to_dict()), 201
 
 @app_views.route('/jobs/<job_id>', methods=['PUT'], strict_slashes=False)
-def put_job(account, job_id):
+def put_job(job_id):
     """ put job """
-    if account.role != "admin":
-        return jsonify({"error": "Unauthorized"}), 401
     job = storage.get("Job", job_id)
     if job is None:
         abort(404)

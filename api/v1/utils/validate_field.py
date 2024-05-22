@@ -40,14 +40,15 @@ def handle_update_info(form_name: str, company_id: str, data: dict) -> dict:
     if not all_fields:
         return []
     for field in all_fields:
-        fields_names.append(field["name"])
-        if field["name"] not in data:
+        field_name = field["name"].replace(' ', '_')
+        fields_names.append(field_name)
+        if field_name not in data:
             # Check if the field is required then return None
             if field["is_required"] is True:
                 return None
             # If the field is not required then set the default value
             else:
-                data[field["name"]] = field["default_value"]
+                data[field_name] = field["default_value"]
 
     # Delete the fields that are not in the form
     for key in data.keys():
