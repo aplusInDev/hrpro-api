@@ -108,7 +108,7 @@ class DB:
             except:
                 raise ValueError("Employee department not found")
             try:
-                employee_job = storage.find_job_by(title=position_info["job title"])
+                employee_job = storage.find_job_by(title=position_info["job_title"])
             except:
                 raise ValueError("Employee job not found")
         elif role == "admin":
@@ -116,7 +116,7 @@ class DB:
             employee_job = Job(title="hr", info='{"title": "hr"}')
             position_info = {
                 "department": "hr",
-                "job title": "hr",
+                "job_title": "hr",
             }
         else:
             raise ValueError("Invalid role")

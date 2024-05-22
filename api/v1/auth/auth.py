@@ -86,6 +86,7 @@ class Auth:
     def add_employee_account(self, account_info: dict, position_info: dict):
         """ Add new employee account """
         company_id = position_info.get("company_id")
+        del position_info["company_id"]
         company = storage.get("Company", company_id)
         if not company:
             raise ValueError("Company not found")

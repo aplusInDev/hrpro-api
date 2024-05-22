@@ -46,7 +46,7 @@ def validate_post_employee(func):
         required_fields = ['first_name', 'last_name', 'email']
         role = request.form.get('role', 'employee')
         if role != 'hr':
-            required_fields = [*required_fields, "department", "job title"]
+            required_fields = [*required_fields, "department", "job_title"]
         for field in required_fields:
             if field not in request.form:
                 return jsonify({"error": "missing information"}), 400
@@ -58,7 +58,7 @@ def validate_post_employee(func):
         }
         position_info = {
             "department": request.form.get("department"),
-            "job title": request.form.get("job title"),
+            "job_title": request.form.get("job_title"),
             "company_id": company_id,
         }
         return func(account_info, position_info, *args, **kwargs)
