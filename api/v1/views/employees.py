@@ -29,9 +29,10 @@ def post_employee(account_info, position_info):
     """ POST /add_employee
     """
     auth = Auth()
-    account_info["hashed_password"] = _generate_random_pass()
+    account_info["password"] = _generate_random_pass()
     try:
         account = auth.add_employee_account(account_info, position_info)
+        auth.send_welcome_mail(account.first_name, account.email, account_info["password"])
     except ValueError as err:
         return jsonify({"error": str(err)}), 400
     return jsonify({"email": account.email, "message": "employee added"}), 201

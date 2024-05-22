@@ -66,7 +66,8 @@ class DB:
         company.jobs.append(new_employee.job)
         company.departments.append(new_employee.department)
         company.save()
-        new_account = Account(**account_info, employee_id=new_employee.id)
+        new_account = Account(**account_info, employee_id=new_employee.id,
+                              role="admin")
         self._session.add(new_account)
         self.__session.commit()
         return new_account

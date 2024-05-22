@@ -82,16 +82,18 @@ class Auth:
         if admin_info.get("password"):
             del admin_info["password"]
         return self._db.add_admin_account(admin_info, company_info)
-    
+
     def add_employee_account(self, account_info: dict, position_info: dict):
         """ Add new employee account """
         company_id = position_info.get("company_id")
         company = storage.get("Company", company_id)
         if not company:
             raise ValueError("Company not found")
+        account_info["hashed_password"] = _hash_password(account_info["password"])
         employee_info = account_info.copy()
-        if employee_info.get("hashed_password"):
-            del employee_info["hashed_password"]
+        for key in ["password", "hased_password"]:
+            if key in employee_info:
+                del employee_info[key]
         role = employee_info.get("role")
         del employee_info["role"]
         try:
@@ -101,6 +103,7 @@ class Auth:
         new_employee.company = company
         new_employee.save()
         new_account = Account(**account_info, employee_id=new_employee.id)
+        self._db._session.add(new_account)
         self._db._session.commit()
         return new_account
     
