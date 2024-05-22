@@ -61,6 +61,11 @@ class DB:
         if employee_info.get("hashed_password"):
             del employee_info["hashed_password"]
         new_employee = self.add_employee("admin", employee_info)
+        new_employee.company = company
+        new_employee.save()
+        company.jobs.append(new_employee.job)
+        company.departments.append(new_employee.department)
+        company.save()
         new_account = Account(**account_info, employee_id=new_employee.id)
         self._session.add(new_account)
         self.__session.commit()
