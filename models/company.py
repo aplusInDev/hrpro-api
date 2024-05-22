@@ -35,24 +35,25 @@ class Company(BaseModel, Base):
     def to_dict(self):
         new_dict = super().to_dict().copy()
         new_dict["departments"] = {
-            department.name: "http://localhost/api/v1/jobs/" +
+            department.name: "http://localhost:5000/api/v1/departments/" +
             department.id for department in self.departments
             }
         new_dict["employees"] = {
             employee.first_name + " " + employee.last_name:
-            "http://localhost/api/v1/employees/" + employee.id
+            "http://localhost:5000/api/v1/employees/" + employee.id
             for employee in self.employees
             }
         new_dict["jobs"] = {
-            job.title: "http://localhost/api/v1/jobs/" + job.id
+            job.title: "http://localhost:5000/api/v1/jobs/" + job.id
             for job in self.jobs
             }
         new_dict["forms"] = {
-            form.name: "http://localhost/api/v1/forms/" + form.id
+            form.name: "http://localhost:5000/api/v1/forms/" + form.id
             for form in self.forms
             }
         new_dict["trainings"] = {
-            training.title: "http://localhost/api/v1/trainings/" + training.id
+            training.title: "http://localhost:5000/api/v1/trainings/" + training.id
             for training in self.trainings
         }
+        new_dict["uri"] = "http://localhost:5000/api/v1/companies/" + self.id
         return new_dict
