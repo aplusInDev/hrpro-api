@@ -31,5 +31,7 @@ class Field(BaseModel, Base):
         new_dict = super().to_dict().copy()
         new_dict["form"] = "http://localhost:5000/api/v1/forms/{}".\
             format(self.form_id)
+        new_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".\
+            format(self.id)
         new_dict["options"] = eval(self.options)
         return new_dict
