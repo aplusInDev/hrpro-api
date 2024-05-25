@@ -7,7 +7,7 @@ def requires_auth(allowed_roles=None):
     """Decorator to check for valid session and optional role requirement.
 
     Args:
-        role: Optional string representing the required role for access.
+        role: Optional list of strings representing the required roles for access.
 
     Usage examples:
     # Usage examples (assuming these are view functions)
