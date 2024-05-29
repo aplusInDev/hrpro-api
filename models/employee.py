@@ -75,6 +75,7 @@ class Employee(BaseModel, Base):
         new_dict["hire_date"] = self.hire_date.strftime("%Y-%m-%d")
         new_dict["position_info"] = position_info
         new_dict["department_info"] = department_info
+        new_dict["absences"] = len(self.absences)
         new_dict["uri"] = "http://localhost:5000/api/v1/employees/" + self.id
         return new_dict
 
