@@ -58,6 +58,12 @@ class Employee(BaseModel, Base):
             self.hire_date = date.today()
 
     def to_dict(self):
+        position_info = eval(self.job.info)
+        position_info = {"job_" + k: v for k, v in position_info.items()}
+        department_info = eval(self.department.info)
+        department_info = {
+            "department_" + k: v for k, v in department_info.items()
+            }
         new_dict = super().to_dict().copy()
         new_dict["department"] = "http://localhost:5000/api/v1/departments/{}".\
             format(self.department_id)
@@ -67,6 +73,8 @@ class Employee(BaseModel, Base):
             format(self.company_id)
         new_dict["info"] = eval(self.info)
         new_dict["hire_date"] = self.hire_date.strftime("%Y-%m-%d")
+        new_dict["position_info"] = position_info
+        new_dict["department_info"] = department_info
         new_dict["uri"] = "http://localhost:5000/api/v1/employees/" + self.id
         return new_dict
 
