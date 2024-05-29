@@ -121,11 +121,7 @@ class DB:
         else:
             raise ValueError("Invalid role")
         str_employee_info = str(employee_info)
-        str_position_info = str(position_info)
-        new_employee = Employee(
-            **employee_info, info=str_employee_info,
-            position_info=str_position_info
-            )
+        new_employee = Employee(**employee_info, info=str_employee_info)
         new_employee.department = employee_department
         new_employee.job = employee_job
         new_employee.save()
