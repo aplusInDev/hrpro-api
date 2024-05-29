@@ -61,7 +61,6 @@ class Training(BaseModel, Base):
     trainer = relationship("Employee", back_populates="trainings")
     trainees = relationship("Employee", secondary=training_trainees,
                             back_populates="trainings")
-    certificate = relationship("Certificate", back_populates="training", uselist=False)
     evaluations = relationship("Evaluation", back_populates="training")
 
     def __init__(self, *args, **kwargs):

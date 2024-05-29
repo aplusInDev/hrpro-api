@@ -33,7 +33,6 @@ class Employee(BaseModel, Base):
                         nullable=True
                         )
     info = Column(Text, nullable=True)
-    position_info = Column(Text, nullable=True)
 
     department = relationship("Department", back_populates="employees")
     job = relationship("Job", back_populates="employees")
@@ -67,7 +66,6 @@ class Employee(BaseModel, Base):
         new_dict["company"] = "http://localhost:5000/api/v1/companies/{}".\
             format(self.company_id)
         new_dict["info"] = eval(self.info)
-        new_dict["position_info"] = eval(self.position_info)
         new_dict["hire_date"] = self.hire_date.strftime("%Y-%m-%d")
         new_dict["uri"] = "http://localhost:5000/api/v1/employees/" + self.id
         return new_dict
