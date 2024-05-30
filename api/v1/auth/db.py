@@ -136,6 +136,8 @@ class DB:
             if not hasattr(Account, key):
                 raise InvalidRequestError(f"Invalid filter criteria: {key}")
         account =  self._session.query(Account).filter_by(**kwargs).first()
+        if not account:
+            raise NoResultFound("account not found")
         return account
 
     def get_session(self, session_id: str):

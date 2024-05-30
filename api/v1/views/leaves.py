@@ -62,3 +62,21 @@ def create_leave(employee_id):
     leave = Leave(**data, employee_id=employee_id)
     leave.save()
     return jsonify(leave.to_dict()), 201
+
+@app_views.route('/leaves/<leave_id>', methods=['PUT'], strict_slashes=False)
+@requires_auth(["admin", "hr"])
+def update_leave(leave_id):
+    """ update leave view
+    update a leave status
+    Args:
+        status: the new status of the leave
+    """
+    leave = storage.get("Leave", leave_id)
+    if not leave:
+        return jsonify({"error": "leave not found"}), 404
+    data = request.get_json()
+    if not data or "status" not in data:
+        return jsonify({"error": "status is required"}), 400
+    leave.status = data["status"]
+    leave.save()
+    return jsonify(leave.to_dict())
