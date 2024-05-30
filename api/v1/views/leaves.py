@@ -24,3 +24,41 @@ def get_leaves():
     year = request.args.get("year")
     leaves = storage.get_leaves(company_id, year)
     return jsonify(leaves)
+
+@app_views.route('/employees/<employee_id>/leaves', methods=['GET'], strict_slashes=False)
+@requires_auth()
+def get_employee_leaves(employee_id):
+    """ get leaves view
+    return all leaves for each employee in the company
+    based on the giving year
+    Args:
+        company_id: the id of the company
+        year: the year of the leaves
+    """
+    employee = storage.get("Employee", employee_id)
+    if not employee:
+        return jsonify({"error": "employee not found"}), 404
+    return jsonify([leave.to_dict() for leave in employee.leaves])
+
+@app_views.route('/employees/<employee_id>/leaves', methods=['POST'], strict_slashes=False)
+@requires_auth()
+def create_leave(employee_id):
+    """ create leave view
+    create a new leave for an employee
+    Args:
+        start_date: the start date of the leave
+        end_date: the end date of the leave
+        leave_type: the type of the leave
+        reason: (optional) the reason of the leave
+    """
+    employee = storage.get("Employee", employee_id)
+    if not employee:
+        return jsonify({"error": "employee not found"}), 404
+    required_fileds = ['start_date', 'end_date', 'leave_type']
+    for field in required_fileds:
+        if field not in request.form.to_dict():
+            return jsonify({"error": f"{field} is required"}), 400
+    data = request.form.to_dict()
+    leave = Leave(**data, employee_id=employee_id)
+    leave.save()
+    return jsonify(leave.to_dict()), 201
