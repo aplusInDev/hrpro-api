@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from models import BaseModel, Base
-from sqlalchemy import Column, String, ForeignKey, Text, Enum
+from sqlalchemy import Column, String, ForeignKey, Text, Enum, Date
 from sqlalchemy.orm import relationship
 
 
@@ -17,8 +17,8 @@ class Leave(BaseModel, Base):
                         nullable=False
                         )
     leave_type = Column(String(50), nullable=False)
-    start_date = Column(String(50), nullable=False)
-    end_date = Column(String(50), nullable=False)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
     reason = Column(Text, nullable=True)
     status = Column(leave_status, nullable=False, default="pending")
 
@@ -28,7 +28,11 @@ class Leave(BaseModel, Base):
         super().__init__(*args, **kwargs)
 
     def to_dict(self):
+        delta = self.end_date - self.start_date
         new_dict = super().to_dict().copy()
         new_dict["employee"] = "http://localhost:5000/api/v1/employees/{}".\
             format(self.employee_id)
+        new_dict['start_date'] = self.start_date.strftime('%Y-%m-%d')
+        new_dict['end_date'] = self.end_date.strftime('%Y-%m-%d')
+        new_dict["duration"] = str(delta.days + 1) + " days"
         return new_dict
