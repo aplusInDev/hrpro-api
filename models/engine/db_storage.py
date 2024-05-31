@@ -4,15 +4,19 @@ database storage engine for the AirBnB clone project.
 """
 
 from models import *
-from models.base_model import Base
 from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, extract
 from os import getenv
-from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import InvalidRequestError
 
 
-classes_list = [Company, Department, Job, Employee, Form, Field]
+classes_dict = {
+    "Company": Company, "Department": Department,
+    "Job": Job, "Employee": Employee, "Form": Form,
+    "Field": Field, "Absence": Absence, "Attendance": Attendance,
+    "Certificate": Certificate, "Evaluation": Evaluation,
+    "Experience": Experience, "Leave": Leave, "Training": Training,
+}
 
 class DBStorage:
     __engine = None
@@ -43,35 +47,39 @@ class DBStorage:
         if env == 'test':
             Base.metadata.drop_all(self.__engine)
 
-    def all(self, cls=None):
+    def all(self, cls: str = None) -> dict:
         """Returns the dictionary __objects"""
 
-        if cls and cls in classes_list:
+        if not isinstance(cls, str):
+            raise TypeError("Expected a string for cls parameter")
+
+        if cls and cls in classes_dict:
+            cls = classes_dict[cls]
             query_list = self.__session.query(cls).all()
         else:
             query_list = []
-            for cls in classes_list:
+            for cls in classes_dict.values():
                 query_list.extend(self.__session.query(cls).all())
         obj = {type(obj).__name__ + '.' + obj.id: obj for obj in query_list}
         return obj
 
-    def new(self, obj):
+    def new(self, obj) -> None:
         """This method adds the specified object to the current database
         session
         """
         self.__session.add(obj)
 
-    def save(self):
+    def save(self) -> None:
         """This method commits all changes to the current database session"""
         self.__session.commit()
 
-    def delete(self, obj=None):
+    def delete(self, obj= None) -> None:
         """This method deletes the specified object from the current database
         session"""
         if obj:
             self.__session.delete(obj)
 
-    def reload(self):
+    def reload(self) -> None:
         """This method creates all tables in the database and initializes a
         new session with the current database engine
         """
@@ -79,15 +87,20 @@ class DBStorage:
         Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
         self.__session = scoped_session(Session)
 
-    def close(self):
+    def close(self) -> None:
         """This method calls remove() on the private session attribute
         (self.__session) or close() on the class Session"""
         self.__session.remove()
 
-    def get(self, cls, id):
+    def get(self, cls: str, id: str):
         """This method retrieves one object based on the class name and its ID
         """
-        if cls and cls in classes_list:
+
+        if not isinstance(cls, str):
+            raise TypeError("Expected a string for cls parameter")
+
+        if cls and cls in classes_dict:
+            cls = classes_dict[cls]
             return self.__session.query(cls).filter(cls.id == id).first()
         return None
     
@@ -96,66 +109,70 @@ class DBStorage:
         """
         return self.__session.query(Company).filter(Company.name == name).first()
     
-    def get_company_by_employee_id(self, employee_id: str) -> Company:
+    def get_company_by_employee_id(self, employee_id: str):
         """This method retrieves one company based on an employee's ID
         Args:
             employee_id:
         Returns:
             company
         """
-        employee = self.get(Employee, employee_id)
+        employee = self.get("Employee", employee_id)
         return employee.company if employee else None
     
-    def get_emplyee_info(self, employee_id: str) -> dict:
-        """This method retrieves employee info based on its ID
-        """
-        employee = self.get(Employee, employee_id)
-        return eval(employee.info) if employee else None
-    
-    def find_form_by_(self, **kwargs) -> Form:
+    def find_form_by_(self, **kwargs):
         """Finds a account based on a set of filters.
         """
+        if not kwargs:
+            raise InvalidRequestError("No filter criteria")
         for key in kwargs.keys():
             if not hasattr(Form, key):
                 raise InvalidRequestError("Invalid filter key")
         form = self.__session.query(Form).filter_by(**kwargs).first()
-        if form:
-            return form
-        else:
-            raise NoResultFound("form not found")
+        return form
         
-    def find_job_by(self, **kwargs) -> Job:
+    def find_job_by(self, **kwargs):
         """Finds a job based on a set of filters.
         """
+        if not kwargs:
+            raise InvalidRequestError("No filter criteria")
         for key in kwargs.keys():
             if not hasattr(Job, key):
                 raise InvalidRequestError("Invalid filter key")
         job = self.__session.query(Job).filter_by(**kwargs).first()
-        if job:
-            return job
-        else:
-            raise NoResultFound("job not found")
+        return job
         
-    def find_department_by(self, **kwargs) -> Department:
+    def find_department_by(self, **kwargs):
         """Finds department based on a set of filters
         """
+        if not kwargs:
+            raise InvalidRequestError("No filter criteria")
         for key in kwargs.keys():
             if not hasattr(Department, key):
                 raise InvalidRequestError("Invalid filter key")
         department = self.__session.query(Department).filter_by(**kwargs).first()
-        if department:
-            return department
-        else:
-            raise NoResultFound("department not found")
+        return department
         
     def find_employee_by(self, **kwargs):
         """Finds employee based on a set of filters
         """
+        if not kwargs:
+            raise InvalidRequestError("No filter criteria")
         for key in kwargs.keys():
             if not hasattr(Employee, key):
                 raise InvalidRequestError("Invalid filter key")
         employee = self.__session.query(Employee).filter_by(**kwargs).first()
-        if employee:
-            return employee
-        else:
-            raise NoResultFound("employee not found")
+        return employee
+    
+    def get_leaves(self, company_id, year):
+        """ retrieve all leaves for a company in a given year
+        """
+        # leaves = self.__session.query(Leave).\
+        #     filter(Leave.employee.has(company_id=company_id)).\
+        #     filter(Leave.start_date.like(f"{year}-%")).\
+        #     all()
+        leaves = self.__session.query(Leave)\
+           .join(Leave.employee)\
+           .filter(Employee.company_id == company_id)\
+           .filter(extract('year', Leave.start_date) == year)\
+           .all()
+        return [leave.to_dict() for leave in leaves]

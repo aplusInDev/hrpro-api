@@ -2,29 +2,24 @@
 
 from flask import jsonify, request, abort
 from api.v1.views import app_views
-from models import storage, Department, Company
-from api.v1.auth.middleware import session_required
+from models import storage, Department
+from api.v1.auth.middleware import requires_auth
 
 
 @app_views.route('companies/<company_id>/departments', methods=['GET'], strict_slashes=False)
+@requires_auth(["admin", "hr"])
 def get_departments(company_id):
     """ get departments """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
-    all_departments = []
-    for department in company.departments:
-        dep_dict = department.to_dict().copy()
-        dep_dict['info'] = eval(dep_dict['info'])
-        dep_dict['uri'] = 'http://localhost:5000/api/v1/departments/{}'.format(dep_dict['id'])
-        del dep_dict['employees']
-        all_departments.append(dep_dict)
-    return jsonify(all_departments), 200
+    return jsonify([d.to_dict() for d in company.departments]), 200
 
+@requires_auth(["admin", "hr"])
 @app_views.route('companies/<company_id>/departments_names', methods=['GET'])
 def get_departments_names(company_id):
     """ get departments names """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     all_departments = []
@@ -32,25 +27,20 @@ def get_departments_names(company_id):
         all_departments.append(department.name)
     return jsonify(all_departments), 200
 
+@requires_auth(["admin", "hr"])
 @app_views.route('departments/<department_id>', methods=['GET'], strict_slashes=False)
 def get_department(department_id):
     """ get department """
-    department = storage.get(Department, department_id)
+    department = storage.get("Department", department_id)
     if department is None:
         abort(404)
-    dep_dict = department.to_dict().copy()
-    dep_dict['info'] = eval(dep_dict['info'])
-    dep_dict['uri'] = 'http://localhost:5000/api/v1/departments/{}'.format(dep_dict['id'])
-    del dep_dict['employees']
-    return jsonify(dep_dict)
+    return jsonify(department.to_dict())
 
+@requires_auth(["admin"])
 @app_views.route('companies/<company_id>/departments', methods=['POST'], strict_slashes=False)
-@session_required
-def post_department(account, company_id):
+def post_department(company_id):
     """ post department """
-    if account.role != "admin":
-        return jsonify({"error": "Unauthorized"}), 401
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     data = request.form
@@ -70,13 +60,11 @@ def post_department(account, company_id):
     return jsonify({"error": "unvalid request"}), 400
     
 
+@requires_auth(["admin"])
 @app_views.route('departments/<department_id>', methods=['PUT'], strict_slashes=False)
-@session_required
-def put_department(account, department_id):
+def put_department(department_id):
     """ put department """
-    if account.role != "admin":
-        abort(401)
-    department = storage.get(Department, department_id)
+    department = storage.get("Department", department_id)
     if department is None:
         abort(404)
     data = request.get_json()
@@ -89,17 +77,14 @@ def put_department(account, department_id):
             department.name = data.get('name')
         department.info = str(data)
         department.save()
-        dep_dict = department.to_dict().copy()
-        dep_dict['info'] = eval(dep_dict['info'])
-        dep_dict['uri'] = 'http://localhost:5000/api/v1/departments/{}'.format(dep_dict['id'])
-        del dep_dict['employees']
-        return jsonify(dep_dict)
+        return jsonify(department.to_dict())
     return jsonify({"error": "unvalid request"}), 400
 
+@requires_auth(["admin"])
 @app_views.route('departments/<department_id>', methods=['DELETE'], strict_slashes=False)
 def delete_department(department_id):
     """ delete department """
-    department = storage.get(Department, department_id)
+    department = storage.get("Department", department_id)
     if department is None:
         abort(404)
     department.delete()

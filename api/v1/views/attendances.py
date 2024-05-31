@@ -2,7 +2,7 @@
 
 from flask import jsonify, request, abort, send_file
 from api.v1.views import app_views
-from models import storage, Company
+from models import storage
 from datetime import datetime, timedelta
 from api.v1.helpers import handle_attendance_sync, handle_attendance
 import pandas as pd
@@ -12,7 +12,7 @@ import io
 @app_views.route('companies/<company_id>/attendance_sync', methods=['POST'])
 def post_employees_attendance_sync(company_id):
     """ post employees attendance """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     if 'file' not in request.files:
@@ -38,7 +38,7 @@ def post_employees_attendance_sync(company_id):
 @app_views.route('companies/<company_id>/attendance', methods=['POST'])
 async def post_employees_attendance(company_id):
     """ post employees attendance """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     if 'file' not in request.files:
@@ -72,7 +72,7 @@ def get_employees_attendance(company_id):
     reqDate = request.args.get('date')
     # convert from str to date
     date = datetime.strptime(reqDate, '%Y-%m-%d').date()
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None or reqDate is None:
         abort(404)
 

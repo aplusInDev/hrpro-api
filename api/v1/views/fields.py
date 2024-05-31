@@ -2,27 +2,16 @@
 
 from flask import jsonify, request, abort
 from api.v1.views import app_views
-from models import storage, Form, Company, Field
+from models import storage, Field
 
 
 @app_views.route('forms/<form_id>/fields', methods=['GET'], strict_slashes=False)
 def get_fields(form_id):
 	""" get fields """
-	form = storage.get(Form, form_id)
+	form = storage.get("Form", form_id)
 	if form is None:
 		abort(404)
-	all_fields = []
-	for field in form.fields:
-		field_dict = field.to_dict().copy()
-		try:
-				field_dict["options"] = eval(field.options)
-		except:
-				pass
-		field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(form.company.id)
-		field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(form_id)
-		field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
-		all_fields.append(field_dict)
-	return jsonify(all_fields)
+	return jsonify([field.to_dict() for field in form.fields])
 
 @app_views.route('fields', methods=['GET'], strict_slashes=False)
 def get_all_fields():
@@ -40,23 +29,15 @@ def get_all_fields():
 @app_views.route('/fields/<field_id>', methods=['GET'], strict_slashes=False)
 def get_field(field_id):
 	""" get field """
-	field = storage.get(Field, field_id)
+	field = storage.get("Field", field_id)
 	if field is None:
 		abort(404)
-	field_dict = field.to_dict().copy()
-	try:
-			field_dict["options"] = eval(field.options)
-	except:
-			pass
-	field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(field.form.company.id)
-	field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(field.form.id)
-	field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
-	return jsonify(field_dict)
+	return jsonify(field.save())
 
 @app_views.route('/forms/<form_id>/fields', methods=['POST'], strict_slashes=False)
 def post_field(form_id):
 	""" post field """
-	form = storage.get(Form, form_id)
+	form = storage.get("Form", form_id)
 	if form is None:
 		abort(404)
 	data = request.get_json()
@@ -68,19 +49,7 @@ def post_field(form_id):
 		pos = len(form.fields) + 1
 		field = Field(form_id=form_id, position=pos, **data)
 		field.save()
-		field_dict = field.to_dict().copy()
-		try:
-			field_dict["options"] = eval(field.options)
-		except:
-				pass
-		field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(form.company.id)
-		field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(form_id)
-		try:
-				field_dict["options"] = eval(field.options)
-		except:
-					pass
-		field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
-		return jsonify(field_dict), 201
+		return jsonify(field.save()), 201
 	
 @app_views.route('/fields/<field_id>', methods=['PUT'], strict_slashes=False)
 def put_field(field_id):
@@ -95,20 +64,12 @@ def put_field(field_id):
 		if key not in ['id', 'created_at', 'updated_at']:
 			setattr(field, key, value)
 	field.save()
-	field_dict = field.to_dict().copy()
-	try:
-			field_dict["options"] = eval(field.options)
-	except:
-			pass
-	field_dict["company"] = "http://localhost:5000/api/v1/companies/{}".format(field.form.company.id)
-	field_dict["form"] = "http://localhost:5000/api/v1/forms/{}".format(field.form.id)
-	field_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".format(field.id)
-	return jsonify(field_dict), 200
+	return jsonify(field.save()), 200
 
 @app_views.route('/fields/<field_id>', methods=['DELETE'], strict_slashes=False)
 def delete_field(field_id):
 	""" delete field """
-	field = storage.get(Field, field_id)
+	field = storage.get("Field", field_id)
 	if field is None:
 		abort(404)
 	field.delete()

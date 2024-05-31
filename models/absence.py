@@ -3,7 +3,6 @@
 from models import BaseModel, Base
 from sqlalchemy import Column, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from os import getenv
 
 
 class Absence(BaseModel, Base):
@@ -19,8 +18,13 @@ class Absence(BaseModel, Base):
     end_date = Column(DateTime, nullable=False)
     reason = Column(String(50), nullable=True)
 
-    if getenv('HRPRO_TYPE_STORAGE') == 'db':
-        employee = relationship("Employee", back_populates="absences")
+    employee = relationship("Employee", back_populates="absences")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def to_dict(self):
+        new_dict = super().to_dict().copy()
+        new_dict["employee"] = "http://localhost:5000/api/v1/employees/{}".\
+            format(self.employee_id)
+        return new_dict

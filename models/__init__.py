@@ -9,6 +9,11 @@ from models.job import Job
 from models.field import Field
 from models.absence import Absence
 from models.attendance import Attendance
+from models.certificate import Certificate
+from models.evaluation import Evaluation
+from models.experience import Experience
+from models.leave import Leave
+from models.training import Training
 from os import getenv
 from dotenv import load_dotenv
 

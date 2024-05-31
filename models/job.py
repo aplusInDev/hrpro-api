@@ -3,7 +3,6 @@
 from models import BaseModel, Base
 from sqlalchemy import Column, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from os import getenv
 
 
 class Job(BaseModel, Base):
@@ -17,17 +16,30 @@ class Job(BaseModel, Base):
                         nullable=True
                         )
     info = Column(Text, nullable=True)
-    
-    if getenv('HRPRO_TYPE_STORAGE') == 'db':
-        company = relationship("Company", back_populates="jobs")
-        employees = relationship("Employee", back_populates="job",
-                               cascade="all, delete-orphan")
-        
-        def to_dict(self):
-            new_dict = super().to_dict().copy()
-            new_dict["employees"] = [employee.to_dict() for employee in self.employees]
-            return new_dict
 
+    company = relationship("Company", back_populates="jobs")
+    employees = relationship("Employee", back_populates="job",
+                            cascade="all, delete-orphan")
+    trainings = relationship("Training", back_populates="job",
+                            cascade="all, delete-orphan")
+    
     def __init__(self, *args, **kwargs):
         """Initializes a new instance"""
         super().__init__(*args, **kwargs)
+
+    def to_dict(self):
+        new_dict = super().to_dict().copy()
+        new_dict["employees"] = {
+            employee.first_name + " " + employee.last_name:
+            "http://localhost:5000/api/v1/employees/" + employee.id
+            for employee in self.employees
+            }
+        new_dict["company"] = "http://localhost:5000/api/v1/companies/{}".\
+            format(self.company_id)
+        new_dict["trainings"] = {
+            training.title: "http://localhost:5000/api/v1/trainings/" + training.id
+            for training in self.trainings
+        }
+        new_dict["info"] = eval(self.info)
+        new_dict["uri"] = "http://localhost:5000/api/v1/jobs/" + self.id
+        return new_dict

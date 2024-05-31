@@ -2,7 +2,7 @@
 
 from flask import jsonify, request, abort, send_file
 from api.v1.views import app_views
-from models import storage, Absence, Employee
+from models import storage
 import pandas as pd
 import io
 
@@ -10,7 +10,7 @@ import io
 @app_views.route('/employees/<employee_id>/absences', methods=['GET'])
 def get_absences(employee_id):
     """Get absences for a given employee"""
-    employee = storage.get(Employee, employee_id)
+    employee = storage.get("Employee", employee_id)
     if employee is None:
         abort(404)
     absences = [absence.to_dict() for absence in employee.absences]
@@ -19,7 +19,7 @@ def get_absences(employee_id):
 @app_views.route('/employees/<employee_id>/absences_sheet', methods=['GET'])
 def get_absences_sheet(employee_id):
     """ Returns employee absences in excel sheet """
-    employee = storage.get(Employee, employee_id)
+    employee = storage.get("Employee", employee_id)
     if employee is None:
         abort(404)
     absences = []
@@ -47,7 +47,7 @@ def update_absence(absence_id):
     reason = request.form.get('reason')
     if reason is None:
         abort(400, 'Reason missing')
-    absence = storage.get(Absence, absence_id)
+    absence = storage.get("Absence", absence_id)
     if absence is None:
         abort(404)
     absence.reason = reason

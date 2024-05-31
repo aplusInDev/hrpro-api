@@ -1,6 +1,5 @@
 from sqlalchemy.orm.exc import NoResultFound
 from models import storage, Attendance, Absence
-from datetime import datetime
 import pandas as pd
 import asyncio
 

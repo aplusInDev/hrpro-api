@@ -4,7 +4,7 @@ from uuid import uuid4
 from sqlalchemy import Column, String, Enum, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from models import storage, Employee
+from models import storage
 
 
 Base = declarative_base()
@@ -13,8 +13,6 @@ role_enum = Enum("employee", "hr", "admin", name="role_type")
 class Account(Base):
     __tablename__ = 'accounts'
     id = Column(String(128), primary_key=True)
-    first_name = Column(String(128), nullable=False)
-    last_name = Column(String(128), nullable=False)
     email = Column(String(128), nullable=False)
     hashed_password = Column(String(128), nullable=False)
     employee_id = Column(String(128), nullable=False)
@@ -32,5 +30,5 @@ class Account(Base):
                 setattr(self, key, value)
 
     @property
-    def employee(self) -> Employee:
-        return storage.get(Employee, self.employee_id)
+    def employee(self):
+        return storage.get("Employee", self.employee_id)

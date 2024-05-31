@@ -3,43 +3,26 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage, Company, Form, Field
-from api.v1.auth.middleware import session_required
+from api.v1.auth.middleware import requires_auth
 
 
 @app_views.route('/companies', methods=['GET'], strict_slashes=False)
 def get_companies():
     """ get companies """
-    companies = storage.all(Company)
-    all_companies = []
-    for company in companies.values():
-        company_dict = company.to_dict().copy()
-        company_dict["employees"] = "http://localhost:5000/api/v1/companies/{}/employees".format(company.id)
-        company_dict["jobs"] = "http://localhost:5000/api/v1/companies/{}/jobs".format(company.id)
-        company_dict["departments"] = "http://localhost:5000/api/v1/companies/{}/departments".format(company.id)
-        forms = {form.name: "http://localhost:5000/api/v1/forms/{}".format(form.id) for form in company.forms}
-        company_dict["forms"] = forms
-        company_dict["uri"] = "http://localhost:5000/api/v1/companies/{}".format(company.id)
-        all_companies.append(company_dict)
-    return jsonify(all_companies)
+    companies = storage.all("Company")
+    return jsonify([company.to_dict() for company in companies.values()])
 
 @app_views.route('/companies/<company_id>', methods=['GET'], strict_slashes=False)
+@requires_auth()
 def get_company(company_id):
     """ get company """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
-    company_dict = company.to_dict().copy()
-    company_dict["employees"] = "http://localhost:5000/api/v1/companies/{}/employees".format(company_id)
-    company_dict["jobs"] = "http://localhost:5000/api/v1/companies/{}/jobs".format(company_id)
-    company_dict["departments"] = "http://localhost:5000/api/v1/companies/{}/departments".format(company_id)
-    forms = [{
-        "id": form.id ,"name": form.name,
-        "uri": "http://localhost:5000/api/v1/forms/{}".format(form.id)} for form in company.forms]
-    company_dict["forms"] = forms
-    company_dict["uri"] = "http://localhost:5000/api/v1/companies/{}".format(company_id)
-    return jsonify(company_dict)
+    return jsonify(company.to_dict())
 
 @app_views.route('/companies', methods=['POST'], strict_slashes=False)
+@requires_auth(["admin"])
 def post_company():
     """ post company """
     data = request.get_json()
@@ -48,7 +31,6 @@ def post_company():
     if 'name' not in data:
         return 'Missing name', 400
     company = Company(**data)
-    company_dict = company.to_dict().copy()
     emp_form = Form(name="employee_form", company_id=company.id)
     dep_form = Form(name="department_form", company_id=company.id)
     job_form = Form(name="job_form", company_id=company.id)
@@ -60,20 +42,16 @@ def post_company():
     for form in [emp_form, dep_form, job_form]:
         company.forms.append(form)
     company.save()
-    company_dict["employees"] = "http://localhost:5000/api/v1/companies/{}/employees".format(company.id)
-    company_dict["jobs"] = "http://localhost:5000/api/v1/companies/{}/jobs".format(company.id)
-    company_dict["departments"] = "http://localhost:5000/api/v1/companies/{}/departments".format(company.id)
-    company_dict["forms"] = "http://localhost:5000/api/v1/companies/{}/forms".format(company.id)
-    company_dict["uri"] = "http://localhost:5000/api/v1/companies/{}".format(company.id)
-    return jsonify(company_dict), 201
+    return jsonify(company.to_dict()), 201
 
 @app_views.route('/companies/<company_id>', methods=['PUT'], strict_slashes=False)
+@requires_auth(["admin"])
 def put_company(company_id):
     """ put company """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
-    data = request.get_json()
+    data = request.form.to_dict()
     if data is None:
         return 'Not a JSON', 400
     for key, value in data.items():
@@ -82,72 +60,14 @@ def put_company(company_id):
                        ]:
             setattr(company, key, value)
     company.save()
-    company_dict = company.to_dict().copy()
-    company_dict["employees"] = "http://localhost:5000/api/v1/companies/{}/employees".format(company_id)
-    company_dict["jobs"] = "http://localhost:5000/api/v1/companies/{}/jobs".format(company_id)
-    company_dict["departments"] = "http://localhost:5000/api/v1/companies/{}/departments".format(company_id)
-    forms = [{
-        "id": form.id ,"name": form.name,
-        "url": "http://localhost:5000/api/v1/forms/{}".format(form.id)} for form in company.forms]
-    company_dict["forms"] = forms
-    company_dict["uri"] = "http://localhost:5000/api/v1/companies/{}".format(company_id)
-    return jsonify(company_dict)
+    return jsonify(company.to_dict())
 
 @app_views.route('/companies/<company_id>', methods=['DELETE'], strict_slashes=False)
+@requires_auth(["admin"])
 def delete_company(company_id):
     """ delete company """
-    company = storage.get(Company, company_id)
+    company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     company.delete()
     return jsonify({}), 200
-
-#######
-
-@app_views.route('/company', methods=['GET'])
-@session_required
-def get_acc_company(account):
-    """ get company for account """
-    if account.role != "admin":
-        abort(401)
-    company = storage.get_company_by_employee_id(account.employee_id)
-    if company is None:
-        abort(404)
-    company_dict = company.to_dict().copy()
-    company_dict["employees"] = "http://localhost:5000/api/v1/companies/{}/employees".format(company.id)
-    company_dict["jobs"] = "http://localhost:5000/api/v1/companies/{}/jobs".format(company.id)
-    company_dict["departments"] = "http://localhost:5000/api/v1/companies/{}/departments".format(company.id)
-    forms = [{
-        "id": form.id ,"name": form.name,
-        "uri": "http://localhost:5000/api/v1/forms/{}".format(form.id)} for form in company.forms]
-    company_dict["forms"] = forms
-    company_dict["uri"] = "http://localhost:5000/api/v1/companies/{}".format(company.id)
-    return jsonify(company_dict)
-
-@app_views.route('/company', methods=['PuT'])
-@session_required
-def put_acc_company(account):
-    """ update company information  """
-    
-    if account.role != "admin":
-        abort(401)
-    company = storage.get_company_by_employee_id(account.employee_id)
-    if company is None:
-        abort(404)
-    data = request.form
-    for key, value in data.items():
-        if key not in ['id', 'created_at', 'updated_at', 'forms',
-                       'employees', 'jobs', 'departments'
-                       ]:
-            setattr(company, key, value)
-    company.save()
-    company_dict = company.to_dict().copy()
-    company_dict["employees"] = "http://localhost:5000/api/v1/companies/{}/employees".format(company.id)
-    company_dict["jobs"] = "http://localhost:5000/api/v1/companies/{}/jobs".format(company.id)
-    company_dict["departments"] = "http://localhost:5000/api/v1/companies/{}/departments".format(company.id)
-    forms = [{
-        "id": form.id ,"name": form.name,
-        "uri": "http://localhost:5000/api/v1/forms/{}".format(form.id)} for form in company.forms]
-    company_dict["forms"] = forms
-    company_dict["uri"] = "http://localhost:5000/api/v1/companies/{}".format(company.id)
-    return jsonify(company_dict)
