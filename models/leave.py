@@ -30,8 +30,8 @@ class Leave(BaseModel, Base):
     def to_dict(self):
         delta = self.end_date - self.start_date
         new_dict = super().to_dict().copy()
-        new_dict["employee"] = "http://localhost:5000/api/v1/employees/{}".\
-            format(self.employee_id)
+        new_dict["employee"] = "{} {}".format(self.employee.first_name,
+                                              self.employee.last_name)
         new_dict['start_date'] = self.start_date.strftime('%Y-%m-%d')
         new_dict['end_date'] = self.end_date.strftime('%Y-%m-%d')
         new_dict["duration"] = str(delta.days + 1) + " days"
