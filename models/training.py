@@ -37,7 +37,7 @@ class Training(BaseModel, Base):
     company_id = Column(String(50),
                         ForeignKey('companies.id', ondelete='CASCADE',
                                    onupdate='CASCADE'),
-                        nullable=True
+                        nullable=False
                         )
     department_id = Column(String(50),
                         ForeignKey('departments.id', ondelete='CASCADE',
@@ -52,7 +52,7 @@ class Training(BaseModel, Base):
     trainer_id = Column(String(50),
                         ForeignKey('employees.id', ondelete='CASCADE',
                                    onupdate='CASCADE'),
-                        nullable=False
+                        nullable=True
                         )
 
     company = relationship("Company", back_populates="trainings")
@@ -70,12 +70,15 @@ class Training(BaseModel, Base):
         new_dict = super().to_dict().copy()
         new_dict["company"] = "http://localhost:5000/api/v1/companies/{}".\
             format(self.company_id)
-        new_dict["department"] = "http://localhost:5000/api/v1/departments/{}".\
-            format(self.department_id)
-        new_dict["job"] = "http://localhost:5000/api/v1/jobs/{}".\
-            format(self.job_id)
-        new_dict["trainer"] = "http://localhost:5000/api/v1/employees/{}".\
-            format(self.trainer_id)
+        if self.department_id:
+            new_dict["department"] = "http://localhost:5000/api/v1/departments/{}".\
+                format(self.department_id)
+        if self.job_id:
+            new_dict["job"] = "http://localhost:5000/api/v1/jobs/{}".\
+                format(self.job_id)
+        if self.trainer_id:
+            new_dict["trainer"] = "http://localhost:5000/api/v1/employees/{}".\
+                format(self.trainer_id)
         new_dict["trainees"] = {
             trainee.first_name + " " + trainee.last_name:
             "http://localhost:5000/api/v1/employees/" + trainee.id
@@ -88,4 +91,6 @@ class Training(BaseModel, Base):
             "http://localhost:5000/api/v1/evaluations/" + evaluation.id
             for evaluation in self.evaluations
         }
+        new_dict["uri"] = "http://localhost:5000/api/v1/trainings/{}".\
+            format(self.id)
         return new_dict
