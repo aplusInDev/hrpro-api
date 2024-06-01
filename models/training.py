@@ -93,4 +93,9 @@ class Training(BaseModel, Base):
         }
         new_dict["uri"] = "http://localhost:5000/api/v1/trainings/{}".\
             format(self.id)
+        try:
+            new_dict["start_date"] = self.start_date.strftime("%Y-%m-%d")
+            new_dict["end_date"] = self.end_date.strftime("%Y-%m-%d")
+        except Exception:
+            pass
         return new_dict

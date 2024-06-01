@@ -129,3 +129,31 @@ def add_trainees(training_id):
         training.trainees.append(trainee)
     training.save()
     return jsonify(training.to_dict())
+
+@app_views.route('/trainings/<training_id>/trainees', methods=['DELETE'], strict_slashes=False)
+def delete_trainees(training_id):
+    """ delete trainees view
+    delete trainees from a training
+    Args:
+        training_id: the id of the training
+        trainees: the ids of the trainees
+    """
+    training = storage.get("Training", training_id)
+    if not training:
+        return jsonify({"error": "training not found"}), 404
+    data = request.form.to_dict()
+    if "trainees" not in data:
+        return jsonify({"error": "trainees is required"}), 400
+    trainees = eval(data['trainees'])
+    for trainee_full_name in trainees:
+        first_name = trainee_full_name.split(" ")[0]
+        last_name = trainee_full_name.split(" ")[1]
+        trainee = storage.find_employee_by(
+            first_name=first_name, last_name=last_name,
+            company_id=training.company_id
+        )
+        if not trainee:
+            return jsonify({"error": f"trainee {trainee_full_name} not found"}), 404
+        training.trainees.remove(trainee)
+    training.save()
+    return jsonify(training.to_dict())
