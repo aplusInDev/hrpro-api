@@ -102,7 +102,7 @@ def create_training(company_id):
     training.save()
     return jsonify(training.to_dict()), 201
 
-@app_views.route('/trainings/<training_id>', methods=['PUT'], strict_slashes=False)
+@app_views.route('/trainings/<training_id>/trainees', methods=['POST'], strict_slashes=False)
 def add_trainees(training_id):
     """ add trainees view
     add trainees to a training
@@ -116,11 +116,16 @@ def add_trainees(training_id):
     data = request.form.to_dict()
     if "trainees" not in data:
         return jsonify({"error": "trainees is required"}), 400
-    trainees = data["trainees"].split(",")
-    for trainee_id in trainees:
-        trainee = storage.get("Employee", trainee_id)
+    trainees = eval(data['trainees'])
+    for trainee_full_name in trainees:
+        first_name = trainee_full_name.split(" ")[0]
+        last_name = trainee_full_name.split(" ")[1]
+        trainee = storage.find_employee_by(
+            first_name=first_name, last_name=last_name,
+            company_id=training.company_id
+        )
         if not trainee:
-            return jsonify({"error": "trainee not found"}), 404
+            return jsonify({"error": f"trainee {trainee_full_name} not found"}), 404
         training.trainees.append(trainee)
     training.save()
     return jsonify(training.to_dict())
