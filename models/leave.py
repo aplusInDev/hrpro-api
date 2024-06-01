@@ -28,11 +28,14 @@ class Leave(BaseModel, Base):
         super().__init__(*args, **kwargs)
 
     def to_dict(self):
-        delta = self.end_date - self.start_date
         new_dict = super().to_dict().copy()
         new_dict["employee"] = "{} {}".format(self.employee.first_name,
                                               self.employee.last_name)
-        new_dict['start_date'] = self.start_date.strftime('%Y-%m-%d')
-        new_dict['end_date'] = self.end_date.strftime('%Y-%m-%d')
-        new_dict["duration"] = str(delta.days + 1) + " days"
+        try:
+            delta = self.end_date - self.start_date
+            new_dict['start_date'] = self.start_date.strftime('%Y-%m-%d')
+            new_dict['end_date'] = self.end_date.strftime('%Y-%m-%d')
+            new_dict["duration"] = str(delta.days + 1) + " days"
+        except Exception:
+            pass
         return new_dict
