@@ -17,3 +17,4 @@ from api.v1.views.auth_session import *
 from api.v1.views.accounts import *
 from api.v1.views.absences import *
 from api.v1.views.leaves import *
+from api.v1.views.trainings import *

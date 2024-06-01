@@ -15,6 +15,17 @@ def get_employees(company_id):
         abort(404)
     return jsonify([employee.to_dict() for employee in company.employees])
 
+@app_views.route('/companies/<company_id>/employees_names', methods=['GET'], strict_slashes=False)
+def get_employees_names(company_id):
+    """ get employees names """
+    company = storage.get("Company", company_id)
+    if company is None:
+        abort(404)
+    employees_names = []
+    for employee in company.employees:
+        employees_names.append(employee.first_name + " " + employee.last_name)
+    return jsonify(employees_names)
+
 @app_views.route('/employees/<employee_id>', methods=['GET'], strict_slashes=False)
 def get_employee(employee_id):
     """ get employee """
