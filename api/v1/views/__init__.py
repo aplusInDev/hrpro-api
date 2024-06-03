@@ -18,3 +18,4 @@ from api.v1.views.accounts import *
 from api.v1.views.absences import *
 from api.v1.views.leaves import *
 from api.v1.views.trainings import *
+from api.v1.views.evaluations import *
