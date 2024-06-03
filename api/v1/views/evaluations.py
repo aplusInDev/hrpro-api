@@ -42,7 +42,7 @@ def delete_evaluation(evaluation_id):
     storage.save()
     return jsonify({}), 200
 
-@app_views.route('/trainings', methods=['POST'])
+@app_views.route('/evaluation', methods=['POST'])
 def create_evaluation() -> dict:
     """ create new evaluation
     Args:
@@ -61,12 +61,12 @@ def create_evaluation() -> dict:
                                              training_id=training_id)
     if evaluation:
         return jsonify(
-            {"message": "you have only one evaluation per training"})
-    data = request.form.to_dict()
+            {"message": "you have only one evaluation per training"}), 400
+    data = request.get_json()
     required_fields = ["score", "anonimous"]
     for field in required_fields:
         if field not in data:
-            return jsonify({"error": f"{field} is required"})
+            return jsonify({"error": f"{field} is required"}), 400
         
     evaluation = Evaluation(**data, training_id=training_id,
                             employee_id=trainee_id)

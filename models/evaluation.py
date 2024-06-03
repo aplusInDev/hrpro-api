@@ -43,7 +43,8 @@ class Evaluation(BaseModel, Base):
         new_dict = super().to_dict().copy()
         new_dict["training"] = "http://localhost:5000/api/v1/trainings/{}".\
             format(self.training_id)
-        new_dict["trainee"] = trainee_name
+        new_dict["employee"] = trainee_name
+        del new_dict["employee_id"]
         new_dict["uri"] = "http://localhost:5000/api/v1/trainings/{}".\
             format(self.id)
         return new_dict
