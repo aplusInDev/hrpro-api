@@ -41,6 +41,28 @@ def get_job_trainings(job_id):
         return jsonify({"error": "job not found"}), 404
     return jsonify([training.to_dict() for training in job.trainings])
 
+@app_views.route('/employees/<employee_id>/trainings', methods=['GET'])
+def get_employee_trainings(employee_id):
+    """ get employee trainings
+    Args:
+        employee_id: the id of employee
+    Returns:
+        all employee trainings
+    """
+    employee = storage.get("Employee", employee_id)
+    if not employee:
+        abort(404)
+    trainings = []
+    for training in employee.trainings:
+        training_dict = training.to_dict().copy()
+        evaluation = storage.found_evaluation_by(training_id=training.id, employee_id=employee.id)
+        if evaluation:
+            training_dict["is_evaluated"] = True
+        else:
+            training_dict["is_evaluated"] = False
+        trainings.append(training_dict)
+    return jsonify(trainings)
+
 @app_views.route('/trainings/<training_id>', methods=['GET'], strict_slashes=False)
 def get_training(training_id):
     """ get training view

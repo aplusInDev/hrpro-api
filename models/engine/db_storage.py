@@ -176,3 +176,14 @@ class DBStorage:
            .filter(extract('year', Leave.start_date) == year)\
            .all()
         return [leave.to_dict() for leave in leaves]
+    
+    def found_evaluation_by(self, **kwargs):
+        """Finds evaluation based on a set of filters
+        """
+        if not kwargs:
+            raise InvalidRequestError("No filter criteria")
+        for key in kwargs.keys():
+            if not hasattr(Evaluation, key):
+                raise InvalidRequestError("Invalid filter key")
+        evaluation = self.__session.query(Evaluation).filter_by(**kwargs).first()
+        return evaluation
