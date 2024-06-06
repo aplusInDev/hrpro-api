@@ -3,7 +3,7 @@
 from flask import jsonify, request, abort, send_file
 from api.v1.views import app_views
 from models import storage
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from api.v1.helpers import handle_attendance_sync, handle_attendance
 import pandas as pd
 import io
@@ -115,3 +115,53 @@ def get_employees_attendance(company_id):
         output, download_name='book2.xlsx', as_attachment=True,
         mimetype='application/vnd.openxmlformats-officedocument.\
             spreadsheetml.sheet'), 200
+
+@app_views.route('/employees/<employee_id>/attendance', methods=['GET'])
+def get_employee_attendance(employee_id):
+    """ retrieve employee attendance
+    Args:
+        employee_id: the id of the employee
+        year: attendance year
+        month: attendance month
+    Returns:
+        list of attendances based on giving month and year
+    """
+    employee = storage.get("Employee", employee_id)
+    if not employee:
+        return jsonify({"error": "employee not found"}), 404
+    required_fileds = ["month", "year"]
+    for field in required_fileds:
+        if field not in request.args:
+            return jsonify({"error": f"{field} is required"}), 400
+    year = request.args.get("year")
+    month = request.args.get("month")
+    attendances = storage.get_attendances(employee_id, year, month)
+    attendances_result = []
+    for attendance in attendances:
+        attendance_data = {
+                    "date": attendance.date,
+                    "check_in": attendance.check_in,
+                    "check_out": attendance.check_out,
+                    "absent": attendance.absent,
+                }
+        attendances_result.append(attendance_data)
+    df = pd.DataFrame(attendances_result)
+    if len(attendances_result) != 0:
+        df['duration'] = df.apply(lambda row: str(
+                timedelta(seconds=(datetime.combine(date.min, row['check_out']) -
+                                datetime.combine(date.min, row['check_in'])).\
+                                    total_seconds()) if row['absent'] == 'No'
+                                    else '0:00:00'
+                                    ),
+                            axis=1)
+
+    # Create an in-memory buffer content as a send_file
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name="Sheet1", index=False)
+    output.seek(0)  # Important: move to the beginning of the BytesIO buffer!
+
+    return send_file(
+        output, download_name='book2.xlsx', as_attachment=True,
+        mimetype='application/vnd.openxmlformats-officedocument.\
+            spreadsheetml.sheet')

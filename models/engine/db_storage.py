@@ -187,3 +187,15 @@ class DBStorage:
                 raise InvalidRequestError("Invalid filter key")
         evaluation = self.__session.query(Evaluation).filter_by(**kwargs).first()
         return evaluation
+
+    def get_attendances(self, employee_id: str, year: int, month: int):
+        """ retrieve all attendances for an employee in a given month
+        and year
+        """
+        attendances = self.__session.query(Attendance)\
+            .filter(Attendance.employee_id == employee_id)\
+            .filter(Attendance.absent == "No")\
+            .filter(extract('year', Attendance.date) == year)\
+            .filter(extract('month', Attendance.date) == month)\
+            .all()
+        return attendances
