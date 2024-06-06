@@ -7,7 +7,7 @@ import pandas as pd
 import io
 
 
-@app_views.route('/employees/<employee_id>/absences', methods=['GET'])
+@app_views.route('/employees/<employee_id>/all_absences', methods=['GET'])
 def get_absences(employee_id):
     """Get absences for a given employee"""
     employee = storage.get("Employee", employee_id)
@@ -24,10 +24,12 @@ def get_absences_sheet(employee_id):
         abort(404)
     absences = []
     for absence in employee.absences:
+        absence_dict = absence.to_dict().copy()
         absence_data = {
-            "from": absence.start_date,
-            "to": absence.end_date,
-            "reason": absence.reason,
+            "from": absence_dict["start_date"],
+            "to": absence_dict["end_date"],
+            "reason": absence_dict["reason"],
+            "n_days": str(absence_dict["n_days"]),
         }
         absences.append(absence_data)
     df = pd.DataFrame(absences)
@@ -53,3 +55,31 @@ def update_absence(absence_id):
     absence.reason = reason
     absence.save()
     return jsonify(absence.to_dict())
+
+@app_views.route('/employees/<employee_id>/absences', methods=['GET'])
+def get_employee_absences(employee_id: str) -> list:
+    """Get absences for a given employee based on giving year
+    Args:
+        employee_id: the id of the employee
+        year: absences year
+    Returns:
+        list of absences based on giving year
+    """
+    employee = storage.get("Employee", employee_id)
+    if employee is None:
+        abort(404)
+    year = request.args.get('year')
+    if year is None:
+        return jsonify({"error": "year is missing"})
+    absences = storage.get_absences(employee_id, year)
+    absences_res = []
+    for absence in absences:
+        absence_dict = absence.to_dict().copy()
+        absence_data = {
+            "from": absence_dict["start_date"],
+            "to": absence_dict["end_date"],
+            "reason": absence_dict["reason"],
+            "n_days": absence_dict["n_days"],
+        }
+        absences_res.append(absence_data)
+    return jsonify(absences_res)

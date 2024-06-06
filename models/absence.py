@@ -27,4 +27,7 @@ class Absence(BaseModel, Base):
         new_dict = super().to_dict().copy()
         new_dict["employee"] = "http://localhost:5000/api/v1/employees/{}".\
             format(self.employee_id)
+        new_dict["start_date"] = self.start_date.strftime('%Y-%m-%d')
+        new_dict["end_date"] = self.end_date.strftime('%Y-%m-%d')
+        new_dict["n_days"] = (self.end_date - self.start_date).days + 1
         return new_dict

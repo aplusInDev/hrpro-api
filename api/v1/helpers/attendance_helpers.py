@@ -62,7 +62,7 @@ async def process_employee_attendance(row):
         return
 
     # check for redundancy
-    existing_record = storage._session.query(Attendance). \
+    existing_record = storage._session.query(Attendance).\
         filter_by(date=row['date'], employee_id=employee.id).first()
     if not existing_record:
         new_attendance = Attendance(

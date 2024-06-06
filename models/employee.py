@@ -58,6 +58,7 @@ class Employee(BaseModel, Base):
             self.hire_date = date.today()
 
     def to_dict(self):
+        n_absences = len(self.absences)
         position_info = eval(self.job.info)
         position_info = {"job_" + k: v for k, v in position_info.items()}
         department_info = eval(self.department.info)
@@ -75,7 +76,13 @@ class Employee(BaseModel, Base):
         new_dict["hire_date"] = self.hire_date.strftime("%Y-%m-%d")
         new_dict["position_info"] = position_info
         new_dict["department_info"] = department_info
-        new_dict["absences"] = len(self.absences)
         new_dict["uri"] = "http://localhost:5000/api/v1/employees/" + self.id
+        new_dict["absences"] = n_absences
+        new_dict["absences_total_days"] = self.calc_absences_days()
         return new_dict
+    
+    def calc_absences_days(self):
+        """ calculate the total number of days an employee was absent
+        """
+        return sum([absence.to_dict()["n_days"] for absence in self.absences])
 
