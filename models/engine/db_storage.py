@@ -199,3 +199,12 @@ class DBStorage:
             .filter(extract('month', Attendance.date) == month)\
             .all()
         return attendances
+
+    def get_absences(self, employee_id: str, year: int) -> list:
+        """ Retrieve all absences for an employee in a giving year
+        """
+        absences = self.__session.query(Absence)\
+            .filter(Absence.employee_id == employee_id)\
+            .filter(extract('year', Absence.start_date) == year)\
+            .all()
+        return absences
