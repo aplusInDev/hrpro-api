@@ -35,8 +35,8 @@ def post_employees_attendance_sync(company_id):
         handle_attendance_sync(df)
         return jsonify({"msg: ": "File uploaded successfully"}), 200
 
-@app_views.route('companies/<company_id>/attendance_async', methods=['POST'])
-async def post_employees_attendance_async(company_id):
+@app_views.route('companies/<company_id>/attendance', methods=['POST'])
+async def post_employees_attendance(company_id):
     """ post employees attendance """
     company = storage.get("Company", company_id)
     if company is None:
@@ -66,8 +66,8 @@ async def post_employees_attendance_async(company_id):
         await handle_attendance(df)
         return jsonify({"msg: ": "File uploaded successfully"}), 200
 
-@app_views.route('companies/<company_id>/attendance', methods=['POST'])
-def post_employees_attendance(company_id):
+@app_views.route('companies/<company_id>/attendance_async', methods=['POST'])
+def post_employees_attendance_async(company_id):
     """ post employees attendance """
     company = storage.get("Company", company_id)
     if company is None:
