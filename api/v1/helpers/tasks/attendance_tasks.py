@@ -42,25 +42,26 @@ async def process_employee_attendance(company_id, row):
     # check for redundancy
     existing_record = storage._session.query(Attendance).\
         filter_by(date=row['date'], employee_id=employee.id).first()
-    if not existing_record:
-        new_attendance = Attendance(
-            employee_id=employee.id, date=row['date'],
-            check_in=row['check_in'], check_out=row['check_out'],
-            absent=row['absent'],
-        )
-        if row['absent'] == 'Yes':
-            if len(employee.absences) == 0:
-                new_absence = Absence(
-                    employee_id=employee.id, start_date=row['date'],
-                    end_date=row['date']
-                )
-                new_absence.employee = employee
-                new_absence.save()
-            else:
-                # process_employee_absence(employee, row['date'])
-                asyncio.create_task(process_employee_absence(employee, row['date']))
-        new_attendance.employee = employee
-        new_attendance.save()
+    if existing_record:
+        return
+    new_attendance = Attendance(
+        employee_id=employee.id, date=row['date'],
+        check_in=row['check_in'], check_out=row['check_out'],
+        absent=row['absent'],
+    )
+    if row['absent'] == 'Yes':
+        if len(employee.absences) == 0:
+            new_absence = Absence(
+                employee_id=employee.id, start_date=row['date'],
+                end_date=row['date']
+            )
+            new_absence.employee = employee
+            new_absence.save()
+        else:
+            # process_employee_absence(employee, row['date'])
+            asyncio.create_task(process_employee_absence(employee, row['date']))
+    new_attendance.employee = employee
+    new_attendance.save()
 
 async def process_employee_absence(employee, absence_date):
     """ process employee absence  """
