@@ -5,9 +5,12 @@ from api.v1.views import app_views
 from models import storage
 from api.v1.utils.accounts_utils import validate_post_employee
 from api.v1.auth.auth import Auth, _generate_random_pass
+from api.v1.helpers.tasks.mail_tasks import send_welcome_mail_task
 
 
-@app_views.route('/companies/<company_id>/employees', methods=['GET'], strict_slashes=False)
+@app_views.route(
+        '/companies/<company_id>/employees', methods=['GET'],
+        strict_slashes=False)
 def get_employees(company_id):
     """ get employees """
     company = storage.get("Company", company_id)
@@ -15,7 +18,9 @@ def get_employees(company_id):
         abort(404)
     return jsonify([employee.to_dict() for employee in company.employees])
 
-@app_views.route('/companies/<company_id>/employees_names', methods=['GET'], strict_slashes=False)
+@app_views.route(
+        '/companies/<company_id>/employees_names', methods=['GET'],
+        strict_slashes=False)
 def get_employees_names(company_id):
     """ get employees names """
     company = storage.get("Company", company_id)
@@ -26,7 +31,9 @@ def get_employees_names(company_id):
         employees_names.append(employee.first_name + " " + employee.last_name)
     return jsonify(employees_names)
 
-@app_views.route('/employees/<employee_id>', methods=['GET'], strict_slashes=False)
+@app_views.route(
+        '/employees/<employee_id>', methods=['GET'],
+        strict_slashes=False)
 def get_employee(employee_id):
     """ get employee """
     employee = storage.get("Employee", employee_id)
@@ -43,12 +50,18 @@ def post_employee(account_info, position_info):
     account_info["password"] = _generate_random_pass()
     try:
         account = auth.add_employee_account(account_info, position_info)
-        auth.send_welcome_mail(account.first_name, account.email, account_info["password"])
+        if account:
+            send_welcome_mail_task.delay(account.first_name,
+                                   account.email, account_info["password"])
     except ValueError as err:
-        return jsonify({"error": str(err)}), 400
-    return jsonify({"email": account.email, "message": "employee added"}), 201
+        return jsonify({"valueError": str(err)}), 400
+    except Exception as err:
+        return jsonify({"error": str(err)}), 500
+    return jsonify({"email": account.email, "message": "employee added"}), 202
 
-@app_views.route('/employees/<employee_id>', methods=['PUT'], strict_slashes=False)
+@app_views.route(
+        '/employees/<employee_id>', methods=['PUT'],
+        strict_slashes=False)
 def put_employee(employee_id):
     """ put employee """
     employee = storage.get("Employee", employee_id)
@@ -63,7 +76,9 @@ def put_employee(employee_id):
     employee.save()
     return jsonify(employee.to_dict())
 
-@app_views.route('/employees/<employee_id>/info', methods=['PUT'], strict_slashes=False)
+@app_views.route(
+        '/employees/<employee_id>/info', methods=['PUT'],
+        strict_slashes=False)
 def put_employee_info(employee_id):
     """ put employee info """
     employee = storage.get("Employee", employee_id)
@@ -79,7 +94,8 @@ def put_employee_info(employee_id):
         employee.save()
         return jsonify(eval(employee.info))
 
-@app_views.route('/employees/<employee_id>', methods=['DELETE'], strict_slashes=False)
+@app_views.route(
+        '/employees/<employee_id>', methods=['DELETE'], strict_slashes=False)
 def delete_employee(employee_id):
     """ delete employee """
     employee = storage.get("Employee", employee_id)

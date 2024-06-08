@@ -4,6 +4,7 @@ broker_connection_retry_on_startup = True
 imports = (
   'api.v1.helpers.tasks.celery_tasks',
   'api.v1.helpers.tasks.attendance_tasks',
+  'api.v1.helpers.tasks.mail_tasks',
 )
 
 config = {
