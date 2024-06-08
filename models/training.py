@@ -84,13 +84,15 @@ class Training(BaseModel, Base):
             "http://localhost:5000/api/v1/employees/" + trainee.id
             for trainee in self.trainees
             }
-        new_dict["evaluations"] = {
-            "anonimous" if evaluation.anonimous
-            else evaluation.employee.first_name + " " +
-            evaluation.employee.last_name:
-            "http://localhost:5000/api/v1/evaluations/" + evaluation.id
-            for evaluation in self.evaluations
-        }
+        new_dict["evaluations"] = [
+            {"traineee": "Anonimous" if evaluation.anonimous 
+                else evaluation.employee.first_name + " " +\
+                evaluation.employee.last_name,
+             "score": evaluation.score,
+             "feedback": evaluation.feedback,
+             "uri": "http://localhost:5000/api/v1/evaluations/" + evaluation.id
+             } for evaluation in self.evaluations
+            ]
         new_dict["uri"] = "http://localhost:5000/api/v1/trainings/{}".\
             format(self.id)
         try:

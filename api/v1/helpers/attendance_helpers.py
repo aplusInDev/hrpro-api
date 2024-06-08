@@ -35,15 +35,15 @@ def handle_attendance_sync(df):
             new_attendance.employee = employee
             new_attendance.save()
 
-async def handle_attendance(df):
+async def handle_attendance(company_id, df):
     tasks = []
     for index, row in df.iterrows():
-        task = asyncio.create_task(process_employee_attendance(row))
+        task = asyncio.create_task(process_employee_attendance(company_id, row))
         tasks.append(task)
     await asyncio.gather(*tasks)
 
 
-async def process_employee_attendance(row):
+async def process_employee_attendance(company_id, row):
     full_name = row["name"]
     full_name = full_name.split()
     if len(full_name) >= 2:
@@ -53,7 +53,11 @@ async def process_employee_attendance(row):
         return
 
     try:
-        employee = storage.find_employee_by(first_name=first_name, last_name=last_name)
+        employee = storage.find_employee_by(
+            first_name=first_name,
+            last_name=last_name,
+            company_id=company_id,
+        )
     except NoResultFound as err:
         # print("request error (No result found)", err)
         return

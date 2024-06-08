@@ -68,7 +68,7 @@ class Auth:
             mail.send(msg)
         except Exception as err:
             return jsonify({"sending email error:": str(err)}), 400
-        
+
     def register_admin(self, admin_info: dict, company_info: dict):
         """ register admin """
         account = self._db.find_account_by(email=admin_info.get("email"))
