@@ -54,7 +54,7 @@ def post_field(form_id):
 @app_views.route('/fields/<field_id>', methods=['PUT'], strict_slashes=False)
 def put_field(field_id):
 	""" put field """
-	field = storage.get(Field, field_id)
+	field = storage.get("Field", field_id)
 	if field is None:
 		abort(404)
 	data = request.get_json()
