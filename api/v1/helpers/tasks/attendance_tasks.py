@@ -66,7 +66,15 @@ async def process_employee_absence(employee, absence_date):
     """ process employee absence  """
     employee_absences = [absence.to_dict() for absence in employee.absences]
     df = pd.DataFrame(employee_absences)
+    
+    # Convert 'start_date' and 'end_date' to Timestamps
+    # to solve the comparison between string and Timestamp objects issue
+    df['start_date'] = pd.to_datetime(df['start_date'])
+    df['end_date'] = pd.to_datetime(df['end_date'])
+    
+    # Ensure 'absence_date' is a Timestamp
     absence_date = pd.Timestamp(absence_date)
+    
     df.sort_values(by='start_date', inplace=True, ascending=False)
     for index, row in df.iterrows():
         if row['start_date'] <= absence_date <= row['end_date']:
@@ -74,7 +82,7 @@ async def process_employee_absence(employee, absence_date):
         if row['start_date'] < absence_date:
             latest_attendance = storage._session.query(Attendance).\
                 filter(Attendance.employee_id == employee.id,
-                          Attendance.date < absence_date).\
+                       Attendance.date < absence_date).\
                 order_by(Attendance.date.desc()).first()
             if latest_attendance and latest_attendance.absent == 'Yes':
                 try:
