@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, date
 from api.v1.helpers import (
     handle_attendance_sync,
     handle_attendance,
+    df_to_json,
 )
 from api.v1.helpers.tasks.attendance_tasks import (
     handle_attendance_async,  
@@ -31,9 +32,14 @@ def post_employees_attendance_sync(company_id):
             for col in df.columns:
                 df[col] = df[col].astype(str)
             # convert each row from str to datetime
-            df['check_in'] = df['check_in'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "00:00:00")
-            df['check_out'] = df['check_out'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "00:00:00")
-            df['absent'] = df['absent'].apply(lambda x: 'No' if x == "False" else 'Yes')
+            df['check_in'] = df['check_in']\
+                .apply(lambda x: datetime.strptime(x, '%H:%M:%S').time()
+                       if x != "nan" else "00:00:00")
+            df['check_out'] = df['check_out']\
+                .apply(lambda x: datetime.strptime(x, '%H:%M:%S').time()
+                       if x != "nan" else "00:00:00")
+            df['absent'] = df['absent']\
+                .apply(lambda x: 'No' if x == "False" else 'Yes')
         except Exception as e:
             return jsonify({"post employee attendance error": str(e)}), 400
         handle_attendance_sync(df)
@@ -58,9 +64,14 @@ async def post_employees_attendance(company_id):
             for col in df.columns:
                 df[col] = df[col].astype(str)
             # convert each row from str to datetime
-            df['check_in'] = df['check_in'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "00:00:00")
-            df['check_out'] = df['check_out'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "00:00:00")
-            df['absent'] = df['absent'].apply(lambda x: 'No' if x == "False" else 'Yes')
+            df['check_in'] = df['check_in']\
+                .apply(lambda x: datetime.strptime(x, '%H:%M:%S').time()
+                    if x != "nan" else "00:00:00")
+            df['check_out'] = df['check_out']\
+                .apply(lambda x: datetime.strptime(x, '%H:%M:%S').time()
+                    if x != "nan" else "00:00:00")
+            df['absent'] = df['absent']\
+                .apply(lambda x: 'No' if x == "False" else 'Yes')
         except Exception as e:
             return jsonify({"error": "file structure should be like " +
                             "column_B => date(date), column_B => name(string)" +
@@ -72,32 +83,63 @@ async def post_employees_attendance(company_id):
 
 @app_views.route('companies/<company_id>/attendance_async', methods=['POST'])
 def post_employees_attendance_async(company_id):
-    """ post employees attendance """
+    """
+    Endpoint: /companies/<company_id>/attendance_async
+    Method: POST
+    Description: Processes an uploaded file containing employee attendance
+    data asynchronously.
+    
+    Parameters:
+        company_id (str): The unique identifier for the company.
+        
+    Request:
+        file (file): A file part in the request containing the attendance
+        data in Excel format.
+        
+    Responses:
+        202 Accepted: The file has been successfully uploaded and is being
+        processed.
+        400 Bad Request: The request does not contain a file part or the file
+        structure is invalid.
+        404 Not Found: The company with the specified company_id does not
+        exist.
+        
+    Functionality:
+        1. Retrieves the company instance using the provided company_id.
+        2. Validates the presence of the 'file' part in the request files.
+        3. Reads the uploaded Excel file into a pandas DataFrame, skipping
+        the first row and using columns B to F.
+        4. Converts the columns to string type and processes the 'check_in',
+        'check_out', and 'absent' columns to the correct format.
+        5. Serializes the DataFrame to a JSON string with 'split' orientation
+        and ISO date format.
+        6. Calls the Celery task 'handle_attendance_async' with the
+        company_id and serialized DataFrame.
+        7. Returns a JSON response indicating the start of file processing.
+        
+    Exceptions:
+        - If the company is not found, aborts with a 404 error.
+        - If the 'file' part is missing or the file structure is invalid,
+        returns a 400 error with a descriptive message.
+        
+    Usage:
+        This endpoint is used to upload employee attendance data for a
+        specific company. The data is processed asynchronously, allowing
+        for non-blocking operation. The client receives immediate
+        confirmation of the upload and processing status.
+    """
     company = storage.get("Company", company_id)
     if company is None:
         abort(404)
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
     file = request.files['file']
-    if file:
-        try:
-            df = pd.read_excel(file, skiprows=1, usecols="B:F", names=[
-                "date", "name", "check_in", "check_out", "absent"])
-
-            for col in df.columns:
-                df[col] = df[col].astype(str)
-            # convert each row from str to datetime
-            df['check_in'] = df['check_in'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "00:00:00")
-            df['check_out'] = df['check_out'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "00:00:00")
-            df['absent'] = df['absent'].apply(lambda x: 'No' if x == "False" else 'Yes')
-
-            # Serialize DataFrame to JSON
-            df_json = df.to_json(orient='split', date_format='iso')
-            # Call the Celery task
-            handle_attendance_async.delay(company_id, df_json)
-            return jsonify({"message": "File uploaded and processing started"}), 202
-        except Exception as e:
-            return jsonify({"error": "Invalid file structure"}), 400
+    if  not file:
+        return jsonify({"error": "No file part"}), 400
+    df_json = df_to_json(file)
+    # Call the celery task
+    handle_attendance_async.delay(company_id, df_json)
+    return jsonify({"message": "File uploaded and processing started"}), 202
 
 @app_views.route('companies/<company_id>/attendance', methods=['GET'])
 def get_employees_attendance(company_id):

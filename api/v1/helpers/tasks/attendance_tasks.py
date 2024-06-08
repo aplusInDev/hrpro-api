@@ -1,7 +1,6 @@
 from api.celery_app import app
 from sqlalchemy.orm.exc import NoResultFound
 from models import storage, Attendance, Absence
-from datetime import datetime
 import pandas as pd
 import asyncio
 
@@ -16,6 +15,7 @@ def handle_attendance_async(company_id, df_json):
             *(process_employee_attendance(company_id, row) for index, row in df.iterrows())
         )
     )
+    return "Task done successfully"
 
 async def process_employee_attendance(company_id, row):
     full_name = row["name"]
@@ -33,7 +33,7 @@ async def process_employee_attendance(company_id, row):
             company_id=company_id,
         )
     except NoResultFound as err:
-        # print("request error (No result found)", err)
+        print("request error (No result found)", err)
         return
 
     if not employee:
