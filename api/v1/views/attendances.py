@@ -4,7 +4,13 @@ from flask import jsonify, request, abort, send_file
 from api.v1.views import app_views
 from models import storage
 from datetime import datetime, timedelta, date
-from api.v1.helpers import handle_attendance_sync, handle_attendance
+from api.v1.helpers import (
+    handle_attendance_sync,
+    handle_attendance,
+)
+from api.v1.helpers.tasks.attendance_tasks import (
+    handle_attendance_async,  
+)
 import pandas as pd
 import io
 
@@ -27,8 +33,6 @@ def post_employees_attendance_sync(company_id):
             # convert each row from str to datetime
             df['check_in'] = df['check_in'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "00:00:00")
             df['check_out'] = df['check_out'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "00:00:00")
-            # for col in df.columns:
-            #     df[col] = df[col].astype(str)
             df['absent'] = df['absent'].apply(lambda x: 'No' if x == "False" else 'Yes')
         except Exception as e:
             return jsonify({"post employee attendance error": str(e)}), 400
@@ -63,7 +67,7 @@ async def post_employees_attendance(company_id):
                             ", column_C => check_in(time), column_D => " +
                             "check_out(time) , column_E => " +
                             "absent(TRUE | FALSE)"}), 400
-        await handle_attendance(df)
+        await handle_attendance(company_id, df)
         return jsonify({"msg: ": "File uploaded successfully"}), 200
 
 @app_views.route('companies/<company_id>/attendance_async', methods=['POST'])
@@ -73,9 +77,7 @@ def post_employees_attendance_async(company_id):
     if company is None:
         abort(404)
     if 'file' not in request.files:
-        return 'No file part', 400
-    if 'file' not in request.files:
-        return jsonify({"error: ": "No file part"}), 400
+        return jsonify({"error": "No file part"}), 400
     file = request.files['file']
     if file:
         try:
@@ -88,14 +90,14 @@ def post_employees_attendance_async(company_id):
             df['check_in'] = df['check_in'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "00:00:00")
             df['check_out'] = df['check_out'].apply(lambda x: datetime.strptime(x, '%H:%M:%S').time() if x != "nan" else "00:00:00")
             df['absent'] = df['absent'].apply(lambda x: 'No' if x == "False" else 'Yes')
+
+            # Serialize DataFrame to JSON
+            df_json = df.to_json(orient='split', date_format='iso')
+            # Call the Celery task
+            handle_attendance_async.delay(company_id, df_json)
+            return jsonify({"message": "File uploaded and processing started"}), 202
         except Exception as e:
-            return jsonify({"error": "file structure should be like " +
-                            "column_B => date(date), column_B => name(string)" +
-                            ", column_C => check_in(time), column_D => " +
-                            "check_out(time) , column_E => " +
-                            "absent(TRUE | FALSE)"}), 400
-        # process_attendance_data(company_id, df)
-        return jsonify({"msg: ": "File uploaded successfully"}), 200
+            return jsonify({"error": "Invalid file structure"}), 400
 
 @app_views.route('companies/<company_id>/attendance', methods=['GET'])
 def get_employees_attendance(company_id):

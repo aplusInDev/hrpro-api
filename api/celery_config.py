@@ -3,6 +3,7 @@ result_backend = 'db+sqlite:///results.db'
 broker_connection_retry_on_startup = True
 imports = (
   'api.v1.helpers.tasks.celery_tasks',
+  'api.v1.helpers.tasks.attendance_tasks',
 )
 
 config = {
