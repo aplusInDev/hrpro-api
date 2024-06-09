@@ -20,10 +20,13 @@ def get_absences(employee_id):
 def get_absences_sheet(employee_id):
     """ Returns employee absences in excel sheet """
     employee = storage.get("Employee", employee_id)
-    if employee is None:
+    year = request.args.get('year')
+    if employee is None or not year:
         abort(404)
     absences = []
     for absence in employee.absences:
+        if absence.start_date.year != int(year):
+            continue
         absence_dict = absence.to_dict().copy()
         absence_data = {
             "from": absence_dict["start_date"],
