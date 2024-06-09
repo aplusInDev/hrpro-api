@@ -57,7 +57,7 @@ def post_employee(account_info, position_info):
         return jsonify({"valueError": str(err)}), 400
     except Exception as err:
         return jsonify({"error": str(err)}), 500
-    return jsonify({"email": account.email, "message": "employee added"}), 202
+    return jsonify(account.employee.to_dict()), 202
 
 @app_views.route(
         '/employees/<employee_id>', methods=['PUT'],
