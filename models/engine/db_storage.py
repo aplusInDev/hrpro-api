@@ -34,10 +34,17 @@ class DBStorage:
     def __init__(self):
         """This method initializes a new instance of the DBStorage class"""
         env = getenv('HRPRO_ENV')
-        mysql_user = getenv('HRPR_MYSQL_USER')
-        mysql_pwd = getenv('HRPRO_MYSQL_PWD')
-        mysql_host = getenv('HRPRO_MYSQL_HOST')
-        mysql_db = getenv('HRPRO_MYSQL_DB')
+        if env == 'test':
+            print("Running in test mode")
+            mysql_user = getenv('HRPRO_TEST_MYSQL_USER')
+            mysql_pwd = getenv('HRPRO_TEST_MYSQL_PWD')
+            mysql_host = getenv('HRPRO_TEST_MYSQL_HOST')
+            mysql_db = getenv('HRPRO_TEST_MYSQL_DB')
+        else:
+            mysql_user = getenv('HRPRO_MYSQL_USER')
+            mysql_pwd = getenv('HRPRO_MYSQL_PWD')
+            mysql_host = getenv('HRPRO_MYSQL_HOST')
+            mysql_db = getenv('HRPRO_MYSQL_DB')
 
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.
                                       format(mysql_user, mysql_pwd,
