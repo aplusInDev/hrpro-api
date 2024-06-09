@@ -36,9 +36,15 @@ def get_employee_leaves(employee_id):
         year: the year of the leaves
     """
     employee = storage.get("Employee", employee_id)
+    year = request.args.get("year")
     if not employee:
         return jsonify({"error": "employee not found"}), 404
-    return jsonify([leave.to_dict() for leave in employee.leaves])
+    if not year:
+        return jsonify({"error": "year is required"}), 400
+    return jsonify([
+        leave.to_dict() for leave in employee.leaves
+        if leave.start_date.year == int(year)
+        ])
 
 @app_views.route('/employees/<employee_id>/leaves', methods=['POST'], strict_slashes=False)
 @requires_auth()
