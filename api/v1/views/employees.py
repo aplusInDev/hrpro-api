@@ -72,7 +72,27 @@ def put_employee(employee_id):
         return 'Not a JSON', 400
     for key, value in data.items():
         if key not in ['id', 'created_at', 'updated_at']:
-            setattr(employee, key, value)
+            if key == 'department' or key == 'department_name':
+                department = storage.find_department_by(
+                    company_id=employee.company_id,
+                    name=value,
+                )
+                if department is None:
+                    # return jsonify({"error": "Department not found"}), 404
+                    continue
+                employee.department = department
+            elif key == 'job' or key == 'job_title':
+                job = storage.find_job_by(
+                    company_id=employee.company_id,
+                    title=value,
+                )
+                if job is None:
+                    # return jsonify({"error": "Job not found"}), 404
+                    continue
+                else:
+                    employee.job = job
+            else:
+                setattr(employee, key, value)
     employee.save()
     return jsonify(employee.to_dict())
 
