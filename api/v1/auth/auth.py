@@ -71,10 +71,14 @@ class Auth:
 
     def register_admin(self, admin_info: dict, company_info: dict):
         """ register admin """
-        account = self._db.find_account_by(email=admin_info.get("email"))
-        if account:
+        try:
+            account = self._db.find_account_by(email=admin_info.get("email"))
             raise ValueError("Account <{}> already exists".format(
                 admin_info.get("email")))
+        except NoResultFound:
+            pass
+        except Exception as err:
+            raise err
         if storage.get_company_by_name(company_info.get("name")):
             raise ValueError("Giving company name already exists")
         hashed_password = _hash_password(admin_info.get("password"))
