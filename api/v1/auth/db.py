@@ -15,7 +15,7 @@ from models import (
 
 
 env = getenv('HRPRO_ENV')
-mysql_user = getenv('HRPR_MYSQL_USER')
+mysql_user = getenv('HRPRO_MYSQL_USER')
 mysql_pwd = getenv('HRPRO_MYSQL_PWD')
 mysql_host = getenv('HRPRO_MYSQL_HOST')
 mysql_db = getenv('HRPRO_ACCOUNTS_DB_NAME')
@@ -34,8 +34,14 @@ class DB:
                                      echo=False)
         if env == 'test':
             Base.metadata.drop_all(self._engine)
+            self.recreate_tables(self._engine)
         Base.metadata.create_all(self._engine)
         self.__session = None
+
+    def recreate_tables(self, engine):
+        """This method creates all tables in the database"""
+        Base.metadata.create_all(engine)
+
 
     @property
     def _session(self):
