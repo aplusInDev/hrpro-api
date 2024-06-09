@@ -85,7 +85,7 @@ class Training(BaseModel, Base):
             for trainee in self.trainees
             }
         new_dict["evaluations"] = [
-            {"traineee": "Anonimous" if evaluation.anonimous 
+            {"trainee": "Anonimous" if evaluation.anonimous 
                 else evaluation.employee.first_name + " " +\
                 evaluation.employee.last_name,
              "score": evaluation.score,
