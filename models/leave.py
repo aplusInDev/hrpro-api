@@ -37,12 +37,12 @@ class Leave(BaseModel, Base):
         end_date = self.end_date
         if type(start_date) == str:
             # Convert strings to datetime objects
-            start_date = datetime.strptime(self.end_date, date_format)
+            start_date = datetime.strptime(self.start_date, date_format)
         else:
             new_dict['start_date'] = self.start_date.strftime('%Y-%m-%d')
         if type(end_date) == str:
             # Convert strings to datetime objects
-            end_date = datetime.strptime(self.start_date, date_format)
+            end_date = datetime.strptime(self.end_date, date_format)
         else:
             new_dict['end_date'] = self.end_date.strftime('%Y-%m-%d')
         delta = end_date - start_date
