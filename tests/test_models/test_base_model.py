@@ -58,6 +58,8 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(base_dict['created_at'], self.created_at.isoformat())
         self.assertEqual(base_dict['updated_at'], self.updated_at.isoformat())
 
+# python3 -m unittest discover -s tests
+# use the above command or ./test_models/test_base_model.py
 if __name__=="__main__":
     unittest.main()
 
