@@ -62,12 +62,20 @@ class Employee(BaseModel, Base):
         absences_days = self.calc_absences_days()
         justified_absences = self.calc_justefied_absences()
         justified_days = self.calc_justefied_absences_days()
-        position_info = eval(self.job.info)
-        position_info = {"job_" + k: v for k, v in position_info.items()}
-        department_info = eval(self.department.info)
-        department_info = {
-            "department_" + k: v for k, v in department_info.items()
-            }
+        try:
+            position_info = eval(self.job.info)
+            position_info = {"job_" + k: v for k, v in position_info.items()}
+            new_dict["position_info"] = position_info
+        except Exception:
+            pass
+        try:
+            department_info = eval(self.department.info)
+            department_info = {
+                "department_" + k: v for k, v in department_info.items()
+                }
+            new_dict["department_info"] = department_info
+        except Exception:
+            pass
         new_dict = super().to_dict().copy()
         new_dict["department"] = "http://localhost:5000/api/v1/departments/{}".\
             format(self.department_id)
@@ -75,10 +83,11 @@ class Employee(BaseModel, Base):
             format(self.job_id)
         new_dict["company"] = "http://localhost:5000/api/v1/companies/{}".\
             format(self.company_id)
-        new_dict["info"] = eval(self.info)
+        try:
+            new_dict["info"] = eval(self.info)
+        except Exception:
+            pass
         new_dict["hire_date"] = self.hire_date.strftime("%Y-%m-%d")
-        new_dict["position_info"] = position_info
-        new_dict["department_info"] = department_info
         new_dict["uri"] = "http://localhost:5000/api/v1/employees/" + self.id
         new_dict["absences"] = n_absences
         new_dict["absences_total_days"] = absences_days
