@@ -3,6 +3,7 @@
 from models import BaseModel, Base
 from sqlalchemy import Column, String, ForeignKey, Text, Enum, Date
 from sqlalchemy.orm import relationship
+from datetime import datetime
 
 
 leave_status = Enum("pending", "approved", "rejected", name="leave_status")
@@ -31,11 +32,19 @@ class Leave(BaseModel, Base):
         new_dict = super().to_dict().copy()
         new_dict["employee"] = "{} {}".format(self.employee.first_name,
                                               self.employee.last_name)
-        try:
-            delta = self.end_date - self.start_date
+        date_format = "%Y-%m-%d"  # You can adjust this format based on your actual date format
+        start_date = self.start_date
+        end_date = self.end_date
+        if type(start_date) == str:
+            # Convert strings to datetime objects
+            start_date = datetime.strptime(self.end_date, date_format)
+        else:
             new_dict['start_date'] = self.start_date.strftime('%Y-%m-%d')
+        if type(end_date) == str:
+            # Convert strings to datetime objects
+            end_date = datetime.strptime(self.start_date, date_format)
+        else:
             new_dict['end_date'] = self.end_date.strftime('%Y-%m-%d')
-            new_dict["duration"] = str(delta.days + 1) + " days"
-        except Exception:
-            pass
+        delta = end_date - start_date
+        new_dict["duration"] = str(delta.days + 1) + " days"
         return new_dict
