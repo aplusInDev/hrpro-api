@@ -25,7 +25,7 @@ class TestAttendanceView(unittest.TestCase):
         """ SetUp for test """
         print('\n\n')
         print('.' * 50)
-        print('... Test Absence class start ...')
+        print('... Test Attendance class start ...')
         print('.' * 50)
 
     @classmethod
@@ -33,14 +33,11 @@ class TestAttendanceView(unittest.TestCase):
         """ Test done """
         print('\n\n')
         print('.' * 50)
-        print('... Test Absence class end ...')
+        print('... Test Attendance class end ...')
         print('.' * 50)
 
     def setUp(self):
         """ set up for test """
-        print('\n\n.................................')
-        print('..... Test Attendance View .....')
-        print('.................................')
         self.app = app
         self.app.config['TESTING'] = True
         self.client = self.app.test_client()
@@ -77,9 +74,6 @@ class TestAttendanceView(unittest.TestCase):
             storage.delete(self.emp)
         except Exception:
             pass
-        print(".................................")
-        print("..... End Test Attendance View .....")
-        print(".................................")
 
 
     def test_attendance_instance(self):

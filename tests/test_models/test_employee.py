@@ -13,7 +13,7 @@ class TestEmployee(unittest.TestCase):
         """ SetUp for test """
         print('\n\n')
         print('.' * 50)
-        print('... Test Absence class start ...')
+        print('... Test Employee class start ...')
         print('.' * 50)
 
     @classmethod
@@ -21,13 +21,11 @@ class TestEmployee(unittest.TestCase):
         """ Test done """
         print('\n\n')
         print('.' * 50)
-        print('... Test Absence class end ...')
+        print('... Test Employee class end ...')
         print('.' * 50)
 
     def setUp(self):
         """ set up for test """
-        print('\n\n.................................')
-        print('..... Test Employee Class .....')
         self.first_name = "John"
         self.last_name = "Doe"
         self.emp = Employee(first_name=self.first_name, last_name=self.last_name)
@@ -39,9 +37,6 @@ class TestEmployee(unittest.TestCase):
     def tearDown(self):
         """ remove test instances """
         del self.emp
-        print(".................................\n\n")
-        print("..... End Test Employee Class .....\n\n")
-        print(".................................\n\n")
 
     def test_instance(self):
         """ Test if instance of Employee """
@@ -106,15 +101,15 @@ class TestEmployee(unittest.TestCase):
 
     def test_get_nont_None_return(self):
         """ Test storage get method """
-        print("... Test storage get method for employee instance,\
-              the result should not be None...")
+        print("... Test storage get method for employee instance, " +
+            "the result should not be None...")
         emp = storage.get("Employee", self.id)
         self.assertIsNotNone(emp)
 
     def test_get_correct_instantiation_return(self):
         """ Test storage get method """
-        print("... Test storage get method for an employee instance,\
-              the result should equals to the employee instance ...")
+        print("... Test storage get method for an employee instance, " +
+            "the result should equals to the employee instance ...")
         emp = storage.get("Employee", self.id)
         self.assertIsInstance(emp, Employee)
     

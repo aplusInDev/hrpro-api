@@ -7,10 +7,25 @@ from datetime import datetime
 
 class TestBaseModel(unittest.TestCase):
     """ Test BaseModel class """
+
+    @classmethod
+    def setUpClass(cls):
+        """ SetUp for test """
+        print('\n\n')
+        print('.' * 50)
+        print('... Test BaseModel class start ...')
+        print('.' * 50)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """ Test done """
+        print('\n\n')
+        print('.' * 50)
+        print('... Test BaseModel class end ...')
+        print('.' * 50)
+
     def setUp(self):
         """ set up for test """
-        print('\n\n.................................')
-        print('..... Test BaseModel Class .....')
         self.base = BaseModel()
         self.id = self.base.id
         self.created_at = self.base.created_at
@@ -19,9 +34,6 @@ class TestBaseModel(unittest.TestCase):
     def tearDown(self):
         """ remove test instances """
         del self.base
-        print(".................................\n\n")
-        print("..... End Test BaseModel Class .....\n\n")
-        print(".................................\n\n")
 
     def test_instance(self):
         """ Test if instance of BaseModel """

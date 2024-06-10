@@ -31,9 +31,6 @@ class TestEmployeeView(unittest.TestCase):
 
     def setUp(self):
         """ set up for test """
-        print('\n\n.................................')
-        print('..... Test Employee View .....')
-        print('.................................\n\n')
         app.config['TESTING'] = True
         self.client = app.test_client()
         self.name = str(uuid4())
@@ -52,9 +49,6 @@ class TestEmployeeView(unittest.TestCase):
             storage.delete(self.emp)
         except Exception:
             pass
-        print(".................................\n\n")
-        print("..... End Test Employee View .....\n\n")
-        print(".................................\n\n")
 
     def test_company_id(self):
         """ Test compnay id existance """

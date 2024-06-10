@@ -31,9 +31,6 @@ class TestAbsence(unittest.TestCase):
 
     def setUp(self):
         """ set up for test """
-        print('.' * 50)
-        print('..... Test Abcence Class .....')
-        print('.' * 50)
         self.id = uuid4()
         self.first_name = "John"
         self.last_name = "Doe"
@@ -59,9 +56,6 @@ class TestAbsence(unittest.TestCase):
     def tearDown(self):
         """ remove test instances """
         del self.emp
-        print(".................................")
-        print("..... End Test Absence Class .....")
-        print(".................................")
 
     def test_not_None_amployee(self):
         """ Test if employee instance is not None """
@@ -75,15 +69,15 @@ class TestAbsence(unittest.TestCase):
 
     def test_get_nont_None_abs_return(self):
         """ Test storage get method """
-        print("... Test storage get method for absence instance,\
-              the result should not be None...")
+        print("... Test storage get method for absence instance, " +
+              "the result should not be None...")
         abs = storage.get("Absence", self.abs.id)
         self.assertIsNotNone(abs)
 
     def test_get_correct_instantiation_return(self):
         """ Test storage get method """
-        print("... Test storage get method for an absence instance,\
-              the result should equals to the absence instance ...")
+        print("... Test storage get method for an absence instance, " +
+              "the result should equals to the absence instance ...")
         abs = storage.get("Absence", self.abs.id)
         self.assertIsInstance(abs, Absence)
     
