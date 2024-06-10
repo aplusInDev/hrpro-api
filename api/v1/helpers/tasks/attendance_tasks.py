@@ -6,7 +6,21 @@ import asyncio
 
 
 @celery_app.task
-def handle_attendance_async(company_id, df_json):
+def handle_attendance_async(company_id: str, df_json) -> str:
+    """
+    A Celery task that processes employee attendance records asynchronously.
+
+    This function is designed to be queued as a background job and handles the processing of attendance data for all employees
+    in a company. It takes a JSON string representing a DataFrame of attendance records, converts it back into a DataFrame,
+    and then asynchronously processes each row using the `process_employee_attendance` function.
+
+    Parameters:
+    - company_id (str): The unique identifier for the company.
+    - df_json (str): A JSON string representing the DataFrame of attendance records.
+
+    Returns:
+    - str: A message indicating the completion status of the task.
+    """
     # Convert JSON string back to DataFrame
     df = pd.read_json(df_json, orient='split')
     loop = asyncio.get_event_loop()
@@ -17,7 +31,23 @@ def handle_attendance_async(company_id, df_json):
     )
     return "Task done successfully"
 
-async def process_employee_attendance(company_id, row):
+async def process_employee_attendance(company_id: str, row) -> None:
+    """
+    Asynchronously processes an employee's attendance record for a given day.
+
+    This function takes a company ID and a row of attendance data, then attempts to find an employee
+    matching the name provided in the row within the specified company. If the employee is found,
+    the function checks for an existing attendance record for that date. If no record exists, it creates
+    a new attendance record with the provided data. If the employee was absent, it either creates a new
+    absence record or updates the existing one using the `process_employee_absence` function.
+
+    Parameters:
+    - company_id (str): The unique identifier for the company.
+    - row (dict): A dictionary containing attendance data with keys for 'name', 'date', 'check_in', 'check_out', and 'absent'.
+
+    Returns:
+    - None
+    """
     full_name = row["name"]
     full_name = full_name.split()
     if len(full_name) >= 2:
@@ -63,8 +93,23 @@ async def process_employee_attendance(company_id, row):
     new_attendance.employee = employee
     new_attendance.save()
 
-async def process_employee_absence(employee, absence_date):
-    """ process employee absence  """
+async def process_employee_absence(employee, absence_date: str) -> None:
+    """
+    Asynchronously processes an employee's absence for a given date.
+
+    This function checks if the provided absence date falls within any existing absence periods for the employee.
+    If it does, the function exits without making any changes. If the absence date is after the latest absence period,
+    it checks the employee's latest attendance record. If the employee was marked absent on their last recorded attendance,
+    the function updates the end date of the current absence period to the provided absence date. If there are no overlapping
+    absences and the employee was not absent on their last attendance day, a new absence record is created for the absence date.
+
+    Parameters:
+    - employee (Employee): The employee object containing absence information.
+    - absence_date (str): The date of absence to process, in 'YYYY-MM-DD' format.
+
+    Returns:
+    - None
+    """
     employee_absences = [absence.to_dict() for absence in employee.absences]
     df = pd.DataFrame(employee_absences)
     
