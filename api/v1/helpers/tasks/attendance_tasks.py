@@ -1,11 +1,11 @@
-from api.celery_app import app
+from api.celery_app import celery_app
 from sqlalchemy.orm.exc import NoResultFound
 from models import storage, Attendance, Absence
 import pandas as pd
 import asyncio
 
 
-@app.task
+@celery_app.task
 def handle_attendance_async(company_id, df_json):
     # Convert JSON string back to DataFrame
     df = pd.read_json(df_json, orient='split')

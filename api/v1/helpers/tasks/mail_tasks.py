@@ -1,14 +1,14 @@
 from flask_mail import Message
 from os import getenv
-from api.celery_app import app
+from api.celery_app import celery_app
 from flask import render_template
 
 
-@app.task
+@celery_app.task
 def send_welcome_mail_task(name, email, password):
     """Celery task to send welcome email."""
-    from api.v1.app import create_app, mail
-    app = create_app()  # Create an instance of our Flask app
+    from api.v1.app import app, mail
+    # app = create_app()  # Create an instance of our Flask app
     with app.app_context():  # Push the application context
         # we use app_context to have access to the application context
         # because we are outside the application context

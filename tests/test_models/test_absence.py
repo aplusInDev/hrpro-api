@@ -13,10 +13,27 @@ tm_format = "%Y-%m-%dT%H:%M:%S.%f"
 class TestAbsence(unittest.TestCase):
     """ Test Absence class """
 
+    @classmethod
+    def setUpClass(cls):
+        """ SetUp for test """
+        print('\n\n')
+        print('.' * 50)
+        print('... Test Absence class start ...')
+        print('.' * 50)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """ Test done """
+        print('\n\n')
+        print('.' * 50)
+        print('... Test Absence class end ...')
+        print('.' * 50)
+
     def setUp(self):
         """ set up for test """
-        print('\n\n.................................')
+        print('.' * 50)
         print('..... Test Abcence Class .....')
+        print('.' * 50)
         self.id = uuid4()
         self.first_name = "John"
         self.last_name = "Doe"
@@ -42,9 +59,9 @@ class TestAbsence(unittest.TestCase):
     def tearDown(self):
         """ remove test instances """
         del self.emp
-        print(".................................\n\n")
-        print("..... End Test Absence Class .....\n\n")
-        print(".................................\n\n")
+        print(".................................")
+        print("..... End Test Absence Class .....")
+        print(".................................")
 
     def test_not_None_amployee(self):
         """ Test if employee instance is not None """
