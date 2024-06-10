@@ -7,6 +7,23 @@ from datetime import datetime
 
 class TestEmployee(unittest.TestCase):
     """ Test Employee class """
+
+    @classmethod
+    def setUpClass(cls):
+        """ SetUp for test """
+        print('\n\n')
+        print('.' * 50)
+        print('... Test Absence class start ...')
+        print('.' * 50)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """ Test done """
+        print('\n\n')
+        print('.' * 50)
+        print('... Test Absence class end ...')
+        print('.' * 50)
+
     def setUp(self):
         """ set up for test """
         print('\n\n.................................')

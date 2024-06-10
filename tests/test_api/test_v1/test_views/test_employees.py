@@ -12,6 +12,23 @@ from uuid import uuid4
 
 class TestEmployeeView(unittest.TestCase):
     """ Test Employee view """
+
+    @classmethod
+    def setUpClass(cls):
+        """ SetUp for test """
+        print('\n\n')
+        print('.' * 50)
+        print('... Test employees view start ...')
+        print('.' * 50)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """ Test done """
+        print('\n\n')
+        print('.' * 50)
+        print('... Test employees view end ...')
+        print('.' * 50)
+
     def setUp(self):
         """ set up for test """
         print('\n\n.................................')
@@ -108,7 +125,7 @@ class TestEmployeeView(unittest.TestCase):
             data={
                 "first_name": "janedoe",
                 "last_name": "janedoe1",
-                "email": "hrpro.team2024@gmail.com",
+                "email": "hr.team2024@gmail.com",
                 "department": self.dep.name,
                 "job_title": self.job.title,
         })
