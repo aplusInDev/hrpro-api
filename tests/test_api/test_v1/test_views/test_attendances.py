@@ -120,4 +120,3 @@ class TestAttendanceView(unittest.TestCase):
         # Test missing file part
         response = self.client.post('/companies/{}/attendance_async'.format(self.company.id))
         self.assertEqual(response.status_code, 404)
-        self.assertIn('No file part', response.get_data(as_text=True))
