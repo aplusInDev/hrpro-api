@@ -16,6 +16,37 @@ def get_absences(employee_id):
     absences = [absence.to_dict() for absence in employee.absences]
     return jsonify(absences)
 
+@app_views.route(
+        '/companies/<company_id>/employees_absences', methods=['GET'],
+        strict_slashes=False)
+def get_employees_absences(company_id):
+    """ get employees """
+    company = storage.get("Company", company_id)
+    if company is None:
+        abort(404)
+    year = request.args.get('year')
+    if year is None:
+        return jsonify({"error": "year is missing"}), 400
+    employees_absences = []
+    for employee in company.employees:
+        employee_absences = storage.get_absences(employee.id, year)
+        n_absences = len(employee_absences)
+        absences_days = employee.calc_absences_days(year)
+        justified_absences = employee.calc_justefied_absences(year)
+        justified_days = employee.calc_justefied_absences_days(year)
+        employees_absences.append({
+            **employee.to_dict(),
+            "absences_info": {
+                "absences": n_absences,
+                "absences_total_days": absences_days,
+                "justified_absences": justified_absences,
+                "justified_absences_days": justified_days,
+                "unjustified_absences": n_absences - justified_absences,
+                "unjustified_absences_days": absences_days - justified_days
+            }
+        })
+    return jsonify(employees_absences)
+
 @app_views.route('/employees/<employee_id>/absences_sheet', methods=['GET'])
 def get_absences_sheet(employee_id):
     """ Returns employee absences in excel sheet """
@@ -24,9 +55,8 @@ def get_absences_sheet(employee_id):
     if employee is None or not year:
         abort(404)
     absences = []
-    for absence in employee.absences:
-        if absence.start_date.year != int(year):
-            continue
+    employee_absences = storage.get_absences(employee_id, year)
+    for absence in employee_absences:
         absence_dict = absence.to_dict().copy()
         absence_data = {
             "from": absence_dict["start_date"],
