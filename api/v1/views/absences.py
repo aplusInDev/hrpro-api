@@ -46,19 +46,6 @@ def get_absences_sheet(employee_id):
         mimetype='application/vnd.openxmlformats-officedocument.\
             spreadsheetml.sheet'), 200
 
-@app_views.route('/absences/<absence_id>', methods=['PUT'])
-def update_absence(absence_id):
-    """Update an absence"""
-    reason = request.form.get('reason')
-    if reason is None:
-        abort(400, 'Reason missing')
-    absence = storage.get("Absence", absence_id)
-    if absence is None:
-        abort(404)
-    absence.reason = reason
-    absence.save()
-    return jsonify(absence.to_dict())
-
 @app_views.route('/employees/<employee_id>/absences', methods=['GET'])
 def get_employee_absences(employee_id: str) -> list:
     """Get absences for a given employee based on giving year
@@ -73,16 +60,30 @@ def get_employee_absences(employee_id: str) -> list:
         abort(404)
     year = request.args.get('year')
     if year is None:
-        return jsonify({"error": "year is missing"})
+        return jsonify({"error": "year is missing"}), 400
     absences = storage.get_absences(employee_id, year)
     absences_res = []
     for absence in absences:
         absence_dict = absence.to_dict().copy()
         absence_data = {
+            "id": absence_dict["id"],
             "from": absence_dict["start_date"],
             "to": absence_dict["end_date"],
-            "reason": absence_dict["reason"],
+            "reason": absence_dict["reason"] if absence_dict["reason"] else "",
             "n_days": absence_dict["n_days"],
         }
         absences_res.append(absence_data)
     return jsonify(absences_res)
+
+@app_views.route('/absences/<absence_id>', methods=['PUT'])
+def update_absence(absence_id):
+    """Update an absence"""
+    reason = request.json.get('reason')
+    if reason is None:
+        abort(400, 'Reason missing')
+    absence = storage.get("Absence", absence_id)
+    if absence is None:
+        abort(404)
+    absence.reason = reason
+    absence.save()
+    return jsonify(absence.to_dict())
