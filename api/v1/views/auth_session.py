@@ -56,6 +56,19 @@ def get_profile():
         except NoResultFound:
             return jsonify({"error": "session not found"}), 403
 
+@app_views.route('/check_login', methods=['GET'])
+def check_login():
+    """ GET /check_login """
+    session_id = request.cookies.get('session_id')
+    if not session_id:
+        return jsonify({"message": "session not found"}), 200
+    try:
+        auth = Auth()
+        auth.get_account_from_session_id(session_id)
+        return jsonify({"message": "ok"}), 200
+    except NoResultFound:
+        return jsonify({"message": "session not found"}), 200
+
 @app_views.route('/logout', methods=['DELETE'])
 def logout():
     """ DELETE /sessions
@@ -64,11 +77,11 @@ def logout():
     If the account exists it destroy the session and redirect the account to GET /
     """
     session_id = request.cookies.get('session_id')
-    if session_id:
-        auth = Auth()
-        if auth.destroy_session(session_id):
-            return hello(), 200
+    if not session_id:
         return jsonify({"error": "session not found"}), 403
+    auth = Auth()
+    if auth.destroy_session(session_id):
+        return hello(), 200
     return jsonify({"error": "session not found"}), 403
 
 @app_views.route('/reset_password', methods=['POST'])
