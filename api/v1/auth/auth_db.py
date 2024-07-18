@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """DB module
 """
 from sqlalchemy import create_engine
@@ -7,10 +8,8 @@ from sqlalchemy.exc import InvalidRequestError
 from .account import Base, Account
 from .session import SessionAuth
 from os import getenv
-from models import (
-    storage, Company, Department,
-    Job, Form, Field, Employee,
-)
+from models import storage, Company
+
 
 
 env = getenv('HRPRO_ENV')
@@ -71,26 +70,6 @@ class DB:
     def save(self) -> None:
         """ This method commits all changes in the database """
         self.__session.commit()
-
-    def add_admin_account(self, account_info: dict, company_info: dict):
-        """ Add new admin account """
-        company = self.add_company(company_info)
-        company.save()
-        employee_info = account_info.copy()
-        if employee_info.get("hashed_password"):
-            del employee_info["hashed_password"]
-        new_employee = self.add_employee("admin", employee_info)
-        new_employee.company = company
-        new_employee.save()
-        company.jobs.append(new_employee.job)
-        company.departments.append(new_employee.department)
-        company.save()
-        new_account = Account(**account_info, employee_id=new_employee.id,
-                              role="admin")
-        # self._session.add(new_account)
-        # self.__session.commit()
-        new_account.save()
-        return new_account
     
     def add_company(self, company_info: dict):
         """Creates new company
@@ -99,53 +78,12 @@ class DB:
         Returns:
             created company
         """
-        new_company = Company(**company_info)
-        new_company.save()
-        emp_form = Form(name="employee", description="employee form")
-        dep_form = Form(name="department", description="department form")
-        job_form = Form(name="job", description="job form")
-        emp_form.fields.append(Field(name="first name", type="text", is_required=False, position=1))
-        emp_form.fields.append(Field(name="last name", type="text", is_required=False, position=2))
-        emp_form.fields.append(Field(name="email", type="email", is_required=True, position=3))
-        dep_form.fields.append(Field(name="name", type="text", is_required=True, position=1))
-        job_form.fields.append(Field(name="title", type="text", is_required=True, position=1))
-        for form in [emp_form, dep_form, job_form]:
-            new_company.forms.append(form)
-        new_company.save()
-        return new_company
-    
-    def add_employee(self, role: str, employee_info: dict,
-                     position_info: dict={}):
-        """Creates new Emplyee
-        Args:
-            employee_info: employee information
-        Returns:
-            created employee
-        """
-        if role in ["employee", "hr"]:
-            try:
-                employee_department = storage.find_department_by(name=position_info["department"])
-            except:
-                raise ValueError("Employee department not found")
-            try:
-                employee_job = storage.find_job_by(title=position_info["job_title"])
-            except:
-                raise ValueError("Employee job not found")
-        elif role == "admin":
-            employee_department = Department(name="hr", info='{"name": "hr"}')
-            employee_job = Job(title="hr", info='{"title": "hr"}')
-            position_info = {
-                "department": "hr",
-                "job_title": "hr",
-            }
-        else:
-            raise ValueError("Invalid role")
-        str_employee_info = str(employee_info)
-        new_employee = Employee(**employee_info, info=str_employee_info)
-        new_employee.department = employee_department
-        new_employee.job = employee_job
-        new_employee.save()
-        return new_employee
+        try:
+            new_company = Company(**company_info)
+            new_company.save()
+            return new_company
+        except Exception:
+            return None
     
     def find_account_by(self, **kwargs):
         """Finds a account based on a set of filters.
