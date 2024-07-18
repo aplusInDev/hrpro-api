@@ -1,13 +1,12 @@
 """DB module
 """
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.orm.exc import NoResultFound # moved to sqlalchemy.exec in the v 1.4.x
 from sqlalchemy.exc import InvalidRequestError
 from .account import Base, Account
 from .session import SessionAuth
 from os import getenv
-import models
 from models import (
     storage, Company, Department,
     Job, Form, Field, Employee,
@@ -58,6 +57,20 @@ class DB:
         if self.__session is not None:
             self.__session.remove()
             self.__session = None
+
+    def reload(self) -> None:
+        """ This method creates all tables in the database """
+        Base.metadata.create_all(self._engine)
+        Session = sessionmaker(bind=self._engine, expire_on_commit=False)
+        self.__session = scoped_session(Session)
+
+    def new(self, obj) -> None:
+        """ This method adds the specified object to the database """
+        self.__session.add(obj)
+
+    def save(self) -> None:
+        """ This method commits all changes in the database """
+        self.__session.commit()
 
     def add_admin_account(self, account_info: dict, company_info: dict):
         """ Add new admin account """

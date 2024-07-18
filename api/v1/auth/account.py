@@ -32,3 +32,9 @@ class Account(Base):
     @property
     def employee(self):
         return storage.get("Employee", self.employee_id)
+    
+    def save(self):
+        """ save method """
+        from . import db
+        db.new(self)
+        db.save()

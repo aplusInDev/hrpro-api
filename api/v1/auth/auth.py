@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from .db import DB
+from .auth_db import DB
 from .account import Account
 from .session import SessionAuth
 import bcrypt
