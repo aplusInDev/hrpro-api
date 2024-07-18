@@ -32,3 +32,8 @@ class SessionAuth(Base):
             for key, value in kwargs.items():
                 setattr(self, key, value)
 
+    def delete(self) -> None:
+        """ Delete method """
+        from . import db
+        db.delete_session(self.id)
+        db.save()

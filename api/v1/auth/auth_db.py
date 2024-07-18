@@ -10,7 +10,7 @@ from os import getenv
 from models import (
     storage, Company, Department,
     Job, Form, Field, Employee,
-    )
+)
 
 
 env = getenv('HRPRO_ENV')
@@ -87,8 +87,9 @@ class DB:
         company.save()
         new_account = Account(**account_info, employee_id=new_employee.id,
                               role="admin")
-        self._session.add(new_account)
-        self.__session.commit()
+        # self._session.add(new_account)
+        # self.__session.commit()
+        new_account.save()
         return new_account
     
     def add_company(self, company_info: dict):
