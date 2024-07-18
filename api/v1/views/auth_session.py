@@ -46,16 +46,16 @@ def login():
             return jsonify({"error": "Login Faild, please try again."}), 401
     auth = Auth()
     if auth.valid_login(company_id, email, password):
-        account = db.find_account_by(email=email, company_id=company_id)
-        if not account.is_active:
-            return jsonify({"error": "Account is not active"}), 401
+        # account = db.find_account_by(email=email, company_id=company_id)
+        # if not account.is_active:
+        #     return jsonify({"error": "Account is not active"}), 401
         session_id = auth.create_session(company_id, email)
         if session_id:
-            current_user = auth.get_current_user(email)
+            current_user = auth.get_current_user(company_id, email)
             response = jsonify(current_user)
             response.set_cookie('session_id', session_id)
             return response, 200
-    return jsonify({"error": "Login Faild, please try again."}), 401
+    return jsonify({"error": "Login Faild2, please try again."}), 401
 
 @app_views.route('/profile', methods=['GET'])
 def get_profile():

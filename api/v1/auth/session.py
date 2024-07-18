@@ -33,14 +33,3 @@ class SessionAuth(Base):
                 self.id = str(uuid4())
             for key, value in kwargs.items():
                 setattr(self, key, value)
-
-    def save(self) -> None:
-        """ Save method
-        """
-        from . import db
-        db.save()
-
-    def delete(self) -> None:
-        """ Delete method """
-        from . import db
-        db.delete_session(self.id)

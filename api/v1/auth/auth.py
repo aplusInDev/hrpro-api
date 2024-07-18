@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from flask import render_template
 from flask_mail import Message
 from os import getenv
-from models import storage, Employee
+from models import storage, Employee, Job, Department
 import string
 import secrets
 
@@ -87,10 +87,24 @@ class Auth:
             "email": admin_info["email"],
         }
         try:
+            admin_department = Department(
+                name="hr",
+                company_id=new_company.id,
+                info="{'name': 'hr'}"
+            )
+            admin_department.save()
+            admin_job = Job(
+                title="hr",
+                company_id=new_company.id,
+                info="{'title': 'hr'}"
+            )
+            admin_job.save()
             new_admin = Employee(
                 **admin_info,
                 info=employee_details,
-                company_id=new_company.id
+                company_id=new_company.id,
+                job_id=admin_job.id,
+                department_id=admin_department.id
             )
             new_admin.company = new_company
             new_admin.save()
@@ -105,6 +119,7 @@ class Auth:
                 company_id=new_company.id
             )
             new_admin_account.save()
+            return new_admin_account
         except Exception:
             new_admin.delete()
             new_company.delete()
@@ -200,7 +215,8 @@ class Auth:
             )
             new_session = SessionAuth()
             account.sessions.append(new_session)
-            new_session.save()
+            self._db.new(new_session)
+            self._db.save()
             return new_session.id
         except NoResultFound:
             return None
