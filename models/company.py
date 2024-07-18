@@ -8,14 +8,12 @@ from sqlalchemy.orm import relationship
 class Company(BaseModel, Base):
     """Company class"""
     __tablename__ = 'companies'
-
-
     name = Column(String(50), nullable=False, unique=True)
     description = Column(Text, nullable=True)
     address = Column(String(50), nullable=False)
-    email = Column(String(50), nullable=True)
-    phone = Column(String(50), nullable=True)
-    website = Column(String(50), nullable=True)
+    email = Column(String(50), nullable=True, unique=True)
+    phone = Column(String(50), nullable=True, unique=True)
+    website = Column(String(50), nullable=True, unique=True)
 
     departments = relationship("Department", back_populates="company",
                                 cascade="all, delete-orphan")

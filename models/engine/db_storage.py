@@ -61,8 +61,7 @@ class DBStorage:
 
     def all(self, cls: str = None) -> dict:
         """Returns the dictionary __objects"""
-
-        if not isinstance(cls, str):
+        if type(cls) is not str:
             raise TypeError("Expected a string for cls parameter")
 
         if cls and cls in classes_dict:
@@ -107,10 +106,8 @@ class DBStorage:
     def get(self, cls: str, id: str):
         """This method retrieves one object based on the class name and its ID
         """
-
-        if not isinstance(cls, str):
+        if type(cls) is not str:
             raise TypeError("Expected a string for cls parameter")
-
         if cls and cls in classes_dict:
             cls = classes_dict[cls]
             return self.__session.query(cls).filter(cls.id == id).first()

@@ -7,15 +7,15 @@ from sqlalchemy.orm import relationship
 
 # create enum with two values yes or no
 absence_enum = Enum('Yes', 'No', name='absence_enum')
+
 class Attendance(BaseModel, Base):
     """Attendance class"""
     __tablename__ = 'attendances'
-
-    employee_id = Column(String(50),
-                         ForeignKey('employees.id', ondelete='CASCADE',
-                                    onupdate='CASCADE'),
-                         nullable=False
-                         )
+    employee_id = Column(
+        String(50),
+        ForeignKey('employees.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False
+    )
     date= Column(Date, nullable=False)
     check_in = Column(Time, nullable=False)
     check_out = Column(Time, nullable=False)

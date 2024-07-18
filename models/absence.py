@@ -8,12 +8,11 @@ from sqlalchemy.orm import relationship
 class Absence(BaseModel, Base):
     """Absence class"""
     __tablename__ = 'absences'
-
-    employee_id = Column(String(50),
-                         ForeignKey('employees.id', ondelete='CASCADE',
-                                    onupdate='CASCADE'),
-                         nullable=False
-                         )
+    employee_id = Column(
+        String(50),
+        ForeignKey('employees.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False
+    )
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime, nullable=False)
     reason = Column(String(50), nullable=True)

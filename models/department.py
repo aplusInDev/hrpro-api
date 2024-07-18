@@ -3,19 +3,22 @@
 from models import BaseModel, Base
 from sqlalchemy import Column, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy.schema import UniqueConstraint
 
 
 class Department(BaseModel, Base):
     __tablename__ = 'departments'
 
     name = Column(String(50), nullable=False)
-    company_id = Column(String(50),
-                        ForeignKey('companies.id', ondelete='CASCADE',
-                                   onupdate='CASCADE'),
-                        nullable=True
-                        )
+    company_id = Column(
+        String(50),
+        ForeignKey('companies.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=True
+    )
     info = Column(Text, nullable=True)
-
+    __table_args__ = (
+        UniqueConstraint('name', 'company_id', name='unique_department'),
+    )
     company = relationship("Company", back_populates="departments")
     employees = relationship("Employee", back_populates="department",
                                 cascade="all, delete-orphan")
@@ -39,6 +42,6 @@ class Department(BaseModel, Base):
             training.title: "http://localhost:5000/api/v1/trainings/" + training.id
             for training in self.trainings
         }
-        new_dict["info"] = eval(self.info)
+        new_dict["info"] = eval(self.info) if self.info else {}
         new_dict["uri"] = "http://localhost:5000/api/v1/departments/" + self.id
         return new_dict

@@ -11,12 +11,11 @@ class Certificate(BaseModel, Base):
     """ training certificate """
 
     __tablename__ = 'certificates'
-
-    employee_id = Column(String(50),
-                        ForeignKey('employees.id', ondelete='CASCADE',
-                                    onupdate='CASCADE'),
-                        nullable=False
-                        )
+    employee_id = Column(
+        String(50),
+        ForeignKey('employees.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False
+    )
     institution = Column(String(50), nullable=False)
     date = Column(Date, nullable=False)
 
@@ -27,6 +26,8 @@ class Certificate(BaseModel, Base):
 
     def to_dict(self):
         new_dict = super().to_dict().copy()
-        new_dict["employee"] = "http://localhost:5000/api/v1/employees/{}".\
+        new_dict["employee"] = "{} {}".format(self.employee.first_name,
+                                                self.employee.last_name)
+        new_dict["employee_uri"] = "http://localhost:5000/api/v1/employees/{}".\
             format(self.employee_id)
         return new_dict

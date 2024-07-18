@@ -1,27 +1,32 @@
 #!/usr/bin/env python3
 
 from models import BaseModel, Base
-from sqlalchemy import Column, String, ForeignKey, Boolean, Text, Integer
+from sqlalchemy import (
+    Column, String, ForeignKey,
+    Boolean, Text, Integer,
+)
 from sqlalchemy.orm import relationship
+from sqlalchemy.schema import UniqueConstraint
 
 
 class Field(BaseModel, Base):
     """Field class"""
     __tablename__ = 'fields'
-
-    form_id = Column(String(50),
-                        ForeignKey('forms.id', ondelete='CASCADE',
-                                   onupdate='CASCADE'),
-                        nullable=True
-                        )
+    form_id = Column(
+        String(50),
+        ForeignKey('forms.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=True
+    )
     position = Column(Integer, nullable=True)
     name = Column(String(50), nullable=True)
-    description = Column(Text, default="")
-    type = Column(String(50), nullable=True, default="text")
-    default_value = Column(String(50), nullable=True, default="")
-    options = Column(String(50), nullable=True, default="[]")
-    is_required = Column(Boolean, nullable=True, default=True)
-
+    description = Column(Text, nullable=True)
+    type = Column(String(50), nullable=False, default="text")
+    default_value = Column(String(50), nullable=True)
+    options = Column(String(50), nullable=True)
+    is_required = Column(Boolean, nullable=True, default=False)
+    __table_args__ = (
+        UniqueConstraint('form_id', 'name', name='unique_field'),
+    )
     form = relationship("Form", back_populates="fields")
 
     def __init__(self, *args, **kwargs):
@@ -29,9 +34,18 @@ class Field(BaseModel, Base):
 
     def to_dict(self):
         new_dict = super().to_dict().copy()
-        new_dict["form"] = "http://localhost:5000/api/v1/forms/{}".\
-            format(self.form_id)
-        new_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".\
-            format(self.id)
+        new_dict["form"] = self.form.name if self.form else ""
+        new_dict["description"] = self.description if self.description else ""
         new_dict["options"] = eval(self.options) if self.options else []
+        new_dict["uri"] = "/api/v1/fields/{}".format(self.id)
         return new_dict
+
+    def save(self) -> None:
+        """ Override save method to update form's last_updated field
+        and remove duplicate options
+        """
+        if self.options:
+            options = eval(self.options)
+            options = list(set(options))
+        super().save()
+        self.form.updated_at = self.updated_at

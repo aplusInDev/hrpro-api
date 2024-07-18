@@ -4,7 +4,7 @@ from models import BaseModel, Base
 from sqlalchemy import (
     Column, String, Date,
     ForeignKey, Text, Integer,
-    )
+)
 from sqlalchemy.orm import relationship
 from datetime import date
 
@@ -12,26 +12,25 @@ from datetime import date
 class Employee(BaseModel, Base):
     """Employee class"""
     __tablename__ = 'employees'
-
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     leave_balance = Column(Integer, nullable=True, default=0)
     hire_date = Column(Date, nullable=True)
-    company_id = Column(String(50),
-                        ForeignKey('companies.id', ondelete='CASCADE',
-                                   onupdate='CASCADE'),
-                        nullable=True
-                        )
-    job_id = Column(String(50),
-                        ForeignKey('jobs.id', ondelete='CASCADE',
-                                   onupdate='CASCADE'),
-                        nullable=True
-                        )
-    department_id = Column(String(50),
-                        ForeignKey('departments.id', ondelete='CASCADE',
-                                   onupdate='CASCADE'),
-                        nullable=True
-                        )
+    company_id = Column(
+        String(50),
+        ForeignKey('companies.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=True
+    )
+    job_id = Column(
+        String(50),
+        ForeignKey('jobs.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=True
+    )
+    department_id = Column(
+        String(50),
+        ForeignKey('departments.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=True
+    )
     info = Column(Text, nullable=True)
 
     department = relationship("Department", back_populates="employees")
@@ -59,34 +58,33 @@ class Employee(BaseModel, Base):
 
     def to_dict(self):
         new_dict = super().to_dict().copy()
-        try:
+        if self.job and self.job.info:
             position_info = eval(self.job.info)
-            position_info = {"job_" + k: v for k, v in position_info.items()}
-            new_dict["position_info"] = position_info
-        except Exception as err:
-            print("error: ", str(err))
-            pass
-        try:
+            position_info = {
+                "job_" + k: v for k, v in position_info.items()
+            }
+        else:
+            position_info = {}
+        new_dict["position_info"] = position_info
+        if self.department and self.department.info:
             department_info = eval(self.department.info)
             department_info = {
                 "department_" + k: v for k, v in department_info.items()
-                }
-            new_dict["department_info"] = department_info
-        except Exception as err:
-            print("error: ", str(err))
-            pass
-        try:
-            new_dict["info"] = eval(self.info)
-        except Exception as err:
-            print("error: ", str(err))
-            pass
-        new_dict["department"] = "http://localhost:5000/api/v1/departments/{}".\
-            format(self.department_id)
-        new_dict["job"] = "http://localhost:5000/api/v1/jobs/{}".\
-            format(self.job_id)
-        new_dict["company"] = "http://localhost:5000/api/v1/companies/{}".\
-            format(self.company_id)
+            }
+        else:
+            department_info = {}
+        new_dict["department_info"] = department_info
+        new_dict["info"] = eval(self.info) if self.info else {}
         new_dict["hire_date"] = self.hire_date.strftime("%Y-%m-%d")
+        new_dict["department_uri"] = "http://localhost:5000/api/v1/departments/{}".\
+            format(self.department_id)
+        new_dict["job_uri"] = "http://localhost:5000/api/v1/jobs/{}".\
+            format(self.job_id)
+        new_dict["company_uri"] = "http://localhost:5000/api/v1/companies/{}".\
+            format(self.company_id)
+        new_dict["company"] = self.company.name
+        new_dict["department"] = self.department.name
+        new_dict["job"] = self.job.title
         new_dict["uri"] = "http://localhost:5000/api/v1/employees/" + self.id
         return new_dict
     
