@@ -33,5 +33,5 @@ class Field(BaseModel, Base):
             format(self.form_id)
         new_dict["uri"] = "http://localhost:5000/api/v1/fields/{}".\
             format(self.id)
-        new_dict["options"] = eval(self.options)
+        new_dict["options"] = eval(self.options) if self.options else []
         return new_dict

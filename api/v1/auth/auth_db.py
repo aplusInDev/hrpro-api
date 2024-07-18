@@ -1,21 +1,20 @@
 """DB module
 """
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.orm.exc import NoResultFound # moved to sqlalchemy.exec in the v 1.4.x
 from sqlalchemy.exc import InvalidRequestError
 from .account import Base, Account
 from .session import SessionAuth
 from os import getenv
-import models
 from models import (
     storage, Company, Department,
     Job, Form, Field, Employee,
-    )
+)
 
 
 env = getenv('HRPRO_ENV')
-mysql_user = getenv('HRPR_MYSQL_USER')
+mysql_user = getenv('HRPRO_MYSQL_USER')
 mysql_pwd = getenv('HRPRO_MYSQL_PWD')
 mysql_host = getenv('HRPRO_MYSQL_HOST')
 mysql_db = getenv('HRPRO_ACCOUNTS_DB_NAME')
@@ -34,8 +33,14 @@ class DB:
                                      echo=False)
         if env == 'test':
             Base.metadata.drop_all(self._engine)
+            self.recreate_tables(self._engine)
         Base.metadata.create_all(self._engine)
         self.__session = None
+
+    def recreate_tables(self, engine):
+        """This method creates all tables in the database"""
+        Base.metadata.create_all(engine)
+
 
     @property
     def _session(self):
@@ -53,6 +58,20 @@ class DB:
             self.__session.remove()
             self.__session = None
 
+    def reload(self) -> None:
+        """ This method creates all tables in the database """
+        Base.metadata.create_all(self._engine)
+        Session = sessionmaker(bind=self._engine, expire_on_commit=False)
+        self.__session = scoped_session(Session)
+
+    def new(self, obj) -> None:
+        """ This method adds the specified object to the database """
+        self.__session.add(obj)
+
+    def save(self) -> None:
+        """ This method commits all changes in the database """
+        self.__session.commit()
+
     def add_admin_account(self, account_info: dict, company_info: dict):
         """ Add new admin account """
         company = self.add_company(company_info)
@@ -68,8 +87,9 @@ class DB:
         company.save()
         new_account = Account(**account_info, employee_id=new_employee.id,
                               role="admin")
-        self._session.add(new_account)
-        self.__session.commit()
+        # self._session.add(new_account)
+        # self.__session.commit()
+        new_account.save()
         return new_account
     
     def add_company(self, company_info: dict):

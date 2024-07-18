@@ -42,14 +42,14 @@ def post_field(form_id):
 		abort(404)
 	data = request.get_json()
 	if data is None:
-		return 'Not a JSON data', 400
+		return jsonify({'error': 'Not a JSON data'}), 400
 	elif 'name' not in data:
-		return 'Missing field name', 400
+		return jsonify({'error': 'Missing field name'}), 400
 	else:
 		pos = len(form.fields) + 1
 		field = Field(form_id=form_id, position=pos, **data)
 		field.save()
-		return jsonify(field.save()), 201
+		return jsonify(field.to_dict()), 201
 	
 @app_views.route('/fields/<field_id>', methods=['PUT'], strict_slashes=False)
 def put_field(field_id):

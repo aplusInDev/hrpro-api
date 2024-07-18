@@ -22,26 +22,26 @@ app.config.update(
 )
 mail = Mail(app)
 
-def create_app():
-    """Construct the core application."""
-    app = Flask(__name__, instance_relative_config=False)
-    app.config.update(
-        MAIL_SERVER='smtp.aplusdev.tech',
-        MAIL_PORT=25,  # 25 or 587
-        MAIL_USE_SSL=False,
-        MAIL_USERNAME=getenv('HRPRO_EMAIL'),
-        MAIL_PASSWORD=getenv('HRPRO_EMAIL_PWD')
-    )
-    mail.init_app(app)
+# def create_app():
+#     """Construct the core application."""
+#     app = Flask(__name__, instance_relative_config=False)
+#     app.config.update(
+#         MAIL_SERVER='smtp.aplusdev.tech',
+#         MAIL_PORT=25,  # 25 or 587
+#         MAIL_USE_SSL=False,
+#         MAIL_USERNAME=getenv('HRPRO_EMAIL'),
+#         MAIL_PASSWORD=getenv('HRPRO_EMAIL_PWD')
+#     )
+#     mail.init_app(app)
 
-    with app.app_context():
-        # Include our Views
-        from api.v1.views import app_views
+#     with app.app_context():
+#         # Include our Views
+#         from api.v1.views import app_views
 
-        # Register Blueprints
-        app.register_blueprint(app_views)
+#         # Register Blueprints
+#         app.register_blueprint(app_views)
 
-        return app
+#         return app
 
 
 @app.route('/send_mail', methods=['POST'])

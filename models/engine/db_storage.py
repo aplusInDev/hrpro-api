@@ -53,6 +53,11 @@ class DBStorage:
 
         if env == 'test':
             Base.metadata.drop_all(self.__engine)
+            self.recreate_tables(self.__engine)
+
+    def recreate_tables(self, engine):
+        """This method creates all tables in the database"""
+        Base.metadata.create_all(engine)
 
     def all(self, cls: str = None) -> dict:
         """Returns the dictionary __objects"""

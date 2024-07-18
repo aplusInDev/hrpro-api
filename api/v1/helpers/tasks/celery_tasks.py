@@ -1,8 +1,8 @@
-from api.celery_app import app
+from api.celery_app import celery_app
 from time import sleep
 
 
-@app.task
+@celery_app.task
 def test_task():
     sleep(20)
     print("Task 2 start")
@@ -11,7 +11,7 @@ def test_task():
     print("Task 1 completed")
     return "Task 1 completed"
 
-@app.task
+@celery_app.task
 def test_task2():
     sleep(2)
     print("Task 2 completed")
