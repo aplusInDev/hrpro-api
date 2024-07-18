@@ -21,6 +21,8 @@ def post_admin(admin_info: dict, company_info: dict):
             }), 201
     except ValueError as err:
         return jsonify({"error": str(err)}), 400
+    except Exception as err:
+        return jsonify({"error": str(err)}), 400
 
 @app_views.route('/reset_password', methods=['PUT'])
 def update_password():
@@ -38,4 +40,6 @@ def update_password():
         auth.update_password(reset_token, password)
         return jsonify({"email": email, "message": "password updated"}), 200
     except ValueError as err:
+        return jsonify({"error": str(err)}), 403
+    except Exception as err:
         return jsonify({"error": str(err)}), 403
