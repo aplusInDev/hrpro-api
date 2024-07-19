@@ -176,18 +176,17 @@ class Auth:
                 tmp_token=activation_token
             )
         except NoResultFound:
-            session.delete()
+            self._db.delete_session(activation_token)
             raise ValueError("No account with this token found")
         # check if session expired
-        if datetime.now() - session.created_at > timedelta(minutes=session.session_duration):
-            session.delete()
-            account.tmp_token = None
-            self.send_activation_mail(account.email, account.first_name)
-            raise ValueError("Session token expired, another email sent {}".format(datetime.now()))
+        # if datetime.now() - session.created_at > timedelta(minutes=session.session_duration):
+        #     account.tmp_token = None
+        #     self._db.delete_session(activation_token)
+        #     raise ValueError("Session token expired, another email sent {}".format(datetime.now()))
         if session and account.tmp_token == activation_token:
             account.is_active = True
             account.tmp_token = None
-            session.delete()
+            self._db.delete_session(activation_token)
             return True
     
     def valid_login(self, company_id: str, email: str, password: str) -> bool:

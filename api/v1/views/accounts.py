@@ -4,6 +4,7 @@ from flask import jsonify, request
 from api.v1.views import app_views
 from api.v1.auth.auth import Auth
 from api.v1.utils.accounts_utils import validate_register
+from api.v1.helpers.tasks.mail_tasks import send_activation_mail_task
 
 
 @app_views.route('/accounts', methods=['POST'])
@@ -14,11 +15,17 @@ def post_admin(admin_info: dict, company_info: dict):
     auth = Auth()
     try:
         account = auth.register_admin(admin_info, company_info)
-        # auth.send_activation_mail(account.email, account.first_name)
+        msg_details = {
+            "name": account.employee.first_name +
+                " " + account.employee.last_name,
+            "email": account.email,
+            "company_id": account.company_id,
+        }
+        send_activation_mail_task.delay(msg_details)
         return jsonify({
             "email": account.email,
             "message": "account created"
-            }), 201
+            }), 202
     except ValueError as err:
         return jsonify({"error": str(err)}), 400
     except Exception as err:
