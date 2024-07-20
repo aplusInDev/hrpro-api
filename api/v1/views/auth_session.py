@@ -37,14 +37,14 @@ def login():
     """ POST /session
     """
     from api.v1.auth import db
-    email = request.form.get('email')
-    password = request.form.get('password')
-    company_id = request.args.get('company_id')
-    for field in [email, password, company_id]:
-        if not field:
+    for field in ["email", "password", "company_id"]:
+        if field not in request.form:
             return jsonify({
                 "error": "filed {} is required".format(field)
             }), 401
+    email = request.form.get('email')
+    password = request.form.get('password')
+    company_id = request.form.get('company_id')
     auth = Auth()
     if auth.valid_login(company_id, email, password):
         account = db.find_account_by(email=email, company_id=company_id)
@@ -106,12 +106,13 @@ def logout():
 def get_reset_password_token():
     """ POST /reset_password
     """
+    for field in ["email", "company_id"]:
+        if field not in request.form:
+            return jsonify({
+                "error": "filed {} is required".format(field)
+            }), 401
     email = request.form.get('email')
-    company_id = request.args.get('company_id')
-    if not company_id:
-        return jsonify({"error": "company_id is required"}), 400
-    if not email:
-        return jsonify({"error": "email is required"}), 400
+    company_id = request.form.get('company_id')
     auth = Auth()
     try:
         reset_token = auth.get_reset_password_token(company_id, email)
