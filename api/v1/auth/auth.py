@@ -5,7 +5,6 @@ from .account import Account
 from .session import SessionAuth
 import bcrypt
 from sqlalchemy.orm.exc import NoResultFound
-from datetime import datetime, timedelta
 from flask import render_template
 from flask_mail import Message
 from os import getenv
@@ -271,27 +270,29 @@ class Auth:
         except NoResultFound:
             raise ValueError("Account not found")
         
-    def update_password(self, reset_token: str, password: str) -> None:
+    def update_password(self, login_details: dict) -> None:
         """Update the password
         """
-        session = self._db.get_session(reset_token)
-        if session:
-            try:
-                account = self._db.find_account_by(tmp_token=reset_token)
-            except NoResultFound:
-                self._db.delete_session(reset_token)
-                raise ValueError("No account with this token found")
-            # check if session expired
-            if datetime.now() - session.created_at > timedelta(seconds=session.session_duration):
-                self._db.delete_session(reset_token)
-                account.tmp_token = None
-                raise ValueError("Session token expired")
-            account.hashed_password = _hash_password(password)
-            self._db.delete_session(reset_token)
-            account.tmp_token = None
-            self._db._session.commit()
-        else:
-            raise ValueError("Session token not found")
+        company_id = login_details["company_id"]
+        email = login_details["email"]
+        password = login_details["password"]
+        new_password = login_details["new_password"]
+        if not self.valid_login(company_id, email, password):
+            raise ValueError("Invalid login")
+        if self.valid_login(company_id, email, new_password):
+            raise ValueError(
+                "New password cannot be the same as the old password"
+            )
+        try:
+            account = self._db.find_account_by(
+                email=email,
+                company_id=company_id
+            )
+            account.hashed_password = _hash_password(new_password)
+            # account.save()
+            self._db.save()
+        except NoResultFound:
+            raise NoResultFound("Account not found")
 
 def _hash_password(password: str) -> str:
     """Hash password

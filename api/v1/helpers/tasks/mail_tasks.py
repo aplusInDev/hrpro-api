@@ -61,3 +61,27 @@ def send_activation_mail_task(msg_details: dict) -> str:
             return "task done successfully"
         except Exception as err:
             return "task failed" + str(err)
+
+@celery_app.task
+def send_reset_password_mail_task(msg_details: dict) -> str:
+    """Celery task to send activation email."""
+    from api.v1.app import app, mail
+    with app.app_context():
+        try:
+            email = msg_details["email"]
+            data = {
+                "name": msg_details["name"],
+                "company_id": msg_details["company_id"],
+                "email": email,
+                "password": msg_details["password"],
+            }
+            msg = Message(
+                "Reset your HRPro password",
+                sender=getenv('HRPRO_EMAIL'),
+                recipients=[email]
+            )
+            msg.html = render_template("reset_password.html", data=data)
+            mail.send(msg)
+            return "task done successfully"
+        except Exception as err:
+            return "task failed" + str(err)

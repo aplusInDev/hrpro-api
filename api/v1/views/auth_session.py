@@ -2,15 +2,18 @@
 
 from flask import jsonify, request
 from api.v1.views import app_views
-from api.v1.auth.auth import Auth
+from api.v1.auth.auth import (
+    Auth, _hash_password, _generate_random_pass
+)
 from sqlalchemy.orm.exc import NoResultFound
+from api.v1.helpers.tasks.mail_tasks import send_reset_password_mail_task
+from api.v1.auth import db
 
 
 @app_views.route('/activate', methods=['GET'])
 def activate_account():
     """ GET /activate
     """
-    from api.v1.auth import db
     auth = Auth()
     try:
         company_id = request.args.get('company_id')
@@ -101,21 +104,3 @@ def logout():
     if auth.destroy_session(session_id):
         return jsonify({"message": "logged out successfully"}), 200
     return jsonify({"error": "session not found"}), 403
-
-@app_views.route('/reset_password', methods=['POST'])
-def get_reset_password_token():
-    """ POST /reset_password
-    """
-    for field in ["email", "company_id"]:
-        if field not in request.form:
-            return jsonify({
-                "error": "filed {} is required".format(field)
-            }), 401
-    email = request.form.get('email')
-    company_id = request.form.get('company_id')
-    auth = Auth()
-    try:
-        reset_token = auth.get_reset_password_token(company_id, email)
-        return jsonify({"email": email, "reset_token": reset_token}), 200
-    except ValueError:
-        return jsonify({"error": "email not found"}), 403
