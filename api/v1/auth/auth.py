@@ -237,7 +237,7 @@ class Auth:
         except NoResultFound:
             return None
         
-    def get_account_from_session_id(self, session_id: str):
+    def get_account_from_session_id(self, session_id: str) -> Account:
         """Get the account from the session id
         """
         session = self._db.get_session(session_id)
@@ -273,24 +273,23 @@ class Auth:
     def update_password(self, login_details: dict) -> None:
         """Update the password
         """
-        company_id = login_details["company_id"]
-        email = login_details["email"]
+        session_id = login_details["session_id"]
         password = login_details["password"]
         new_password = login_details["new_password"]
-        if not self.valid_login(company_id, email, password):
-            raise ValueError("Invalid login")
-        if self.valid_login(company_id, email, new_password):
+        try:
+            account = self.get_account_from_session_id(session_id)
+        except NoResultFound as err:
+            raise NoResultFound(str(err))
+        if not self.valid_login(account.company_id, account.email, password):
+            raise ValueError("Invalid login informations")
+        if self.valid_login(account.company_id, account.email, new_password):
             raise ValueError(
                 "New password cannot be the same as the old password"
             )
         try:
-            account = self._db.find_account_by(
-                email=email,
-                company_id=company_id
-            )
             account.hashed_password = _hash_password(new_password)
-            # account.save()
             self._db.save()
+            self._db.delete_session(session_id)
         except NoResultFound:
             raise NoResultFound("Account not found")
 

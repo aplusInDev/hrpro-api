@@ -47,7 +47,12 @@ def reset_password():
             }), 401
     email = request.form.get('email')
     company_id = request.form.get('company_id')
-    account = db.find_account_by(email=email, company_id=company_id)
+    try:
+        account = db.find_account_by(email=email, company_id=company_id)
+    except NoResultFound as err:
+        return jsonify({"error": str(err)}), 404
+    except Exception as err:
+        return jsonify({"error": str(err)}), 400
     password = _generate_random_pass()
     hashed_password = _hash_password(password)
     account.hashed_password = hashed_password
@@ -65,28 +70,28 @@ def reset_password():
 @app_views.route("/update_password", methods=["POST"])
 def update_password():
     """ POST /update_password """
-    for field in ["email", "company_id", "password", "new_password"]:
+    for field in ["password", "new_password"]:
         if field not in request.form:
             return jsonify({
                 "error": "filed {} is required".format(field)
             }), 400
-    email = request.form.get('email')
-    company_id = request.form.get('company_id')
     password = request.form.get('password')
     new_password = request.form.get('new_password')
+    session_id = request.cookies.get('session_id')
+    if not session_id:
+        return jsonify({"error": "Unauthorized: Missing session ID"}), 401
     login_details = {
-        "email": email,
-        "company_id": company_id,
+        "session_id": session_id,
         "password": password,
         "new_password": new_password,
     }
-    auth = Auth()
     try:
+        auth = Auth()
         auth.update_password(login_details)
-        return jsonify({"message": "password updated successfully"}), 200
+        return jsonify({"message": "Password updated successfully"}), 200
     except ValueError as err:
-        return jsonify({"error": str(err)}), 403
+        return jsonify({"error": "ValueError: {}".format(str(err))}), 403
     except NoResultFound:
-        return jsonify({"error": "account not found"}), 403
+        return jsonify({"error": "Account Not Found"}), 403
     except Exception as err:
-        return jsonify({"error": str(err)}), 403
+        return jsonify({"error": "Exception: {}".format(str(err))}), 403

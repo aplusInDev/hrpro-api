@@ -2,11 +2,8 @@
 
 from flask import jsonify, request
 from api.v1.views import app_views
-from api.v1.auth.auth import (
-    Auth, _hash_password, _generate_random_pass
-)
+from api.v1.auth.auth import Auth
 from sqlalchemy.orm.exc import NoResultFound
-from api.v1.helpers.tasks.mail_tasks import send_reset_password_mail_task
 from api.v1.auth import db
 
 
@@ -69,13 +66,14 @@ def get_profile():
     """ GET /profile
     """
     session_id = request.cookies.get('session_id')
-    if session_id:
-        auth = Auth()
-        try:
-            account = auth.get_account_from_session_id(session_id)
-            return jsonify(account.employee.to_dict()), 200
-        except NoResultFound:
-            return jsonify({"error": "session not found"}), 403
+    if not session_id:
+        return jsonify({"error": "session not found"}), 403
+    auth = Auth()
+    try:
+        account = auth.get_account_from_session_id(session_id)
+        return jsonify(account.employee.to_dict()), 200
+    except NoResultFound:
+        return jsonify({"error": "session not found"}), 403
 
 @app_views.route('/check_login', methods=['GET'])
 def check_login():
