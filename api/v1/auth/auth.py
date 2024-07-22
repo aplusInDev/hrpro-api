@@ -131,37 +131,57 @@ class Auth:
         if not company:
             raise ValueError("Company not found")
         email = employee_info["email"]
-        if self._db.find_account_by(email=email, company_id=company_id):
+        try:
+            self._db.find_account_by(email=email, company_id=company_id)
             raise Exception("faild to register the new employee," +
                             "please try again.")
+        except NoResultFound:
+            pass
         employee_details = {
             "first_name": employee_info["first_name"],
             "last_name": employee_info["last_name"],
             "email": employee_info["email"],
         }
         try:
-            new_employee = Employee(
-                **employee_info,
-                info=employee_details
+            employee_job = storage.find_job_by(
+                company_id=company_id,
+                title=employee_info["job_title"]
             )
-            new_employee.company = company
+            employee_dep = storage.find_department_by(
+                company_id=company_id,
+                name=employee_info["department"],
+            )
+            new_employee = Employee(
+                **employee_details,
+                info=employee_details,
+                company_id=company_id,
+                department_id=employee_dep.id,
+                job_id=employee_job.id,
+            )
+            # new_employee.company = company
             new_employee.save()
-        except Exception:
-            raise Exception("faild to create new employee")
-        password = _generate_random_pass()
+        except NoResultFound:
+            raise ValueError("Employee department or job not found")
+        except Exception as err:
+            print(str(err))
+            raise Exception("faild to create new employee for this reason: {}"
+                            .format(str(err)))
+        password = employee_info["password"]
         hashed_password = _hash_password(password)
         employee_info["hashed_password"] = hashed_password
         try:
             new_account = Account(
                 **employee_info,
-                role=employee_info.get("role"),
                 employee_id=new_employee.id,
-                company_id=company_id
             )
             new_account.save()
-        except Exception:
+            return new_account
+        except Exception as err:
             new_employee.delete()
-            raise Exception("faild to create employee account")
+            raise Exception(
+                "faild to create employee account for this reason: {}"
+                .format(str(err))
+            )
     
     def activate_account(self, account_id: str, activation_token: str) -> bool:
         """Activate the account

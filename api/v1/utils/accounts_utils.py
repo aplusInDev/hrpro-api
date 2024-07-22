@@ -2,6 +2,7 @@
 
 from flask import jsonify, request
 from functools import wraps
+from api.v1.auth.auth import Auth
 
 
 def validate_register(func):
@@ -40,9 +41,12 @@ def validate_post_employee(func):
     """
     @wraps(func)
     def wrapper(*args, **kwargs):
-        company_id = request.args.get("company_id")
-        if not company_id:
-            return jsonify({"error": "company_id is required"}), 400
+        session_id = request.cookies.get('session_id')
+        if not session_id:
+            return jsonify({"error": "Unauthorized"}), 401
+        account = Auth().get_account_from_session_id(session_id)
+        if not account:
+            return jsonify({"error": "Invalid login"}), 400
         required_fields = ['first_name', 'last_name', 'email']
         role = request.form.get('role', 'employee')
         if role != 'hr':
@@ -50,16 +54,20 @@ def validate_post_employee(func):
         for field in required_fields:
             if field not in request.form:
                 return jsonify({"error": "missing information"}), 400
-        account_info = {
+        if role == 'hr':
+            department = request.form.get("department", "hr")
+            job_title = request.form.get("job_title", "hr")
+        else:
+            department = request.form.get("department")
+            job_title = request.form.get("job_title")
+        employee_info = {
             "first_name": request.form.get("first_name"),
             "last_name": request.form.get("last_name"),
             "email": request.form.get("email"),
             "role": role,
+            "department": department,
+            "job_title": job_title,
+            "company_id": account.company_id,
         }
-        position_info = {
-            "department": request.form.get("department"),
-            "job_title": request.form.get("job_title"),
-            "company_id": company_id,
-        }
-        return func(account_info, position_info, *args, **kwargs)
+        return func(employee_info, *args, **kwargs)
     return wrapper

@@ -115,7 +115,7 @@ class DB:
         else:
             raise NoResultFound("Session not found")
     
-    def update_account(self, account_id: int, **kwargs) -> None:
+    def update_account(self, account_id: str, **kwargs) -> None:
         """Update a account in the database
         """
         try:
@@ -126,3 +126,14 @@ class DB:
         except Exception as err:
             self._session.rollback()
             raise ValueError("Error updating account: {}".format(err))
+        
+    def delete_account(self, account_id: str) -> str:
+        """ Delete account """
+        try:
+            account = self.find_account_by(id=account_id)
+            self._session.delete(account)
+            self.save()
+            return None
+        except Exception as err:
+            return str(err)
+

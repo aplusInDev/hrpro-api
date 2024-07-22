@@ -48,7 +48,7 @@ def login():
     auth = Auth()
     if auth.valid_login(company_id, email, password):
         account = db.find_account_by(email=email, company_id=company_id)
-        if not account.is_active:
+        if not account.is_active and account.role == 'admin':
             return jsonify({
                 "error": "Your account is not activated yet,"+
                 " please check your email to activate it."

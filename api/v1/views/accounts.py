@@ -29,7 +29,8 @@ def post_admin(admin_info: dict, company_info: dict):
         send_activation_mail_task.delay(msg_details)
         return jsonify({
             "email": account.email,
-            "message": "account created"
+            "message": "Account created successfully. Please check your"+
+            "email for your login information"
             }), 202
     except ValueError as err:
         return jsonify({"error": str(err)}), 400

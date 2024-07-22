@@ -7,7 +7,7 @@ from api.v1.auth import db
 
 
 @celery_app.task
-def send_welcome_mail_task(name, email, password) -> str:
+def send_welcome_mail_task(msg_details: dict) -> str:
     """Celery task to send welcome email."""
     from api.v1.app import app, mail
     # app = create_app()  # Create an instance of our Flask app
@@ -15,15 +15,9 @@ def send_welcome_mail_task(name, email, password) -> str:
         # we use app_context to have access to the application context
         # because we are outside the application context
         try:
-            data = {
-                "name": name,
-                "email": email,
-                "password": password,
-                "login_link": "http://localhost:3000/login"
-            }
             msg = Message("Welcome to HRPro", sender=getenv('HRPRO_EMAIL'),
-                        recipients=[email])
-            msg.html = render_template("email_welcome.html", data=data)
+                        recipients=[msg_details['email']])
+            msg.html = render_template("email_welcome.html", data=msg_details)
             mail.send(msg)
             return "task done successfully"
         except Exception as err:

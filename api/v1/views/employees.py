@@ -43,21 +43,28 @@ def get_employee(employee_id):
 
 @app_views.route('/add_employee', methods=['POST'])
 @validate_post_employee
-def post_employee(account_info, position_info):
+def post_employee(employee_info):
     """ POST /add_employee
     """
     auth = Auth()
-    account_info["password"] = _generate_random_pass()
+    employee_info["password"] = _generate_random_pass()
     try:
-        account = auth.add_employee_account(account_info, position_info)
+        account = auth.register_employee(employee_info)
         if account:
-            send_welcome_mail_task.delay(account.first_name,
-                                   account.email, account_info["password"])
+            msg_details = {
+                "name": account.employee.first_name +
+                    " " + account.employee.last_name,
+                "company_id": account.company_id,
+                "email": account.email,
+                "password": employee_info["password"],
+                "login_link": "http://localhost:3000/login",
+            }
+            send_welcome_mail_task.delay(msg_details)
+            return jsonify(account.employee.to_dict()), 202
     except ValueError as err:
-        return jsonify({"valueError": str(err)}), 400
+        return jsonify({"error": 'ValueError: {}'.format(str(err))}), 400
     except Exception as err:
-        return jsonify({"error": str(err)}), 500
-    return jsonify(account.employee.to_dict()), 202
+        return jsonify({"error": "Exception: {}".format(str(err))}), 500
 
 @app_views.route(
         '/employees/<employee_id>', methods=['PUT'],
@@ -118,8 +125,12 @@ def put_employee_info(employee_id):
         '/employees/<employee_id>', methods=['DELETE'], strict_slashes=False)
 def delete_employee(employee_id):
     """ delete employee """
+    auth = Auth()
     employee = storage.get("Employee", employee_id)
     if employee is None:
         abort(404)
     employee.delete()
+    account = auth._db.find_account_by(employee_id=employee_id)
+    if account:
+        auth._db.delete_account(account.id)
     return jsonify({}), 204
