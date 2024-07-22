@@ -18,9 +18,9 @@ class Field(BaseModel, Base):
         nullable=True
     )
     position = Column(Integer, nullable=True)
-    name = Column(String(50), nullable=True)
+    name = Column(String(50), nullable=False)
     description = Column(Text, nullable=True)
-    type = Column(String(50), nullable=False, default="text")
+    type = Column(String(50), nullable=True, default="text")
     default_value = Column(String(50), nullable=True)
     options = Column(String(50), nullable=True)
     is_required = Column(Boolean, nullable=True, default=False)
@@ -38,6 +38,8 @@ class Field(BaseModel, Base):
         new_dict["description"] = self.description if self.description else ""
         new_dict["options"] = eval(self.options) if self.options else []
         new_dict["uri"] = "/api/v1/fields/{}".format(self.id)
+        new_dict["default_value"] = self.default_value\
+            if self.default_value else ""
         return new_dict
 
     def save(self) -> None:

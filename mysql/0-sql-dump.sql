@@ -1,18 +1,3 @@
--- Dumping data for `accounts` table
-USE hrpro_accounts_db;
-
-
-LOCK TABLES `accounts` WRITE;
-
-
-INSERT INTO accounts (id, email, hashed_password, employee_id, role, is_active)
-VALUES
-('account-8543-4342-8931-7fc7472f95ec', 'abdessamad.laabid@edu.uiz.ac.ma', '$2b$12$KnA2hO4wPI5flElmOEU5I.LIdkntprRVJarJpUQv9ccLLXrEzJhHO', 'admin-9aff-400f-a21c-af244ced2111', 'admin', 1);
-
-
-UNLOCK TABLES;
-
-
 -- Dumping data for `companies` table
 USE hrpro_dev_db;
 
@@ -111,6 +96,21 @@ VALUES
 ('employee-9aff-400f-a21c-af244ced2128', '2024-05-13 18:38:28', '2024-05-13 18:38:28', "aplus18", "test", 'company-2d0a-4279-90ae-c6fe33172c0e', 'job-8543-4342-8931-7fc7472f9511', 'department-20ec-439f-9e10-bb6dfdb9ff11', '{"first_name": "aplus18", "last_name": "test"}', '2024-05-13'),
 ('employee-9aff-400f-a21c-af244ced2129', '2024-05-13 18:38:28', '2024-05-13 18:38:28', "aplus19", "test", 'company-2d0a-4279-90ae-c6fe33172c0e', 'job-8543-4342-8931-7fc7472f9511', 'department-20ec-439f-9e10-bb6dfdb9ff11', '{"first_name": "aplus19", "last_name": "test"}', '2024-05-13'),
 ('employee-9aff-400f-a21c-af244ced2130', '2024-05-13 18:38:28', '2024-05-13 18:38:28', "aplus20", "test", 'company-2d0a-4279-90ae-c6fe33172c0e', 'job-8543-4342-8931-7fc7472f9511', 'department-20ec-439f-9e10-bb6dfdb9ff11', '{"first_name": "aplus20", "last_name": "test"}', '2024-05-13');
+
+
+UNLOCK TABLES;
+
+
+-- Dumping data for `accounts` table
+USE hrpro_accounts_db;
+
+
+LOCK TABLES `accounts` WRITE;
+
+
+INSERT INTO accounts (id, email, hashed_password, company_id, employee_id, role, is_active)
+VALUES
+('account-8543-4342-8931-7fc7472f95ec', 'abdessamad.laabid@edu.uiz.ac.ma', '$2b$12$KnA2hO4wPI5flElmOEU5I.LIdkntprRVJarJpUQv9ccLLXrEzJhHO', 'company-2d0a-4279-90ae-c6fe33172c0e', 'admin-9aff-400f-a21c-af244ced2111', 'admin', 1);
 
 
 UNLOCK TABLES;
