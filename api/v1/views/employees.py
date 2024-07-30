@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+""" employees views """
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage
@@ -43,20 +43,20 @@ def get_employee(employee_id):
 
 @app_views.route('/add_employee', methods=['POST'])
 @validate_post_employee
-def post_employee(employee_info):
+def post_employee(employee_details):
     """ POST /add_employee
     """
     auth = Auth()
-    employee_info["password"] = _generate_random_pass()
+    employee_details["password"] = _generate_random_pass()
     try:
-        account = auth.register_employee(employee_info)
+        account = auth.register_employee(employee_details)
         if account:
             msg_details = {
                 "name": account.employee.first_name +
                     " " + account.employee.last_name,
                 "company_id": account.company_id,
                 "email": account.email,
-                "password": employee_info["password"],
+                "password": employee_details["password"],
                 "login_link": "http://localhost:3000/login",
             }
             send_welcome_mail_task.delay(msg_details)

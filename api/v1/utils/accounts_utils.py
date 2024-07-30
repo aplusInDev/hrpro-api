@@ -60,7 +60,7 @@ def validate_post_employee(func):
         else:
             department = request.form.get("department")
             job_title = request.form.get("job_title")
-        employee_info = {
+        employee_details = {
             "first_name": request.form.get("first_name"),
             "last_name": request.form.get("last_name"),
             "email": request.form.get("email"),
@@ -69,5 +69,5 @@ def validate_post_employee(func):
             "job_title": job_title,
             "company_id": account.company_id,
         }
-        return func(employee_info, *args, **kwargs)
+        return func(employee_details, *args, **kwargs)
     return wrapper
