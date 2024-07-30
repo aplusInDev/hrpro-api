@@ -33,7 +33,7 @@ class Account(Base):
                 setattr(self, key, value)
 
     @property
-    def employee(self):
+    def employee(self) -> None:
         return storage.get("Employee", self.employee_id)
     
     def save(self):
@@ -41,3 +41,8 @@ class Account(Base):
         from . import db
         db.new(self)
         db.save()
+
+    def delete(self) -> None:
+        """ delete method """
+        from . import db
+        db.delete_account(self.id)

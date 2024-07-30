@@ -76,7 +76,7 @@ def put_employee(employee_id):
         abort(404)
     data = request.get_json()
     if data is None:
-        return 'Not a JSON', 400
+        return {"error": "Not a json"}, 400
     for key, value in data.items():
         if key not in ['id', 'created_at', 'updated_at']:
             if key == 'department' or key == 'department_name':
@@ -85,7 +85,6 @@ def put_employee(employee_id):
                     name=value,
                 )
                 if department is None:
-                    # return jsonify({"error": "Department not found"}), 404
                     continue
                 employee.department = department
             elif key == 'job' or key == 'job_title':
@@ -94,7 +93,6 @@ def put_employee(employee_id):
                     title=value,
                 )
                 if job is None:
-                    # return jsonify({"error": "Job not found"}), 404
                     continue
                 else:
                     employee.job = job
@@ -113,13 +111,20 @@ def put_employee_info(employee_id):
         abort(404)
     data = request.get_json()
     if data is None:
-        return 'Not valid data', 400
+        return {"error": "Not a valid data"}, 400
     else:
-        from api.v1.utils.validate_field import handle_update_info
-        data = handle_update_info("employee", employee.company_id, data)
-        employee.info = str(data)
-        employee.save()
-        return jsonify(eval(employee.info))
+        from api.v1.utils.form_utils import handle_update_info
+        for key, value in data.items():
+            if key not in ['id', 'created_at', 'updated_at']:
+                if hasattr(employee, key):
+                    setattr(employee, key, value)
+        try:
+            data = handle_update_info("employee", employee.company_id, data)
+            employee.info = str(data)
+            employee.save()
+            return jsonify(eval(employee.info)), 200
+        except ValueError as err:
+            return jsonify({"error": "- ValueError - {}".format(str(err))}), 400
 
 @app_views.route(
         '/employees/<employee_id>', methods=['DELETE'], strict_slashes=False)

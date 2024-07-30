@@ -3,7 +3,6 @@
 from flask import jsonify, request, abort
 from api.v1.views import app_views
 from models import storage, Form
-from api.v1.utils import is_exists_form
 
 
 @app_views.route('/companies/<company_id>/forms', methods=['GET'], strict_slashes=False)
@@ -27,12 +26,19 @@ def post_form(company_id):
     """ post form """
     data = request.get_json()
     if data is None:
-        return 'Not a JSON data', 400
+        return jsonify({'error': 'Not a JSON data'}), 400
     elif 'name' not in data:
-        return 'Missing name', 400
+        return {'error': 'Missing name'}, 400
     else:
-        if is_exists_form(company_id, data):
-            return jsonify({"error": "form name already exists"}), 400
+        form_name = data['name']
+        form = storage.find_form_by_(
+                name=form_name,
+                company_id=company_id,
+            )
+        if form:
+            return jsonify({
+                "error": "{} Form already exists".format(form_name)
+            }), 400
         form = Form(company_id=company_id, **data)
         form.save()
         return jsonify(form.to_dict()), 201
