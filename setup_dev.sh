@@ -5,3 +5,4 @@ sudo apt-get install -y libmariadb-dev
 sudo apt-get install -y python3-dev
 pip3 install wheel
 pip3 install --upgrade pip setuptools
+sudo apt-get install -y gcc
