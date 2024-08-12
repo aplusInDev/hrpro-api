@@ -56,9 +56,9 @@ def login():
         session_id = auth.create_session(company_id, email)
         if session_id:
             current_user = auth.get_current_user(company_id, email)
-            response = jsonify(current_user)
+            # response = jsonify(current_user)
+            response = make_response(jsonify(current_user))
             response.set_cookie('session_id', session_id)
-            response = make_response(jsonify(response))
             response.headers['Access-Control-Expose-Headers'] = 'Set-Cookie'
             return response, 200
             # return response, 200
