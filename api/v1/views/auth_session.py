@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import jsonify, request
+from flask import jsonify, request, make_response
 from api.v1.views import app_views
 from api.v1.auth.auth import Auth
 from sqlalchemy.orm.exc import NoResultFound
@@ -58,7 +58,10 @@ def login():
             current_user = auth.get_current_user(company_id, email)
             response = jsonify(current_user)
             response.set_cookie('session_id', session_id)
+            response = make_response(jsonify(response))
+            response.headers['Access-Control-Expose-Headers'] = 'Set-Cookie'
             return response, 200
+            # return response, 200
     return jsonify({"error": "Login Faild, please try again."}), 401
 
 @app_views.route('/profile', methods=['GET'])
