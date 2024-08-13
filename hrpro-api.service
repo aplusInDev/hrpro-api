@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve hrpro-api
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/hrpro-api
+Environment="PATH=/home/ubuntu/hrpro-api/.hrpro_env/bin"
+ExecStart=/home/ubuntu/hrpro-api/.hrpro_env/bin/gunicorn --workers 3 --bind unix:hrpro-api.sock -m 007 wsgi:app
+
+[Install]
+WantedBy=multi-user.target
