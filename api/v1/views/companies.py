@@ -34,9 +34,10 @@ def put_company(company_id):
     if data is None:
         return 'Not a JSON', 400
     for key, value in data.items():
-        if key not in ['id', 'created_at', 'updated_at', 'forms',
-                       'employees', 'jobs', 'departments'
-                       ]:
+        if key not in [
+            'id', 'created_at', 'updated_at', 'forms',
+            'employees', 'jobs', 'departments'
+        ]:
             setattr(company, key, value)
     company.save()
     return jsonify(company.to_dict())
