@@ -5,14 +5,21 @@ from api.v1.views import app_views
 from models import storage
 import pandas as pd
 import io
+from api.v1.auth import auth
 
 
 @app_views.route('/employees/<employee_id>/all_absences', methods=['GET'])
 def get_absences(employee_id):
     """Get absences for a given employee"""
+    session_id = request.cookies.get('session_id')
+    account = auth.get_account_from_session_id(session_id)
+    if account.role == 'employee' and account.id != employee_id:
+        abort(403)
     employee = storage.get("Employee", employee_id)
     if employee is None:
         abort(404)
+    if account.role != "employee" and account.company_id != employee.company_id:
+        abort(403)
     absences = [absence.to_dict() for absence in employee.absences]
     return jsonify(absences)
 
@@ -21,6 +28,10 @@ def get_absences(employee_id):
         strict_slashes=False)
 def get_employees_absences(company_id):
     """ get employees """
+    session_id = request.cookies.get('session_id')
+    account = auth.get_account_from_session_id(session_id)
+    if account.company_id != company or account.role not in ["admin", "hr"]:
+        abort(403)
     company = storage.get("Company", company_id)
     if company is None:
         abort(404)
