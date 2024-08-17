@@ -3,27 +3,19 @@
 from models import storage
 
 
-def is_exists_field(form_id, data):
-    form = storage.get("Form", form_id)
-    if form is None:
-        return True
-    for field in form.fields:
-        if field.name == data['name']:
-            return True
-    return False
-
 def get_all_fields(form_name: str, company_id: str) -> list:
     """ retrive fields """
     form = storage.find_form_by_(name=form_name, company_id=company_id)
     if form is None:
         return None
-    all_fields = []
-    for field in form.fields:
-        all_fields.append(field.to_dict())
-    return all_fields
+    return [field.to_dict() for field in form.fields]
+
 
 def handle_update_info(form_name: str, company_id: str, data: dict) -> dict:
-    """def handle_update_info(form_name: str, company_id: str, data: dict) -> dict | None:
+    """def handle_update_info(
+        form_name: str, company_id: str,
+        data: dict
+    ) -> dict | None:
     This function is used to validate the data that is going to be updated
     in the database
     Args:
@@ -43,9 +35,9 @@ def handle_update_info(form_name: str, company_id: str, data: dict) -> dict:
         field_name = field["name"].replace(' ', '_')
         fields_names.append(field_name)
         if field_name not in data:
-            # Check if the field is required then return None
+            # Check if the field is required then raise an error
             if field["is_required"] is True:
-                return None
+                raise ValueError(f"Missing {field_name} field")
             # If the field is not required then set the default value
             else:
                 data[field_name] = field["default_value"]

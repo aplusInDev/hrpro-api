@@ -1,0 +1,9 @@
+server {
+    listen 80;
+    server_name www.aplusdev.tech;
+
+    location /api/v1 {
+        include proxy_params;
+        proxy_pass http://unix:/home/ubuntu/hrpro-api/hrpro-api.sock;
+    }
+}

@@ -127,7 +127,7 @@ class DBStorage:
         """
         employee = self.get("Employee", employee_id)
         return employee.company if employee else None
-    
+
     def find_form_by_(self, **kwargs):
         """Finds a account based on a set of filters.
         """
@@ -138,7 +138,17 @@ class DBStorage:
                 raise InvalidRequestError("Invalid filter key")
         form = self.__session.query(Form).filter_by(**kwargs).first()
         return form
-        
+
+    def find_field_by(self, **kwargs):
+        """ Finds field based on query """
+        if not kwargs:
+            raise InvalidRequestError("No filter criteria")
+        for key in kwargs.keys():
+            if not hasattr(Field, key):
+                raise InvalidRequestError("Invalid filter key")
+        field = self.__session.query(Field).filter_by(**kwargs).first()
+        return field
+
     def find_job_by(self, **kwargs):
         """Finds a job based on a set of filters.
         """
@@ -149,7 +159,7 @@ class DBStorage:
                 raise InvalidRequestError("Invalid filter key")
         job = self.__session.query(Job).filter_by(**kwargs).first()
         return job
-        
+
     def find_department_by(self, **kwargs):
         """Finds department based on a set of filters
         """
@@ -160,7 +170,7 @@ class DBStorage:
                 raise InvalidRequestError("Invalid filter key")
         department = self.__session.query(Department).filter_by(**kwargs).first()
         return department
-        
+
     def find_employee_by(self, **kwargs):
         """Finds employee based on a set of filters
         """
@@ -171,7 +181,7 @@ class DBStorage:
                 raise InvalidRequestError("Invalid filter key")
         employee = self.__session.query(Employee).filter_by(**kwargs).first()
         return employee
-    
+
     def get_leaves(self, company_id, year):
         """ retrieve all leaves for a company in a given year
         """
@@ -185,7 +195,7 @@ class DBStorage:
            .filter(extract('year', Leave.start_date) == year)\
            .all()
         return [leave.to_dict() for leave in leaves]
-    
+
     def found_evaluation_by(self, **kwargs):
         """Finds evaluation based on a set of filters
         """

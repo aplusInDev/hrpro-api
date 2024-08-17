@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import jsonify, request, abort
+from flask import jsonify, request
 from api.v1.views import app_views
 from models import storage, Leave
 from api.v1.auth.middleware import requires_auth

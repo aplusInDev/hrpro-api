@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
+import io
+import pandas as pd
 from flask import jsonify, request, abort, send_file
 from api.v1.views import app_views
 from models import storage
-import pandas as pd
-import io
 
 
 @app_views.route('/employees/<employee_id>/all_absences', methods=['GET'])

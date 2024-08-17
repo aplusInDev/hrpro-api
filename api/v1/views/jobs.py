@@ -45,7 +45,7 @@ def post_job(company_id):
         return jsonify({"error": "unvalid request"}), 400
     else:
         data = data.to_dict()
-    from api.v1.utils.validate_field import handle_update_info
+    from api.v1.utils.form_utils import handle_update_info
     data = handle_update_info("job", company_id, data)
     if not data:
         return jsonify({"error": "unvalid request"}), 400
@@ -65,16 +65,16 @@ def put_job(job_id):
     data = request.get_json()
     if not data:
         return jsonify({"error": "Not a json data"}), 400
-
-    from api.v1.utils.validate_field import handle_update_info
-    data = handle_update_info("job", job.company_id, data)
-    if not data:
-        return jsonify({"error": "unvalid request"}), 400
     if "title" in data:
         job.title = data["title"]
-    job.info = str(data)
-    job.save()
-    return jsonify(job.to_dict())
+    try:
+        from api.v1.utils.form_utils import handle_update_info
+        data = handle_update_info("job", job.company_id, data)
+        job.info = str(data)
+        job.save()
+        return jsonify(job.to_dict()), 200
+    except ValueError as err:
+        return jsonify({"error": "- ValueError - {}".format(str(err))}), 400
 
 @app_views.route('/jobs/<job_id>', methods=['DELETE'], strict_slashes=False)
 @requires_auth(["admin"])

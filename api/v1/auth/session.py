@@ -15,9 +15,11 @@ class SessionAuth(Base):
     """
     __tablename__ = 'sessions'
     id = Column(String(128), primary_key=True, default=lambda: str(uuid4()))
-    account_id = Column(String(128), ForeignKey(
-        'accounts.id', ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False)
+    account_id = Column(
+        String(128),
+        ForeignKey('accounts.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False
+    )
     session_duration = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.now())
 
@@ -32,8 +34,13 @@ class SessionAuth(Base):
             for key, value in kwargs.items():
                 setattr(self, key, value)
 
+    def save(self) -> None:
+        """ save method """
+        from . import db
+        db.new(self)
+        db.save()
+
     def delete(self) -> None:
-        """ Delete method """
+        """ delete method """
         from . import db
         db.delete_session(self.id)
-        db.save()

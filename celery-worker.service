@@ -1,0 +1,14 @@
+[Unit]
+Description=Celery Worker Service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/hrpro-api
+ExecStart=/home/ubuntu/hrpro-api/.hrpro_env/bin/celery -A api.celery_app worker -l info
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

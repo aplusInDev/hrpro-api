@@ -14,15 +14,15 @@ def get_fields(form_id):
 	return jsonify([field.to_dict() for field in form.fields])
 
 @app_views.route('fields', methods=['GET'], strict_slashes=False)
-def get_all_fields():
+def get_form_fields():
 	"""Get all form fields based on form name and company_id
 	"""
 	form_name = request.args.get('form_name')
 	company_id = request.args.get('company_id')
 	if not form_name:
-		return 'Missing form_name', 400
+		return jsonify({'error': 'Missing form_name'}), 400
 	if not company_id:
-		return 'Missing company_id', 400
+		return jsonify({'error': 'Missing company_id'}), 400
 	form = storage.find_form_by_(name=form_name, company_id=company_id)
 	return get_fields(form.id)
 
@@ -46,8 +46,20 @@ def post_field(form_id):
 	elif 'name' not in data:
 		return jsonify({'error': 'Missing field name'}), 400
 	else:
-		pos = len(form.fields) + 1
-		field = Field(form_id=form_id, position=pos, **data)
+		field_name = data['name']
+		field = storage.find_field_by(
+			name=field_name,
+			form_id=form_id,
+		)
+		if field:
+			return jsonify({
+				"error": "{} Field already exists".format(field_name)
+			}), 400
+		if 'options' in data:
+			options = eval(data['options'])
+			options = list(set(options))
+			data['options'] = str(options)
+		field = Field(form_id=form_id, **data)
 		field.save()
 		return jsonify(field.to_dict()), 201
 	

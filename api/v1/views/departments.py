@@ -47,7 +47,7 @@ def post_department(company_id):
     if not data:
         return jsonify({"error": "Not a form data"}), 400
 
-    from api.v1.utils.validate_field import handle_update_info
+    from api.v1.utils.form_utils import handle_update_info
     data = data.to_dict()
     data = handle_update_info("department", company_id, data)
     if data and data.get("name", None):
@@ -70,15 +70,16 @@ def put_department(department_id):
     data = request.get_json()
     if not data:
         return jsonify({"error": "Not a json data"}), 400
-    from api.v1.utils.validate_field import handle_update_info
-    data = handle_update_info("department", department.company_id, data)
-    if data:
-        if 'name' in data:
-            department.name = data.get('name')
+    if 'name' in data:
+        department.name = data.get('name')
+    try:
+        from api.v1.utils.form_utils import handle_update_info
+        data = handle_update_info("department", department.company_id, data)
         department.info = str(data)
         department.save()
         return jsonify(department.to_dict())
-    return jsonify({"error": "unvalid request"}), 400
+    except ValueError as err:
+        return jsonify({"error": "- ValueError - {}".format(str(err))}), 400
 
 @requires_auth(["admin"])
 @app_views.route('departments/<department_id>', methods=['DELETE'], strict_slashes=False)

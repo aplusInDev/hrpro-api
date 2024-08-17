@@ -55,3 +55,20 @@ class Company(BaseModel, Base):
         }
         new_dict["uri"] = "http://localhost:5000/api/v1/companies/" + self.id
         return new_dict
+
+
+    def save(self) -> None:
+        """ Override the save method to create standard forms and its fields
+        """
+        from models import Form, Field
+        emp_form = Form(name="employee", description="employee form")
+        dep_form = Form(name="department", description="department form")
+        job_form = Form(name="job", description="job form")
+        emp_form.fields.append(Field(name="first_name", type="text", is_required=False, position=1))
+        emp_form.fields.append(Field(name="last_name", type="text", is_required=False, position=2))
+        emp_form.fields.append(Field(name="email", type="email", is_required=True, position=3))
+        dep_form.fields.append(Field(name="name", type="text", is_required=True, position=1))
+        job_form.fields.append(Field(name="title", type="text", is_required=True, position=1))
+        for form in [emp_form, dep_form, job_form]:
+            self.forms.append(form)
+        super().save()

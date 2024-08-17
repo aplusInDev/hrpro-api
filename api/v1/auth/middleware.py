@@ -2,6 +2,7 @@ from functools import wraps
 from flask import request, jsonify
 from os import getenv
 from api.v1.auth.auth import Auth
+from sqlalchemy.orm.exc import NoResultFound
 
 
 def requires_auth(allowed_roles=None):
@@ -40,16 +41,24 @@ def requires_auth(allowed_roles=None):
                 return func(*args, **kwargs)
             session_id = request.cookies.get('session_id')
             if not session_id:
-                return jsonify({"error": "Unauthorized: Missing session ID"}), 401
-
-            account = Auth().get_account_from_session_id(session_id)
-            if not account:
-                return jsonify({"error": "Unauthorized: Invalid session ID"}), 401
+                return jsonify({
+                    "error": "Unauthorized: Missing session ID"
+                }), 401
+            try:
+                account = Auth().get_account_from_session_id(session_id)
+            except NoResultFound as err:
+                return jsonify({
+                    "error": "Unauthorized: Invalid session ID"
+                }), 401
+            except Exception as err:
+                return jsonify({
+                    "error": str(err)
+                })
             
             if allowed_roles and account.role not in allowed_roles:
-                return jsonify({"error": "Forbidden: Insufficient permissions"}), 403
-            else:
-                print("passed")
+                return jsonify({
+                    "error": "Forbidden: Insufficient permissions"
+                }), 403
 
             return func(*args, **kwargs)
 

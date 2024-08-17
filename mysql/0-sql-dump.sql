@@ -1,18 +1,3 @@
--- Dumping data for `accounts` table
-USE hrpro_accounts_db;
-
-
-LOCK TABLES `accounts` WRITE;
-
-
-INSERT INTO accounts (id, email, hashed_password, employee_id, role, is_active)
-VALUES
-('account-8543-4342-8931-7fc7472f95ec', 'abdessamad.laabid@edu.uiz.ac.ma', '$2b$12$KnA2hO4wPI5flElmOEU5I.LIdkntprRVJarJpUQv9ccLLXrEzJhHO', 'admin-9aff-400f-a21c-af244ced2111', 'admin', 1);
-
-
-UNLOCK TABLES;
-
-
 -- Dumping data for `companies` table
 USE hrpro_dev_db;
 
@@ -90,7 +75,7 @@ LOCK TABLES `employees` WRITE;
 
 INSERT INTO `employees` (id, created_at, updated_at, first_name, last_name, company_id, job_id, department_id, info, hire_date)
 VALUES
-('admin-9aff-400f-a21c-af244ced2111', '2024-05-13 18:38:28', '2024-05-13 18:38:28', "abdessamad", "plus", 'company-2d0a-4279-90ae-c6fe33172c0e', 'job-8543-4342-8931-7fc7472f9510', 'department-20ec-439f-9e10-bb6dfdb9ff10', '{"first_name": "abdessamad", "last_name": "plus", "email": "abdessamad.laabid@edu.uiz.ac.ma"}', '2024-05-13'),
+('admin-9aff-400f-a21c-af244ced2111', '2024-05-13 18:38:28', '2024-05-13 18:38:28', "abdessamad", "plus", 'company-2d0a-4279-90ae-c6fe33172c0e', 'job-8543-4342-8931-7fc7472f9510', 'department-20ec-439f-9e10-bb6dfdb9ff10', '{"first_name": "abdessamad", "last_name": "plus", "email": "laabid.abdessamadplus@gmail.com"}', '2024-05-13'),
 ('employee-9aff-400f-a21c-af244ced2111', '2024-05-13 18:38:28', '2024-05-13 18:38:28', "aplus1", "test", 'company-2d0a-4279-90ae-c6fe33172c0e', 'job-8543-4342-8931-7fc7472f9511', 'department-20ec-439f-9e10-bb6dfdb9ff11', '{"first_name": "aplus1", "last_name": "test"}', '2024-05-13'),
 ('employee-9aff-400f-a21c-af244ced2112', '2024-05-13 18:38:28', '2024-05-13 18:38:28', "aplus2", "test", 'company-2d0a-4279-90ae-c6fe33172c0e', 'job-8543-4342-8931-7fc7472f9511', 'department-20ec-439f-9e10-bb6dfdb9ff11', '{"first_name": "aplus2", "last_name": "test"}', '2024-05-13'),
 ('employee-9aff-400f-a21c-af244ced2113', '2024-05-13 18:38:28', '2024-05-13 18:38:28', "aplus3", "test", 'company-2d0a-4279-90ae-c6fe33172c0e', 'job-8543-4342-8931-7fc7472f9511', 'department-20ec-439f-9e10-bb6dfdb9ff11', '{"first_name": "aplus3", "last_name": "test"}', '2024-05-13'),

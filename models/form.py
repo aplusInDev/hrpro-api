@@ -35,5 +35,5 @@ class Form(BaseModel, Base):
         new_dict["company"] = "http://localhost:5000/api/v1/companies/{}".\
             format(self.company_id)
         new_dict["description"] = self.description if self.description else ""
-        new_dict["uri"] = "/api/v1/forms/{}".format(self.id)
+        new_dict["uri"] = "http://localhost:5000/api/v1/forms/{}".format(self.id)
         return new_dict
