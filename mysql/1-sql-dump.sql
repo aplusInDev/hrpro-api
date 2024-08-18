@@ -1,5 +1,5 @@
 -- Dumping data for `accounts` table
-USE hrpro_accounts_db;
+-- USE hrpro_accounts_db;
 
 
 LOCK TABLES `accounts` WRITE;

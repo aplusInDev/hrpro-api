@@ -1,5 +1,5 @@
 -- Dumping data for `companies` table
-USE hrpro_dev_db;
+-- USE hrpro_dev_db;
 
 
 LOCK TABLES `companies` WRITE;

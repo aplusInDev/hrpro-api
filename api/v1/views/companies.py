@@ -39,5 +39,5 @@ def put_company(company_id):
             'employees', 'jobs', 'departments'
         ]:
             setattr(company, key, value)
-    company.save()
+    storage.save()
     return jsonify(company.to_dict())
